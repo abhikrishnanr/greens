@@ -7,29 +7,39 @@ interface Category {
   name: string
 }
 
+interface Tier {
+  id: string
+  name: string
+  actualPrice: number
+  offerPrice?: number | null
+  duration?: number | null
+}
+
 interface Service {
   id: string
-  main_service_name: string
-  minPrice?: number | null
-  active: boolean
-  service_description?: string
-  duration?: number
+  name: string
+  caption?: string | null
+  description?: string | null
+  imageUrl?: string | null
+  tiers: Tier[]
 }
 
 export default function ServicesAdmin() {
   const [categories, setCategories] = useState<Category[]>([])
   const [category, setCategory] = useState('')
   const [services, setServices] = useState<Service[]>([])
-  const empty: Partial<Service> = {
-    id: '',
-    main_service_name: '',
-    service_description: '',
-    duration: 0,
-    active: true,
-  }
-  const [form, setForm] = useState<Partial<Service>>(empty)
-  const [showForm, setShowForm] = useState(false)
-  const [editing, setEditing] = useState(false)
+
+  const emptyService: Partial<Service> = { id: '', name: '', caption: '', description: '', imageUrl: '' }
+  const [serviceForm, setServiceForm] = useState<Partial<Service>>(emptyService)
+  const [showServiceForm, setShowServiceForm] = useState(false)
+  const [editingService, setEditingService] = useState(false)
+
+  const emptyTier: Partial<Tier> = { id: '', name: '', actualPrice: 0, offerPrice: null, duration: null }
+  const [tiers, setTiers] = useState<Tier[]>([])
+  const [tierForm, setTierForm] = useState<Partial<Tier>>(emptyTier)
+  const [showTierModal, setShowTierModal] = useState(false)
+  const [editingTier, setEditingTier] = useState(false)
+  const [tierServiceId, setTierServiceId] = useState('')
 
   const loadCategories = async () => {
     const res = await fetch('/api/admin/service-categories')
@@ -39,7 +49,7 @@ export default function ServicesAdmin() {
 
   const loadServices = async () => {
     if (!category) return
-    const res = await fetch(`/api/admin/services/${category}`)
+    const res = await fetch(`/api/admin/services-new/${category}`)
     const data = await res.json()
     setServices(data)
   }
@@ -47,60 +57,105 @@ export default function ServicesAdmin() {
   useEffect(() => { loadCategories() }, [])
   useEffect(() => { loadServices() }, [category])
 
-  const toggle = async (id: string, active: boolean) => {
-    await fetch(`/api/admin/service/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ active }),
+  const openAddService = () => {
+    setServiceForm({ ...emptyService, id: crypto.randomUUID() })
+    setEditingService(false)
+    setShowServiceForm(true)
+  }
+
+  const openEditService = (svc: Service) => {
+    setServiceForm({
+      id: svc.id,
+      name: svc.name,
+      caption: svc.caption || '',
+      description: svc.description || '',
+      imageUrl: svc.imageUrl || '',
     })
-    loadServices()
+    setEditingService(true)
+    setShowServiceForm(true)
   }
 
-  const openAdd = () => {
-    setForm({ ...empty, id: crypto.randomUUID(), active: true })
-    setEditing(false)
-    setShowForm(true)
-  }
-
-  const openEdit = (s: Service) => {
-    setForm({
-      id: s.id,
-      main_service_name: s.main_service_name,
-      service_description: s.service_description || '',
-      duration: s.duration || 0,
-      active: s.active,
-    })
-    setEditing(true)
-    setShowForm(true)
-  }
-
-  const save = async (e: React.FormEvent) => {
+  const saveService = async (e: React.FormEvent) => {
     e.preventDefault()
     const body = {
-      mainServiceName: form.main_service_name,
-      serviceDescription: form.service_description,
-      duration: Number(form.duration),
-      applicableTo: 'unisex',
-      subCategory: 'general',
-      costCategory: 'standard',
-      active: form.active,
+      name: serviceForm.name,
+      caption: serviceForm.caption,
+      description: serviceForm.description,
+      imageUrl: serviceForm.imageUrl,
     }
-    if (editing) {
-      await fetch(`/api/admin/service/${form.id}`, {
+    if (editingService) {
+      await fetch(`/api/admin/service-new/${serviceForm.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
     } else {
-      await fetch(`/api/admin/services/${category}`, {
+      await fetch(`/api/admin/services-new/${category}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: form.id, ...body }),
+        body: JSON.stringify(body),
       })
     }
-    setShowForm(false)
-    setForm(empty)
+    setShowServiceForm(false)
+    setServiceForm(emptyService)
     loadServices()
+  }
+
+  const openTierManager = (svc: Service) => {
+    setTierServiceId(svc.id)
+    setTiers(svc.tiers)
+    setShowTierModal(true)
+  }
+
+  const openAddTier = () => {
+    setTierForm({ ...emptyTier, id: crypto.randomUUID() })
+    setEditingTier(false)
+  }
+
+  const openEditTier = (t: Tier) => {
+    setTierForm({ ...t })
+    setEditingTier(true)
+  }
+
+  const saveTier = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const body = {
+      id: tierForm.id,
+      name: tierForm.name,
+      actualPrice: Number(tierForm.actualPrice),
+      offerPrice: tierForm.offerPrice !== null && tierForm.offerPrice !== undefined ? Number(tierForm.offerPrice) : null,
+      duration: tierForm.duration ? Number(tierForm.duration) : null,
+    }
+    if (editingTier) {
+      await fetch(`/api/admin/service-tiers/${tierServiceId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+    } else {
+      await fetch(`/api/admin/service-tiers/${tierServiceId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+    }
+    const res = await fetch(`/api/admin/service-tiers/${tierServiceId}`)
+    const data = await res.json()
+    setTiers(data)
+    setTierForm(emptyTier)
+    setEditingTier(false)
+  }
+
+  const deleteTier = async (id: string) => {
+    if (!confirm('Delete this tier?')) return
+    await fetch(`/api/admin/service-tiers/${tierServiceId}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    })
+    const res = await fetch(`/api/admin/service-tiers/${tierServiceId}`)
+    const data = await res.json()
+    setTiers(data)
   }
 
   return (
@@ -118,33 +173,29 @@ export default function ServicesAdmin() {
           ))}
         </select>
         {category && (
-          <button className="bg-green-600 px-3 py-2 rounded" onClick={openAdd}>+ Add Service</button>
+          <button className="bg-green-600 px-3 py-2 rounded" onClick={openAddService}>+ Add Service</button>
         )}
       </div>
+
       {services.length > 0 && (
         <table className="w-full text-sm text-left">
           <thead>
             <tr>
               <th>Name</th>
-              <th>Duration</th>
-              <th>Active</th>
+              <th>Caption</th>
+              <th>Tiers</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             {services.map(s => (
               <tr key={s.id} className="border-t border-gray-700">
-                <td>{s.main_service_name}</td>
-                <td>{s.duration ?? '—'}</td>
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={s.active}
-                    onChange={e => toggle(s.id, e.target.checked)}
-                  />
-                </td>
+                <td>{s.name}</td>
+                <td>{s.caption ?? '—'}</td>
+                <td>{s.tiers.length}</td>
                 <td className="space-x-2">
-                  <button className="underline" onClick={() => openEdit(s)}>Edit</button>
+                  <button className="underline" onClick={() => openEditService(s)}>Edit</button>
+                  <button className="underline" onClick={() => openTierManager(s)}>Manage Tiers</button>
                 </td>
               </tr>
             ))}
@@ -152,42 +203,112 @@ export default function ServicesAdmin() {
         </table>
       )}
 
-      {showForm && (
+      {showServiceForm && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-gray-900 p-6 rounded w-full max-w-lg">
-            <h2 className="text-xl mb-4">{editing ? 'Edit' : 'Add'} Service</h2>
-            <form onSubmit={save} className="space-y-2">
+            <h2 className="text-xl mb-4">{editingService ? 'Edit' : 'Add'} Service</h2>
+            <form onSubmit={saveService} className="space-y-2">
               <input
                 className="w-full p-2 rounded bg-gray-800"
                 placeholder="Name"
-                value={form.main_service_name || ''}
-                onChange={e => setForm({ ...form, main_service_name: e.target.value })}
+                value={serviceForm.name || ''}
+                onChange={e => setServiceForm({ ...serviceForm, name: e.target.value })}
                 required
               />
+              <input
+                className="w-full p-2 rounded bg-gray-800"
+                placeholder="Caption"
+                value={serviceForm.caption || ''}
+                onChange={e => setServiceForm({ ...serviceForm, caption: e.target.value })}
+              />
               <WysiwygEditor
-                value={form.service_description || ''}
-                onChange={desc => setForm({ ...form, service_description: desc })}
+                value={serviceForm.description || ''}
+                onChange={desc => setServiceForm({ ...serviceForm, description: desc })}
               />
               <input
-                type="number"
                 className="w-full p-2 rounded bg-gray-800"
-                placeholder="Duration (min)"
-                value={form.duration ?? 0}
-                onChange={e => setForm({ ...form, duration: parseInt(e.target.value) })}
+                placeholder="Image URL"
+                value={serviceForm.imageUrl || ''}
+                onChange={e => setServiceForm({ ...serviceForm, imageUrl: e.target.value })}
               />
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={form.active}
-                  onChange={e => setForm({ ...form, active: e.target.checked })}
-                />
-                Active
-              </label>
               <div className="text-right space-x-2 pt-2">
-                <button type="button" className="px-3 py-1 bg-gray-600 rounded" onClick={() => setShowForm(false)}>Cancel</button>
+                <button type="button" className="px-3 py-1 bg-gray-600 rounded" onClick={() => setShowServiceForm(false)}>Cancel</button>
                 <button type="submit" className="px-3 py-1 bg-green-600 rounded">Save</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showTierModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-gray-900 p-6 rounded w-full max-w-lg">
+            <h2 className="text-xl mb-4">Manage Tiers</h2>
+            <table className="w-full text-sm text-left mb-4">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Price</th>
+                  <th>Offer</th>
+                  <th>Duration</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {tiers.map(t => (
+                  <tr key={t.id} className="border-t border-gray-700">
+                    <td>{t.name}</td>
+                    <td>{t.actualPrice}</td>
+                    <td>{t.offerPrice ?? '—'}</td>
+                    <td>{t.duration ?? '—'}</td>
+                    <td className="space-x-2">
+                      <button className="underline" onClick={() => openEditTier(t)}>Edit</button>
+                      <button className="underline text-red-400" onClick={() => deleteTier(t.id)}>Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <button className="bg-green-600 px-3 py-1 rounded mb-4" onClick={openAddTier}>+ Add Tier</button>
+            {tierForm.name !== undefined && (
+              <form onSubmit={saveTier} className="space-y-2">
+                <input
+                  className="w-full p-2 rounded bg-gray-800"
+                  placeholder="Name"
+                  value={tierForm.name || ''}
+                  onChange={e => setTierForm({ ...tierForm, name: e.target.value })}
+                  required
+                />
+                <input
+                  type="number"
+                  className="w-full p-2 rounded bg-gray-800"
+                  placeholder="Actual Price"
+                  value={tierForm.actualPrice ?? 0}
+                  onChange={e => setTierForm({ ...tierForm, actualPrice: parseFloat(e.target.value) })}
+                  required
+                />
+                <input
+                  type="number"
+                  className="w-full p-2 rounded bg-gray-800"
+                  placeholder="Offer Price"
+                  value={tierForm.offerPrice ?? ''}
+                  onChange={e => setTierForm({ ...tierForm, offerPrice: e.target.value ? parseFloat(e.target.value) : null })}
+                />
+                <input
+                  type="number"
+                  className="w-full p-2 rounded bg-gray-800"
+                  placeholder="Duration (min)"
+                  value={tierForm.duration ?? ''}
+                  onChange={e => setTierForm({ ...tierForm, duration: e.target.value ? parseInt(e.target.value) : null })}
+                />
+                <div className="text-right space-x-2 pt-2">
+                  <button type="submit" className="px-3 py-1 bg-green-600 rounded">{editingTier ? 'Update' : 'Add'} Tier</button>
+                </div>
+              </form>
+            )}
+            <div className="text-right mt-4">
+              <button className="px-3 py-1 bg-gray-600 rounded" onClick={() => setShowTierModal(false)}>Close</button>
+            </div>
           </div>
         </div>
       )}

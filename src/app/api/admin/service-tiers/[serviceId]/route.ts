@@ -1,0 +1,43 @@
+import { PrismaClient } from '@prisma/client'
+import { NextResponse } from 'next/server'
+
+const prisma = new PrismaClient()
+
+export async function GET(req: Request, { params }: { params: { serviceId: string } }) {
+  const tiers = await prisma.serviceTier.findMany({ where: { serviceId: params.serviceId }, orderBy: { name: 'asc' } })
+  return NextResponse.json(tiers)
+}
+
+export async function POST(req: Request, { params }: { params: { serviceId: string } }) {
+  const data = await req.json()
+  const tier = await prisma.serviceTier.create({
+    data: {
+      serviceId: params.serviceId,
+      name: data.name,
+      actualPrice: Number(data.actualPrice || 0),
+      offerPrice: data.offerPrice === null || data.offerPrice === undefined ? null : Number(data.offerPrice),
+      duration: data.duration ? Number(data.duration) : null,
+    },
+  })
+  return NextResponse.json(tier)
+}
+
+export async function PUT(req: Request, { params }: { params: { serviceId: string } }) {
+  const data = await req.json()
+  const tier = await prisma.serviceTier.update({
+    where: { id: data.id },
+    data: {
+      name: data.name,
+      actualPrice: Number(data.actualPrice || 0),
+      offerPrice: data.offerPrice === null || data.offerPrice === undefined ? null : Number(data.offerPrice),
+      duration: data.duration ? Number(data.duration) : null,
+    },
+  })
+  return NextResponse.json(tier)
+}
+
+export async function DELETE(req: Request, { params }: { params: { serviceId: string } }) {
+  const { id } = await req.json()
+  await prisma.serviceTier.delete({ where: { id } })
+  return NextResponse.json({ success: true })
+}
