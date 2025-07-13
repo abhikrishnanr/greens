@@ -22,20 +22,20 @@ export default function DashboardPage() {
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">Admin Dashboard</h1>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-gray-800 p-4 rounded">
-          <div className="text-sm text-gray-400">Bookings</div>
+        <div className="bg-white p-4 rounded shadow border">
+          <div className="text-sm text-gray-500">Bookings</div>
           <div className="text-2xl font-bold">{data.bookings}</div>
         </div>
-        <div className="bg-gray-800 p-4 rounded">
-          <div className="text-sm text-gray-400">Services</div>
+        <div className="bg-white p-4 rounded shadow border">
+          <div className="text-sm text-gray-500">Services</div>
           <div className="text-2xl font-bold">{data.services}</div>
         </div>
-        <div className="bg-gray-800 p-4 rounded">
-          <div className="text-sm text-gray-400">Staff</div>
+        <div className="bg-white p-4 rounded shadow border">
+          <div className="text-sm text-gray-500">Staff</div>
           <div className="text-2xl font-bold">{data.staff}</div>
         </div>
-        <div className="bg-gray-800 p-4 rounded">
-          <div className="text-sm text-gray-400">Branches</div>
+        <div className="bg-white p-4 rounded shadow border">
+          <div className="text-sm text-gray-500">Branches</div>
           <div className="text-2xl font-bold">{data.branches}</div>
         </div>
       </div>

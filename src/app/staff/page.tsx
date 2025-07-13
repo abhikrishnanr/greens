@@ -161,7 +161,7 @@ const handleExport = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-800 p-6 text-white">
+    <div className="min-h-screen bg-gray-50 p-6 text-gray-900">
       <Toaster richColors position="top-center"/>
       <header className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Staff Management</h1>
@@ -187,7 +187,7 @@ const handleExport = () => {
           placeholder="Search staff..."
           value={searchTerm}
           onChange={e=>setSearchTerm(e.target.value)}
-          className="flex-1 p-2 rounded bg-gray-700 border border-gray-600"
+          className="flex-1 p-2 rounded bg-gray-200 border border-gray-300"
         />
         <div className="space-x-2">
           {['ALL','AVAILABLE','REMOVED'].map(val=>(
@@ -195,7 +195,7 @@ const handleExport = () => {
               key={val}
               onClick={()=>setFilter(val as any)}
               className={`px-3 py-1 rounded ${
-                filter===val?'bg-indigo-600':'bg-gray-700'
+                filter===val?'bg-indigo-600':'bg-gray-200'
               }`}
             >
               {val}
@@ -211,10 +211,10 @@ const handleExport = () => {
         {filtered.map(staff=>(
           <div
             key={staff.id}
-            className="bg-gray-900 p-6 rounded-xl border border-gray-700 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition"
+            className="bg-white p-6 rounded-xl border border-gray-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition"
           >
             <div className="flex justify-center mb-6">
-               <div className="w-32 h-32 rounded-full bg-gray-700 overflow-hidden">
+               <div className="w-32 h-32 rounded-full bg-gray-200 overflow-hidden">
                 {staff.imageUrl
                    ? <img src={staff.imageUrl} className="w-full h-full object-cover"/>
                    : <span className="block w-full h-full text-2xl text-center leading-14">
@@ -226,7 +226,7 @@ const handleExport = () => {
             </div>
             <div className="flex justify-center mb-6">
  <h1 className="text-3xl font-semibold">{staff.name}</h1></div>
-            <table className="w-full text-white text-base mb-6">
+            <table className="w-full text-base mb-6 bg-white rounded shadow border">
               <tbody>
                 <tr>
                   <th className="text-left pr-4 py-1 font-medium">Email</th>
@@ -298,12 +298,12 @@ const handleExport = () => {
       {/* ── ADD MODAL ── */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-gray-900 p-6 rounded-xl w-full max-w-2xl border border-gray-700 overflow-auto max-h-[90vh]">
+          <div className="bg-white p-6 rounded-xl w-full max-w-2xl border border-gray-300 overflow-auto max-h-[90vh]">
             <h2 className="text-2xl mb-4">Add New Staff</h2>
             <form
               onSubmit={handleAdd}
               encType="multipart/form-data"
-              className="grid grid-cols-2 gap-4 text-white"
+              className="grid grid-cols-2 gap-4 text-gray-900"
             >
               {/* Profile Pic */}
               <div className="col-span-2">
@@ -317,7 +317,7 @@ const handleExport = () => {
                 <input
                   name="name"
                   required
-                  className="w-full p-2 rounded bg-gray-700"
+                  className="w-full p-2 rounded bg-gray-200"
                 />
               </div>
               {/* Email */}
@@ -327,7 +327,7 @@ const handleExport = () => {
                   name="email"
                   type="email"
                   required
-                  className="w-full p-2 rounded bg-gray-700"
+                  className="w-full p-2 rounded bg-gray-200"
                 />
               </div>
               {/* Phone */}
@@ -336,7 +336,7 @@ const handleExport = () => {
                 <input
                   name="phone"
                   required maxLength={10} pattern="\d{10}"
-                  className="w-full p-2 rounded bg-gray-700"
+                  className="w-full p-2 rounded bg-gray-200"
                 />
               </div>
               {/* Gender */}
@@ -345,7 +345,7 @@ const handleExport = () => {
                 <select
                   name="gender"
                   required
-                  className="w-full p-2 rounded bg-gray-700"
+                  className="w-full p-2 rounded bg-gray-200"
                 >
                   <option value="">— select —</option>
                   <option>Male</option>
@@ -360,7 +360,7 @@ const handleExport = () => {
                   name="dob"
                   type="date"
                   required
-                  className="w-full p-2 rounded bg-gray-700"
+                  className="w-full p-2 rounded bg-gray-200"
                 />
               </div>
               {/* Address */}
@@ -369,7 +369,7 @@ const handleExport = () => {
                 <input
                   name="address"
                   required
-                  className="w-full p-2 rounded bg-gray-700"
+                  className="w-full p-2 rounded bg-gray-200"
                 />
               </div>
               {/* Designation */}
@@ -378,7 +378,7 @@ const handleExport = () => {
                 <input
                   name="designation"
                   required
-                  className="w-full p-2 rounded bg-gray-700"
+                  className="w-full p-2 rounded bg-gray-200"
                 />
               </div>
               {/* Experience */}
@@ -386,7 +386,7 @@ const handleExport = () => {
                 <label className="block mb-1">Experience</label>
                 <input
                   name="experience"
-                  className="w-full p-2 rounded bg-gray-700"
+                  className="w-full p-2 rounded bg-gray-200"
                 />
               </div>
               {/* Start Date */}
@@ -396,7 +396,7 @@ const handleExport = () => {
                   name="startDate"
                   type="date"
                   required
-                  className="w-full p-2 rounded bg-gray-700"
+                  className="w-full p-2 rounded bg-gray-200"
                 />
               </div>
               {/* Role */}
@@ -405,7 +405,7 @@ const handleExport = () => {
                 <select
                   name="role"
                   required
-                  className="w-full p-2 rounded bg-gray-700"
+                  className="w-full p-2 rounded bg-gray-200"
                 >
                   <option>customer</option>
                   <option>staff</option>
@@ -418,7 +418,7 @@ const handleExport = () => {
                 <select
                   name="branchId"
                   required
-                  className="w-full p-2 rounded bg-gray-700"
+                  className="w-full p-2 rounded bg-gray-200"
                 >
                   <option value="">— select —</option>
                   {branches.map(b=>(
@@ -431,7 +431,7 @@ const handleExport = () => {
                 <button
                   type="button"
                   onClick={()=>setShowAddModal(false)}
-                  className="px-4 py-2 bg-gray-600 rounded"
+                  className="px-4 py-2 bg-gray-300 rounded"
                 >
                   Cancel
                 </button>
@@ -450,12 +450,12 @@ const handleExport = () => {
       {/* ── EDIT MODAL ── */}
       {selectedStaff && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-gray-900 p-6 rounded-xl w-full max-w-2xl border border-gray-700 overflow-auto max-h-[90vh]">
+          <div className="bg-white p-6 rounded-xl w-full max-w-2xl border border-gray-300 overflow-auto max-h-[90vh]">
             <h2 className="text-2xl mb-4">Edit Staff</h2>
             <form
               onSubmit={handleEdit}
               encType="multipart/form-data"
-              className="grid grid-cols-2 gap-4 text-white"
+              className="grid grid-cols-2 gap-4 text-gray-900"
             >
               {/* Profile Pic */}
               <div className="col-span-2">
@@ -473,7 +473,7 @@ const handleExport = () => {
                   name="name"
                   defaultValue={selectedStaff.name}
                   required
-                  className="w-full p-2 rounded bg-gray-800"
+                  className="w-full p-2 rounded bg-gray-100"
                 />
               </div>
 
@@ -485,7 +485,7 @@ const handleExport = () => {
                   type="email"
                   defaultValue={selectedStaff.email}
                   required
-                  className="w-full p-2 rounded bg-gray-800"
+                  className="w-full p-2 rounded bg-gray-100"
                 />
               </div>
 
@@ -496,7 +496,7 @@ const handleExport = () => {
                   name="phone"
                   defaultValue={selectedStaff.phone}
                   required maxLength={10} pattern="\d{10}"
-                  className="w-full p-2 rounded bg-gray-800"
+                  className="w-full p-2 rounded bg-gray-100"
                 />
               </div>
 
@@ -507,7 +507,7 @@ const handleExport = () => {
                   name="gender"
                   defaultValue={selectedStaff.gender}
                   required
-                  className="w-full p-2 rounded bg-gray-800"
+                  className="w-full p-2 rounded bg-gray-100"
                 >
                   <option value="">— select —</option>
                   <option>Male</option>
@@ -524,7 +524,7 @@ const handleExport = () => {
                   type="date"
                   defaultValue={selectedStaff.dob?.split('T')[0]}
                   required
-                  className="w-full p-2 rounded bg-gray-800"
+                  className="w-full p-2 rounded bg-gray-100"
                 />
               </div>
 
@@ -535,7 +535,7 @@ const handleExport = () => {
                   name="address"
                   defaultValue={selectedStaff.address}
                   required
-                  className="w-full p-2 rounded bg-gray-800"
+                  className="w-full p-2 rounded bg-gray-100"
                 />
               </div>
 
@@ -546,7 +546,7 @@ const handleExport = () => {
                   name="designation"
                   defaultValue={selectedStaff.designation}
                   required
-                  className="w-full p-2 rounded bg-gray-800"
+                  className="w-full p-2 rounded bg-gray-100"
                 />
               </div>
 
@@ -556,7 +556,7 @@ const handleExport = () => {
                 <input
                   name="experience"
                   defaultValue={selectedStaff.experience}
-                  className="w-full p-2 rounded bg-gray-800"
+                  className="w-full p-2 rounded bg-gray-100"
                 />
               </div>
 
@@ -568,7 +568,7 @@ const handleExport = () => {
                   type="date"
                   defaultValue={selectedStaff.startDate?.split('T')[0]}
                   required
-                  className="w-full p-2 rounded bg-gray-800"
+                  className="w-full p-2 rounded bg-gray-100"
                 />
               </div>
 
@@ -579,7 +579,7 @@ const handleExport = () => {
                   name="role"
                   defaultValue={selectedStaff.role}
                   required
-                  className="w-full p-2 rounded bg-gray-800"
+                  className="w-full p-2 rounded bg-gray-100"
                 >
                   <option>customer</option>
                   <option>staff</option>
@@ -594,7 +594,7 @@ const handleExport = () => {
                   name="branchId"
                   defaultValue={selectedStaff.branchId||''}
                   required
-                  className="w-full p-2 rounded bg-gray-800"
+                  className="w-full p-2 rounded bg-gray-100"
                 >
                   <option value="">— select —</option>
                   {branches.map(b=>(
@@ -608,7 +608,7 @@ const handleExport = () => {
                 <button
                   type="button"
                   onClick={()=>setSelectedStaff(null)}
-                  className="px-4 py-2 bg-gray-600 rounded"
+                  className="px-4 py-2 bg-gray-300 rounded"
                 >
                   Cancel
                 </button>
