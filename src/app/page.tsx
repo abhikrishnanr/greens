@@ -103,23 +103,6 @@ export default function HomePage() {
   // ---- PAGE STARTS HERE ----
   return (
     <main className="bg-[#052b1e] min-h-screen font-sans text-green-50">
-      {/* HEADER */}
-      <header className="sticky top-0 z-50 bg-[#03150d] bg-opacity-98 shadow flex items-center justify-between px-3 py-2">
-        <a href="/" className="flex items-center">
-          <img src="/logo.png" alt="Greens Beauty Salon Logo" className="w-auto h-11" />
-        </a>
-        <div className="flex items-center gap-3">
-          <a href="tel:+918891467678" className="flex items-center gap-1 bg-[#052b1e] hover:bg-primary/10 px-3 py-2 rounded-full text-green-100 font-medium shadow transition">
-            <FiPhone className="text-lg" /> Call
-          </a>
-          <a href="/cart" className="relative">
-            <FiShoppingCart className="text-2xl text-primary" />
-            {cart.length > 0 && (
-              <span className="absolute -top-2 -right-2 text-xs bg-yellow-400 text-black rounded-full px-1 font-bold">{cart.length}</span>
-            )}
-          </a>
-        </div>
-      </header>
 
       {/* HERO SECTION WITH VIDEO */}
 <section className="relative min-h-[420px] md:min-h-[520px] flex items-center justify-center overflow-hidden">
@@ -155,6 +138,9 @@ export default function HomePage() {
         className="px-6 py-2 rounded-full bg-primary text-[#03150d] font-medium hover:bg-opacity-90 transition-colors text-center"
       >
         Book Now
+      </a>
+      <a href="/login" className="px-6 py-2 rounded-full bg-[#052b1e] text-primary font-medium hover:bg-[#0c422d] transition-colors text-center">
+        Login
       </a>
     </div>
   </div>
@@ -605,10 +591,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ---- FOOTER ---- */}
-      <footer className="text-center py-5 text-green-200 text-xs bg-[#082012]">
-        &copy; {new Date().getFullYear()} Greens Beauty Salon. All rights reserved.
-      </footer>
       <style>{`
         .text-primary { color: #41eb70 !important; }
         .bg-primary { background: #41eb70 !important; }

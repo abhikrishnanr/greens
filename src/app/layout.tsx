@@ -2,6 +2,8 @@
 import './globals.css'
 import React from 'react'
 import { Providers } from './providers'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
 import "react-datepicker/dist/react-datepicker.css";
 
 export const metadata = {
@@ -66,8 +68,14 @@ export default function RootLayout({
           }
         `}</style>
       </head>
-      <body>
-        <Providers>{children}</Providers>
+      <body className="min-h-screen flex flex-col">
+        <Providers>
+          <Header />
+          <main className="flex-1">
+            {children}
+          </main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   )
