@@ -1,10 +1,8 @@
-import { PrismaClient } from '@prisma/client'
 import { NextResponse } from 'next/server'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/lib/prisma'
 
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
-  const { id } = await params
+  const { id } = params
   const data = await req.json()
   const service = await prisma.serviceNew.update({
     where: { id },
@@ -19,7 +17,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 }
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
-  const { id } = await params
+  const { id } = params
   await prisma.serviceTier.deleteMany({ where: { serviceId: id } })
   await prisma.serviceNew.delete({ where: { id } })
   return NextResponse.json({ success: true })
