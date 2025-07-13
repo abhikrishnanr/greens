@@ -5,7 +5,7 @@ export async function GET(req: Request, { params }: { params: { tierId: string }
   const { tierId } = params
   const entries = await prisma.serviceTierPriceHistory.findMany({
     where: { tierId },
-    orderBy: { changedAt: 'desc' },
+    orderBy: { startDate: 'desc' },
   })
   return NextResponse.json(entries)
 }
@@ -18,6 +18,8 @@ export async function POST(req: Request, { params }: { params: { tierId: string 
       tierId,
       actualPrice: Number(data.actualPrice),
       offerPrice: data.offerPrice === null || data.offerPrice === undefined ? null : Number(data.offerPrice),
+      startDate: data.startDate ? new Date(data.startDate) : new Date(),
+      endDate: data.endDate ? new Date(data.endDate) : null,
     },
   })
   return NextResponse.json(entry)
@@ -30,6 +32,8 @@ export async function PUT(req: Request, { params }: { params: { tierId: string }
     data: {
       actualPrice: Number(data.actualPrice),
       offerPrice: data.offerPrice === null || data.offerPrice === undefined ? null : Number(data.offerPrice),
+      startDate: data.startDate ? new Date(data.startDate) : undefined,
+      endDate: data.endDate ? new Date(data.endDate) : null,
     },
   })
   return NextResponse.json(entry)

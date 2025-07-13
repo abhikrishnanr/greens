@@ -553,11 +553,13 @@ export default function ServicesAdmin() {
                           <div className="space-y-2 text-sm">
                             <div className="flex items-center gap-2">
                               <DollarSign className="h-3 w-3 text-slate-500" />
-                              <span className="text-slate-600">Price: </span>
-                              <span className="font-medium">${tier.actualPrice}</span>
+                              <span className="text-slate-600">Current Price:</span>
+                              <span className="font-medium">
+                                ₹{tier.offerPrice ?? tier.actualPrice}
+                              </span>
                               {tier.offerPrice && (
                                 <Badge variant="secondary" className="text-xs">
-                                  Offer: ${tier.offerPrice}
+                                  MRP ₹{tier.actualPrice}
                                 </Badge>
                               )}
                             </div>

@@ -27,24 +27,39 @@ export async function GET(req, { params }: { params: { id: string } }) {
       orderBy: { id: 'asc' },
     })
 
+    const now = new Date()
+    const tiers = await Promise.all(
+      service.tiers.map(async (t) => {
+        const current = await prisma.serviceTierPriceHistory.findFirst({
+          where: {
+            tierId: t.id,
+            startDate: { lte: now },
+            OR: [{ endDate: null }, { endDate: { gt: now } }],
+          },
+          orderBy: { startDate: 'desc' },
+        })
+        return {
+          id: t.id,
+          name: t.name,
+          actualPrice: current?.actualPrice ?? t.actualPrice,
+          offerPrice: current?.offerPrice ?? t.offerPrice,
+          duration: t.duration,
+        }
+      })
+    )
+
     const result = {
       id: service.id,
       name: service.name,
       caption: service.caption ?? '',
       description: service.description ?? '',
       imageUrl: service.imageUrl ?? null,
-      images: images.map(img => ({
+      images: images.map((img) => ({
         id: img.id,
         imageUrl: img.imageUrl,
         caption: img.caption ?? null,
       })),
-      tiers: service.tiers.map(t => ({
-        id: t.id,
-        name: t.name,
-        actualPrice: t.actualPrice,
-        offerPrice: t.offerPrice,
-        duration: t.duration,
-      })),
+      tiers,
     }
 
     return NextResponse.json(result)
