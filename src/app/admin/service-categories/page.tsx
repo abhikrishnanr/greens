@@ -6,14 +6,26 @@ interface Category {
   id: string
   name: string
   description?: string
+  imageUrl?: string
+  caption?: string
   order?: number
 }
 
 export default function ServiceCategoriesPage() {
-  const empty: Category = { id: '', name: '', description: '', order: 0 }
+  const empty: Category = { id: '', name: '', description: '', imageUrl: '', caption: '', order: 0 }
   const [cats, setCats] = useState<Category[]>([])
   const [form, setForm] = useState<Category>(empty)
   const [editing, setEditing] = useState(false)
+
+  const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const fd = new FormData()
+    fd.append('file', file)
+    const res = await fetch('/api/upload', { method: 'POST', body: fd })
+    const data = await res.json()
+    setForm({ ...form, imageUrl: data.url })
+  }
 
   const load = async () => {
     const res = await fetch('/api/admin/service-categories')
@@ -39,7 +51,14 @@ export default function ServiceCategoriesPage() {
   }
 
   const edit = (c: Category) => {
-    setForm(c)
+    setForm({
+      id: c.id,
+      name: c.name,
+      description: c.description || '',
+      imageUrl: c.imageUrl || '',
+      caption: c.caption || '',
+      order: c.order ?? 0,
+    })
     setEditing(true)
   }
 
@@ -69,6 +88,21 @@ export default function ServiceCategoriesPage() {
           onChange={desc => setForm({ ...form, description: desc })}
         />
         <input
+          type="file"
+          accept="image/*"
+          onChange={handleImage}
+          className="w-full p-2 rounded bg-gray-800"
+        />
+        {form.imageUrl && (
+          <img src={form.imageUrl} alt="preview" className="h-32 object-cover" />
+        )}
+        <input
+          className="w-full p-2 rounded bg-gray-800"
+          placeholder="Caption"
+          value={form.caption || ''}
+          onChange={e => setForm({ ...form, caption: e.target.value })}
+        />
+        <input
           type="number"
           className="w-full p-2 rounded bg-gray-800"
           placeholder="Order"
@@ -83,6 +117,8 @@ export default function ServiceCategoriesPage() {
         <thead>
           <tr>
             <th>Name</th>
+            <th>Caption</th>
+            <th>Image</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -90,6 +126,8 @@ export default function ServiceCategoriesPage() {
           {cats.map(c => (
             <tr key={c.id} className="border-t border-gray-700">
               <td>{c.name}</td>
+              <td>{c.caption ?? '—'}</td>
+              <td>{c.imageUrl ? <img src={c.imageUrl} className="h-10"/> : '—'}</td>
               <td className="space-x-2">
                 <button className="underline" onClick={() => edit(c)}>Edit</button>
                 <button className="underline text-red-400" onClick={() => del(c.id)}>Delete</button>

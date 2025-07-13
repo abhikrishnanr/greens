@@ -40,6 +40,16 @@ export default function ServicesAdmin() {
   const [showServiceForm, setShowServiceForm] = useState(false)
   const [editingService, setEditingService] = useState(false)
 
+  const handleServiceImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const fd = new FormData()
+    fd.append('file', file)
+    const res = await fetch('/api/upload', { method: 'POST', body: fd })
+    const data = await res.json()
+    setServiceForm({ ...serviceForm, imageUrl: data.url })
+  }
+
   const emptyTier: Partial<Tier> = { id: '', name: '', actualPrice: 0, offerPrice: null, duration: null }
   const [tiers, setTiers] = useState<Tier[]>([])
   const [tierForm, setTierForm] = useState<Partial<Tier>>(emptyTier)
@@ -53,6 +63,18 @@ export default function ServicesAdmin() {
   const [showImageModal, setShowImageModal] = useState(false)
   const [editingImage, setEditingImage] = useState(false)
   const [imageServiceId, setImageServiceId] = useState('')
+
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const fd = new FormData()
+    fd.append('file', file)
+    const res = await fetch('/api/upload', { method: 'POST', body: fd })
+    const data = await res.json()
+    setImageForm({ ...imageForm, imageUrl: data.url })
+  }
+
 
   const loadCategories = async () => {
     const res = await fetch('/api/admin/service-categories')
@@ -293,11 +315,14 @@ export default function ServicesAdmin() {
                 onChange={desc => setServiceForm({ ...serviceForm, description: desc })}
               />
               <input
+                type="file"
+                accept="image/*"
+                onChange={handleServiceImage}
                 className="w-full p-2 rounded bg-gray-800"
-                placeholder="Image URL"
-                value={serviceForm.imageUrl || ''}
-                onChange={e => setServiceForm({ ...serviceForm, imageUrl: e.target.value })}
               />
+              {serviceForm.imageUrl && (
+                <img src={serviceForm.imageUrl} alt="preview" className="h-32 object-cover" />
+              )}
               <div className="text-right space-x-2 pt-2">
                 <button type="button" className="px-3 py-1 bg-gray-600 rounded" onClick={() => setShowServiceForm(false)}>Cancel</button>
                 <button type="submit" className="px-3 py-1 bg-green-600 rounded">Save</button>
@@ -395,7 +420,11 @@ export default function ServicesAdmin() {
               <tbody>
                 {images.map(img => (
                   <tr key={img.id} className="border-t border-gray-700">
+
+                    <td>{img.imageUrl ? <img src={img.imageUrl} className="h-10"/> : '—'}</td>
+
                     <td>{img.imageUrl}</td>
+
                     <td>{img.caption ?? '—'}</td>
                     <td className="space-x-2">
                       <button className="underline" onClick={() => openEditImage(img)}>Edit</button>
@@ -409,12 +438,23 @@ export default function ServicesAdmin() {
             {imageForm.imageUrl !== undefined && (
               <form onSubmit={saveImage} className="space-y-2">
                 <input
+
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="w-full p-2 rounded bg-gray-800"
+                />
+                {imageForm.imageUrl && (
+                  <img src={imageForm.imageUrl} alt="preview" className="h-24 object-cover" />
+                )}
+
                   className="w-full p-2 rounded bg-gray-800"
                   placeholder="Image URL"
                   value={imageForm.imageUrl || ''}
                   onChange={e => setImageForm({ ...imageForm, imageUrl: e.target.value })}
                   required
                 />
+
                 <input
                   className="w-full p-2 rounded bg-gray-800"
                   placeholder="Caption"

@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
       name: data.name,
       description: data.description,
       imageUrl: data.imageUrl,
+      caption: data.caption,
       order: data.order ?? 0,
     }
   });
@@ -35,6 +36,7 @@ export async function PUT(req: NextRequest) {
       name: data.name,
       description: data.description,
       imageUrl: data.imageUrl,
+      caption: data.caption,
       order: data.order,
     }
   });
