@@ -21,11 +21,19 @@ export async function POST(req: Request, { params }: { params: { serviceId: stri
       duration: data.duration ? Number(data.duration) : null,
     },
   })
+  await prisma.serviceTierPriceHistory.create({
+    data: {
+      tierId: tier.id,
+      actualPrice: tier.actualPrice,
+      offerPrice: tier.offerPrice,
+    },
+  })
   return NextResponse.json(tier)
 }
 
 export async function PUT(req: Request, { params }: { params: { serviceId: string } }) {
   const data = await req.json()
+  const existing = await prisma.serviceTier.findUnique({ where: { id: data.id } })
   const tier = await prisma.serviceTier.update({
     where: { id: data.id },
     data: {
@@ -35,6 +43,15 @@ export async function PUT(req: Request, { params }: { params: { serviceId: strin
       duration: data.duration ? Number(data.duration) : null,
     },
   })
+  if (existing && (existing.actualPrice !== tier.actualPrice || existing.offerPrice !== tier.offerPrice)) {
+    await prisma.serviceTierPriceHistory.create({
+      data: {
+        tierId: tier.id,
+        actualPrice: tier.actualPrice,
+        offerPrice: tier.offerPrice,
+      },
+    })
+  }
   return NextResponse.json(tier)
 }
 
