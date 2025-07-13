@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
+import Link from 'next/link'
 import { FiShoppingCart, FiPhone, FiSearch, FiMapPin, FiMail, FiInstagram, FiX, FiEye } from "react-icons/fi"
 import { MdMale, MdFemale, MdStar, MdDiamond, MdEco } from "react-icons/md"
 import { motion, AnimatePresence } from "framer-motion"
@@ -29,70 +30,34 @@ const TIER_LABELS = {
 }
 
 export default function HomePage() {
-  const [services, setServices] = useState([])
+  const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
   const [expandedCat, setExpandedCat] = useState(null)
-  const [expandedService, setExpandedService] = useState(null)
   const [cart, setCart] = useState([])
   const [error, setError] = useState(null)
-  const [gender, setGender] = useState("all")
-  const [tier, setTier] = useState("all")
-  const [search, setSearch] = useState("")
 
   useEffect(() => {
     setLoading(true)
-    fetch("/api/services/all")
+    fetch('/api/v2/service-categories')
       .then((res) => {
-        if (!res.ok) throw new Error("API error")
+        if (!res.ok) throw new Error('API error')
         return res.json()
       })
       .then((data) => {
-        setServices(Array.isArray(data) ? data : [])
+        setCategories(Array.isArray(data) ? data : [])
         setLoading(false)
       })
-      .catch((e) => {
-        setError("Unable to fetch services.")
+      .catch(() => {
+        setError('Unable to fetch services.')
         setLoading(false)
       })
   }, [])
 
-  // --- Filtering logic ---
-  const filteredServices = useMemo(() => {
-    return services.filter(
-      (s) =>
-        (gender === "all" || (s.applicable_to && s.applicable_to.toLowerCase() === gender)) &&
-        (tier === "all" || (s.tier && s.tier.toLowerCase() === tier)) &&
-        (!search ||
-          (s.main_service_name && s.main_service_name.toLowerCase().includes(search.toLowerCase())) ||
-          (s.sub_category && s.sub_category.toLowerCase().includes(search.toLowerCase())) ||
-          (s.caption && s.caption.toLowerCase().includes(search.toLowerCase()))),
-    )
-  }, [services, gender, tier, search])
-
-  const categories = useMemo(() => {
-    const map = new Map()
-    filteredServices.forEach((s) => {
-      if (!map.has(s.main_service_name)) {
-        map.set(s.main_service_name, {
-          name: s.main_service_name,
-          caption: s.main_service_name_description || s.caption,
-          image: s.category_image_url,
-          tiers: new Set(s.tier ? [s.tier] : []),
-        })
-      } else if (s.tier) {
-        map.get(s.main_service_name).tiers.add(s.tier)
-      }
-    })
-    return Array.from(map.values()).map((c) => ({
-      ...c,
-      tiers: Array.from(c.tiers),
-    }))
-  }, [filteredServices])
-
   const subServices = useMemo(() => {
     if (!expandedCat) return []
-    return filteredServices.filter((s) => s.main_service_name === expandedCat)
-  }, [expandedCat, filteredServices])
+    const cat = categories.find((c) => c.id === expandedCat)
+    return cat ? cat.services : []
+  }, [expandedCat, categories])
 
   function addToCart(service) {
     setCart((prev) => (prev.find((item) => item.id === service.id) ? prev : [...prev, { ...service, qty: 1 }]))
@@ -322,225 +287,16 @@ export default function HomePage() {
             <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: "#41eb70" }}>
               Our Services
             </h2>
-            {tier !== "all" && <p className="text-lg text-gray-400 italic">{TIER_LABELS[tier]?.helper}</p>}
           </motion.div>
-
-          {/* FILTERS & SEARCH - POSITIONED BELOW "OUR SERVICES" HEADING */}
-          <motion.div
-            className="max-w-6xl mx-auto mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 shadow-2xl border border-gray-700/50">
-              {/* Desktop Layout: Search centered above, filters side-by-side below */}
-              <div className="hidden lg:block">
-                {/* Search Bar - Centered Above */}
-                <div className="flex justify-center mb-8">
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="text-green-300 text-sm font-semibold tracking-wide">Search Services</div>
-                    <div className="relative w-96">
-                      <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-green-400 text-lg" />
-                      <input
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search services..."
-                        className="w-full bg-gray-700/50 backdrop-blur-sm rounded-full px-12 py-3 border border-gray-600/50 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition-all"
-                      />
-                      {search && (
-                        <button
-                          onClick={() => setSearch("")}
-                          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-green-400 transition-colors"
-                        >
-                          <FiX />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Filters Side-by-Side */}
-                <div className="grid grid-cols-2 gap-12">
-                  {/* Gender Filters */}
-                  <div className="flex flex-col items-center gap-4">
-                    <div className="text-green-300 text-sm font-semibold tracking-wide">Filter by Gender</div>
-                    <div className="flex gap-3">
-                      <CompactFilterTab
-                        icon={<MdMale />}
-                        label="Male"
-                        active={gender === "male"}
-                        onClick={() => setGender("male")}
-                        activeColor="bg-gradient-to-r from-blue-500 to-blue-600 text-white"
-                      />
-                      <CompactFilterTab
-                        icon={<MdFemale />}
-                        label="Female"
-                        active={gender === "female"}
-                        onClick={() => setGender("female")}
-                        activeColor="bg-gradient-to-r from-pink-500 to-pink-600 text-white"
-                      />
-                      <CompactFilterTab
-                        label="All"
-                        active={gender === "all"}
-                        onClick={() => setGender("all")}
-                        activeColor="bg-gradient-to-r from-green-500 to-emerald-600 text-white"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Service Type Filters */}
-                  <div className="flex flex-col items-center gap-4">
-                    <div className="text-green-300 text-sm font-semibold tracking-wide">Filter by Service Type</div>
-                    <div className="flex gap-2 flex-wrap justify-center">
-                      <CompactFilterTab
-                        label="All"
-                        active={tier === "all"}
-                        onClick={() => setTier("all")}
-                        activeColor="bg-gradient-to-r from-green-500 to-emerald-600 text-white"
-                      />
-                      <CompactFilterTab
-                        icon={<MdStar className="text-yellow-400" />}
-                        label="Deluxe"
-                        active={tier === "deluxe"}
-                        onClick={() => setTier("deluxe")}
-                        activeColor="bg-gradient-to-r from-yellow-500 to-amber-600 text-white"
-                      />
-                      <CompactFilterTab
-                        icon={<MdDiamond className="text-blue-400" />}
-                        label="Premium"
-                        active={tier === "premium"}
-                        onClick={() => setTier("premium")}
-                        activeColor="bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
-                      />
-                      <CompactFilterTab
-                        icon={<MdEco className="text-green-400" />}
-                        label="Basic"
-                        active={tier === "basic"}
-                        onClick={() => setTier("basic")}
-                        activeColor="bg-gradient-to-r from-green-500 to-emerald-600 text-white"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Mobile Layout: Stacked */}
-              <div className="lg:hidden space-y-6">
-                {/* Search Bar */}
-                <div className="flex flex-col items-center gap-3">
-                  <div className="text-green-300 text-sm font-semibold tracking-wide">Search Services</div>
-                  <div className="relative w-full max-w-sm">
-                    <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-green-400 text-lg" />
-                    <input
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      placeholder="Search services..."
-                      className="w-full bg-gray-700/50 backdrop-blur-sm rounded-full px-12 py-3 border border-gray-600/50 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition-all"
-                    />
-                    {search && (
-                      <button
-                        onClick={() => setSearch("")}
-                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-green-400 transition-colors"
-                      >
-                        <FiX />
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Gender Filters */}
-                <div className="flex flex-col items-center gap-3">
-                  <div className="text-green-300 text-sm font-semibold tracking-wide">Filter by Gender</div>
-                  <div className="flex gap-2 flex-wrap justify-center">
-                    <CompactFilterTab
-                      icon={<MdMale />}
-                      label="Male"
-                      active={gender === "male"}
-                      onClick={() => setGender("male")}
-                      activeColor="bg-gradient-to-r from-blue-500 to-blue-600 text-white"
-                    />
-                    <CompactFilterTab
-                      icon={<MdFemale />}
-                      label="Female"
-                      active={gender === "female"}
-                      onClick={() => setGender("female")}
-                      activeColor="bg-gradient-to-r from-pink-500 to-pink-600 text-white"
-                    />
-                    <CompactFilterTab
-                      label="All"
-                      active={gender === "all"}
-                      onClick={() => setGender("all")}
-                      activeColor="bg-gradient-to-r from-green-500 to-emerald-600 text-white"
-                    />
-                  </div>
-                </div>
-
-                {/* Service Type Filters */}
-                <div className="flex flex-col items-center gap-3">
-                  <div className="text-green-300 text-sm font-semibold tracking-wide">Filter by Service Type</div>
-                  <div className="flex gap-2 flex-wrap justify-center">
-                    <CompactFilterTab
-                      label="All"
-                      active={tier === "all"}
-                      onClick={() => setTier("all")}
-                      activeColor="bg-gradient-to-r from-green-500 to-emerald-600 text-white"
-                    />
-                    <CompactFilterTab
-                      icon={<MdStar className="text-yellow-400" />}
-                      label="Deluxe"
-                      active={tier === "deluxe"}
-                      onClick={() => setTier("deluxe")}
-                      activeColor="bg-gradient-to-r from-yellow-500 to-amber-600 text-white"
-                    />
-                    <CompactFilterTab
-                      icon={<MdDiamond className="text-blue-400" />}
-                      label="Premium"
-                      active={tier === "premium"}
-                      onClick={() => setTier("premium")}
-                      activeColor="bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
-                    />
-                    <CompactFilterTab
-                      icon={<MdEco className="text-green-400" />}
-                      label="Basic"
-                      active={tier === "basic"}
-                      onClick={() => setTier("basic")}
-                      activeColor="bg-gradient-to-r from-green-500 to-emerald-600 text-white"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          <div className="max-w-7xl mx-auto">
-            {loading && (
-              <div className="text-center py-20">
-                <div className="inline-block w-12 h-12 border-4 border-gray-600 border-t-green-400 rounded-full animate-spin mb-4"></div>
-                <p className="text-gray-400 text-lg">Loading services...</p>
-              </div>
-            )}
-
-            {error && (
-              <div className="text-center py-20">
-                <p className="text-red-400 text-lg">{error}</p>
-              </div>
-            )}
-
-            {!loading && !error && categories.length === 0 && (
-              <div className="text-center py-20">
-                <p className="text-gray-400 text-lg">No services found.</p>
-              </div>
-            )}
 
             {/* Category Cards */}
             <div className="space-y-8">
               <AnimatePresence>
                 {categories.map((cat, idx) => {
-                  const isOpen = expandedCat === cat.name
+                  const isOpen = expandedCat === cat.id
                   return (
                     <motion.div
-                      key={cat.name}
+                      key={cat.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
@@ -548,7 +304,7 @@ export default function HomePage() {
                       className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700/50 overflow-hidden hover:shadow-green-400/10 transition-all duration-300"
                     >
                       <motion.button
-                        onClick={() => setExpandedCat(isOpen ? null : cat.name)}
+                        onClick={() => setExpandedCat(isOpen ? null : cat.id)}
                         className="w-full p-8 focus:outline-none"
                         whileHover={{ backgroundColor: "rgba(65, 235, 112, 0.05)" }}
                       >
@@ -570,16 +326,6 @@ export default function HomePage() {
                                 {cat.name}
                               </h3>
                               <p className="text-gray-300 text-lg mb-4">{cat.caption}</p>
-                              <div className="flex flex-wrap gap-2">
-                                {cat.tiers.map((tier) => (
-                                  <span
-                                    key={tier}
-                                    className={`px-3 py-1 border font-semibold rounded-full text-sm flex items-center ${TIER_LABELS[tier]?.color}`}
-                                  >
-                                    {TIER_LABELS[tier]?.icon}
-                                    {TIER_LABELS[tier]?.label}
-                                  </span>
-                                ))}
                               </div>
                             </div>
                           </div>
@@ -603,95 +349,26 @@ export default function HomePage() {
                             transition={{ duration: 0.4 }}
                             className="px-8 pb-8"
                           >
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                              {subServices.map((svc, svcIdx) => (
-                                <motion.div
-                                  key={svc.id}
-                                  initial={{ opacity: 0, y: 20 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  transition={{ duration: 0.4, delay: svcIdx * 0.1 }}
-                                  className="bg-gray-700/30 backdrop-blur-sm rounded-xl p-6 border border-gray-600/30 hover:shadow-xl hover:shadow-green-400/10 transition-all duration-300 group"
-                                  whileHover={{ y: -5 }}
-                                >
-                                  <div className="mb-4">
+                            <div className="space-y-6">
+                              {subServices.map((svc) => (
+                                <div key={svc.id} className="bg-gray-700/30 backdrop-blur-sm rounded-xl p-6 border border-gray-600/30 flex items-center justify-between">
+                                  <div className="flex items-center gap-6">
                                     <img
-                                      src={svc.image_url || "/placeholder.svg?height=240&width=320"}
-                                      alt={svc.sub_category}
-                                      className="w-full h-32 object-cover rounded-xl shadow-lg border border-gray-600/50 group-hover:scale-105 transition-transform duration-300"
+                                      src={svc.imageUrl || "/placeholder.svg?height=240&width=320"}
+                                      alt={svc.name}
+                                      className="w-24 h-18 object-cover rounded-xl shadow-lg border border-gray-600/50"
                                       style={{ aspectRatio: "4/3" }}
                                     />
-                                  </div>
-
-                                  <div className="mb-4">
-                                    <h4
-                                      className="font-bold text-xl mb-2 group-hover:text-green-300 transition-colors"
-                                      style={{ color: "#41eb70" }}
-                                    >
-                                      {svc.sub_category}
-                                    </h4>
-                                    <div className="flex flex-wrap gap-2 mb-3">
-                                      {svc.tier && (
-                                        <span
-                                          className={`px-2 py-1 border font-semibold rounded-full text-xs flex items-center ${TIER_LABELS[svc.tier]?.color}`}
-                                        >
-                                          {TIER_LABELS[svc.tier]?.icon}
-                                          {TIER_LABELS[svc.tier]?.label}
-                                        </span>
-                                      )}
-                                      {svc.offer_price && svc.offer_price < svc.original_price && (
-                                        <span className="bg-gradient-to-r from-yellow-500 to-amber-600 text-white px-2 py-1 rounded-full text-xs font-bold">
-                                          OFFER
-                                        </span>
-                                      )}
-                                    </div>
-                                    <p className="text-gray-300 text-sm line-clamp-2 leading-relaxed">
-                                      {svc.description?.replace(/<[^>]+>/g, "").substring(0, 80)}...
-                                    </p>
-                                  </div>
-
-                                  <div className="flex items-center justify-between">
                                     <div>
-                                      {svc.offer_price && svc.offer_price < svc.original_price ? (
-                                        <div className="flex items-center gap-2">
-                                          <span className="line-through text-gray-400 text-sm">
-                                            ₹{svc.original_price}
-                                          </span>
-                                          <span className="font-bold text-xl" style={{ color: "#41eb70" }}>
-                                            ₹{svc.offer_price}
-                                          </span>
-                                        </div>
-                                      ) : (
-                                        <span className="font-bold text-xl" style={{ color: "#41eb70" }}>
-                                          ₹{svc.original_price}
-                                        </span>
+                                      <h4 className="font-bold text-xl" style={{ color: '#41eb70' }}>{svc.name}</h4>
+                                      <p className="text-gray-300 text-sm mb-1">{svc.caption}</p>
+                                      {svc.minPrice !== null && (
+                                        <span className="font-bold" style={{ color: '#41eb70' }}>From ₹{svc.minPrice}</span>
                                       )}
                                     </div>
-                                    <div className="flex gap-2">
-                                      <motion.button
-                                        className="px-3 py-2 border-2 rounded-full text-sm font-semibold hover:bg-green-400/10 transition-all flex items-center gap-1"
-                                        style={{
-                                          borderColor: "#41eb70",
-                                          color: "#41eb70",
-                                        }}
-                                        onClick={() => setExpandedService(svc)}
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                      >
-                                        <FiEye className="text-xs" />
-                                        View
-                                      </motion.button>
-                                      <motion.button
-                                        className="px-3 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full text-sm font-bold shadow-lg hover:shadow-green-500/25 transition-all flex items-center gap-1"
-                                        onClick={() => addToCart(svc)}
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                      >
-                                        <FiShoppingCart className="text-xs" />
-                                        Book
-                                      </motion.button>
-                                    </div>
                                   </div>
-                                </motion.div>
+                                  <Link href={`/services/${svc.id}`} className="text-green-400 underline text-sm">View Details</Link>
+                                </div>
                               ))}
                             </div>
                           </motion.div>
@@ -706,94 +383,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SERVICE DETAILS MODAL */}
-      <AnimatePresence>
-        {expandedService && (
-          <motion.div
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setExpandedService(null)}
-          >
-            <motion.div
-              className="bg-gray-800 rounded-3xl max-w-lg w-full p-8 relative shadow-2xl border border-gray-700/50"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                className="absolute right-4 top-4 w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center text-gray-300 hover:bg-gray-600 hover:text-white transition-colors"
-                onClick={() => setExpandedService(null)}
-              >
-                <FiX />
-              </button>
-
-              <div className="text-center mb-8">
-                <img
-                  src={expandedService.image_url || "/placeholder.svg?height=240&width=320"}
-                  alt={expandedService.sub_category}
-                  className="w-40 h-30 rounded-2xl mx-auto mb-6 shadow-xl object-cover border border-gray-600/50"
-                  style={{ aspectRatio: "4/3" }}
-                />
-                <h3 className="font-bold text-2xl mb-4" style={{ color: "#41eb70" }}>
-                  {expandedService.sub_category}
-                </h3>
-
-                <div className="flex items-center gap-3 justify-center mb-6 flex-wrap">
-                  {expandedService.tier && (
-                    <span
-                      className={`px-3 py-1 border font-semibold rounded-full text-sm flex items-center ${TIER_LABELS[expandedService.tier]?.color}`}
-                    >
-                      {TIER_LABELS[expandedService.tier]?.icon}
-                      {TIER_LABELS[expandedService.tier]?.label}
-                    </span>
-                  )}
-                  {expandedService.offer_price && expandedService.offer_price < expandedService.original_price && (
-                    <span className="bg-gradient-to-r from-yellow-500 to-amber-600 text-white px-3 py-1 rounded-full text-sm font-bold">
-                      SPECIAL OFFER
-                    </span>
-                  )}
-                </div>
-
-                <div className="mb-6">
-                  {expandedService.offer_price && expandedService.offer_price < expandedService.original_price ? (
-                    <div className="flex items-center justify-center gap-3">
-                      <span className="text-gray-400 line-through text-lg">₹{expandedService.original_price}</span>
-                      <span className="font-extrabold text-3xl" style={{ color: "#41eb70" }}>
-                        ₹{expandedService.offer_price}
-                      </span>
-                    </div>
-                  ) : (
-                    <span className="font-bold text-3xl" style={{ color: "#41eb70" }}>
-                      ₹{expandedService.original_price}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div
-                className="text-gray-300 mb-8 text-center leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: expandedService.description }}
-              />
-
-              <motion.button
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold text-lg shadow-xl hover:shadow-green-500/25 transition-all flex items-center gap-2 justify-center"
-                onClick={() => {
-                  addToCart(expandedService)
-                  setExpandedService(null)
-                }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <FiShoppingCart /> Book This Service
-              </motion.button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* CART BAR */}
       <AnimatePresence>
@@ -989,24 +578,3 @@ export default function HomePage() {
       </footer>
     </main>
   )
-}
-
-// COMPACT FILTER TAB COMPONENT
-function CompactFilterTab({ icon, label, active, onClick, activeColor }) {
-  const baseStyle =
-    "px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 border focus:outline-none shadow-md"
-  const inactiveStyle = "bg-gray-800/50 text-gray-300 border-gray-700/50 hover:bg-gray-700/50 hover:scale-105"
-  const style = active ? `${activeColor} border-transparent shadow-lg` : inactiveStyle
-
-  return (
-    <motion.button
-      className={`${baseStyle} ${style} flex items-center justify-center gap-1 min-w-[70px]`}
-      onClick={onClick}
-      whileHover={{ scale: active ? 1 : 1.05 }}
-      whileTap={{ scale: 0.95 }}
-    >
-      {icon && <span className="text-sm">{icon}</span>}
-      <span>{label}</span>
-    </motion.button>
-  )
-}
