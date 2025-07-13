@@ -1,73 +1,90 @@
-"use client";
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import TextStyle from '@tiptap/extension-text-style'
-import Color from '@tiptap/extension-color'
-import { useEffect } from 'react'
-import { MdFormatBold, MdFormatItalic, MdLooksOne, MdLooksTwo } from 'react-icons/md'
+"use client"
 
-export default function WysiwygEditor({ value, onChange, className = '' }) {
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      TextStyle,
-      Color,
-    ],
-    content: value,
-    onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
-    }
-  });
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import { Bold, Italic, List, Link, Eye, Code } from "lucide-react"
 
-  useEffect(() => {
-    if (editor && value !== editor.getHTML()) {
-      editor.commands.setContent(value || "");
-    }
-  }, [value]);
+interface WysiwygEditorProps {
+  value: string
+  onChange: (value: string) => void
+}
 
-  if (!editor) return <div>Loading editor...</div>;
+export default function WysiwygEditor({ value, onChange }: WysiwygEditorProps) {
+  const [isPreview, setIsPreview] = useState(false)
+
+  const insertText = (before: string, after = "") => {
+    const textarea = document.querySelector("textarea") as HTMLTextAreaElement
+    if (!textarea) return
+
+    const start = textarea.selectionStart
+    const end = textarea.selectionEnd
+    const selectedText = value.substring(start, end)
+    const newText = value.substring(0, start) + before + selectedText + after + value.substring(end)
+
+    onChange(newText)
+
+    // Reset cursor position
+    setTimeout(() => {
+      textarea.focus()
+      textarea.setSelectionRange(start + before.length, start + before.length + selectedText.length)
+    }, 0)
+  }
 
   return (
-    <div className={`rounded border bg-white p-2 text-gray-800 ${className}`}>
-      <div className="mb-2 flex gap-1 flex-wrap">
-        <button
+    <div className="border rounded-lg overflow-hidden bg-white">
+      <div className="flex items-center gap-2 p-2 border-b bg-slate-50">
+        <Button type="button" variant="ghost" size="sm" onClick={() => insertText("**", "**")} className="h-8 w-8 p-0">
+          <Bold className="h-4 w-4" />
+        </Button>
+        <Button type="button" variant="ghost" size="sm" onClick={() => insertText("*", "*")} className="h-8 w-8 p-0">
+          <Italic className="h-4 w-4" />
+        </Button>
+        <Button type="button" variant="ghost" size="sm" onClick={() => insertText("- ")} className="h-8 w-8 p-0">
+          <List className="h-4 w-4" />
+        </Button>
+        <Button
           type="button"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={`p-1 rounded hover:bg-green-100 ${editor.isActive('bold') ? 'bg-green-200' : ''}`}
+          variant="ghost"
+          size="sm"
+          onClick={() => insertText("[", "](url)")}
+          className="h-8 w-8 p-0"
         >
-          <MdFormatBold />
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={`p-1 rounded hover:bg-green-100 ${editor.isActive('italic') ? 'bg-green-200' : ''}`}
-        >
-          <MdFormatItalic />
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-          className={`p-1 rounded hover:bg-green-100 ${editor.isActive('heading', { level: 1 }) ? 'bg-green-200' : ''}`}
-        >
-          <MdLooksOne />
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={`p-1 rounded hover:bg-green-100 ${editor.isActive('heading', { level: 2 }) ? 'bg-green-200' : ''}`}
-        >
-          <MdLooksTwo />
-        </button>
-        <input
-          type="color"
-          onChange={e => editor.chain().focus().setColor(e.target.value).run()}
-          className="h-8 w-8 p-0 border rounded"
-        />
-        <button type="button" onClick={() => editor.chain().focus().unsetColor().run()} className="p-1 rounded hover:bg-green-100">
-          Reset
-        </button>
+          <Link className="h-4 w-4" />
+        </Button>
+        <Button type="button" variant="ghost" size="sm" onClick={() => insertText("`", "`")} className="h-8 w-8 p-0">
+          <Code className="h-4 w-4" />
+        </Button>
+        <div className="ml-auto">
+          <Button type="button" variant="ghost" size="sm" onClick={() => setIsPreview(!isPreview)} className="h-8 px-3">
+            <Eye className="h-4 w-4 mr-1" />
+            {isPreview ? "Edit" : "Preview"}
+          </Button>
+        </div>
       </div>
-      <EditorContent editor={editor} className="min-h-[120px] bg-white text-gray-800 p-2 rounded border" />
+
+      {isPreview ? (
+        <div
+          className="p-4 min-h-[120px] prose prose-sm max-w-none"
+          dangerouslySetInnerHTML={{
+            __html: value
+              .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+              .replace(/\*(.*?)\*/g, "<em>$1</em>")
+              .replace(/`(.*?)`/g, "<code>$1</code>")
+              .replace(/^- (.+)$/gm, "<li>$1</li>")
+              .replace(/(<li>.*<\/li>)/s, "<ul>$1</ul>")
+              .replace(/\[([^\]]+)\]$$([^)]+)$$/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+              .replace(/\n/g, "<br>"),
+          }}
+        />
+      ) : (
+        <Textarea
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="min-h-[120px] border-0 resize-none focus-visible:ring-0"
+          placeholder="Enter description... You can use **bold**, *italic*, `code`, - lists, and [links](url)"
+        />
+      )}
     </div>
   )
 }
