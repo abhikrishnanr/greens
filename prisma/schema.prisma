@@ -12,37 +12,37 @@ datasource db {
 // 3. Models
 
 model User {
-  id            String    @id @default(uuid()) @db.VarChar(191)
-  name          String?   @db.VarChar(191)
-  email         String?   @unique @db.VarChar(191)
-  role          String    @default("customer") @db.VarChar(191)
-  branchId      String?   @db.VarChar(191)
-  branch        Branch?   @relation(fields: [branchId], references: [id])
-  phone         String?   @unique @db.VarChar(191)
-  address       String?   @db.Text
-  designation   String?   @db.VarChar(191)
-  dob           DateTime? @db.Timestamp(3)
-  experience    String?   @db.VarChar(191)
-  gender        String?   @db.VarChar(191)
-  removed       Boolean   @default(false)
-  startDate     DateTime? @db.Timestamp(3)
-  imageUrl      String?   @db.VarChar(191)
-  createdAt     DateTime  @default(now()) @db.Timestamp(3)
-  updatedAt     DateTime  @default(now()) @updatedAt @db.Timestamp(3)
+  id          String    @id @default(uuid()) @db.VarChar(191)
+  name        String?   @db.VarChar(191)
+  email       String?   @unique @db.VarChar(191)
+  role        String    @default("customer") @db.VarChar(191)
+  branchId    String?   @db.VarChar(191)
+  branch      Branch?   @relation(fields: [branchId], references: [id])
+  phone       String?   @unique @db.VarChar(191)
+  address     String?   @db.Text
+  designation String?   @db.VarChar(191)
+  dob         DateTime? @db.Timestamp(3)
+  experience  String?   @db.VarChar(191)
+  gender      String?   @db.VarChar(191)
+  removed     Boolean   @default(false)
+  startDate   DateTime? @db.Timestamp(3)
+  imageUrl    String?   @db.VarChar(191)
+  createdAt   DateTime  @default(now()) @db.Timestamp(3)
+  updatedAt   DateTime  @default(now()) @updatedAt @db.Timestamp(3)
 
   bookings      Booking[]
   staffBookings Booking[] @relation("StaffBookings")
 }
 
 model Branch {
-  id            String           @id @db.VarChar(191)
-  name          String           @db.VarChar(191)
-  address       String           @db.VarChar(191)
-  phone         String           @db.VarChar(191)
-  upiId         String?          @db.VarChar(191)
-  qrUrl         String?          @db.VarChar(191)
-  createdAt     DateTime         @default(now()) @db.Timestamp(3)
-  updatedAt     DateTime         @default(now()) @updatedAt @db.Timestamp(3)
+  id        String   @id @db.VarChar(191)
+  name      String   @db.VarChar(191)
+  address   String   @db.VarChar(191)
+  phone     String   @db.VarChar(191)
+  upiId     String?  @db.VarChar(191)
+  qrUrl     String?  @db.VarChar(191)
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(3)
 
   bookings      Booking[]
   users         User[]
@@ -50,35 +50,35 @@ model Branch {
 }
 
 model Coupon {
-  id             String     @id @db.VarChar(191)
-  code           String     @unique @db.VarChar(191)
-  description    String?    @db.VarChar(191)
-  discountType   String     @db.VarChar(191)
+  id             String   @id @db.VarChar(191)
+  code           String   @unique @db.VarChar(191)
+  description    String?  @db.VarChar(191)
+  discountType   String   @db.VarChar(191)
   discountValue  Float
-  startDate      DateTime   @db.Timestamp(3)
-  endDate        DateTime   @db.DateTime(3)
+  startDate      DateTime @db.Timestamp(3)
+  endDate        DateTime @db.DateTime(3)
   minAmount      Float?
   maxRedemptions Int?
-  timesUsed      Int        @default(0)
-  isActive       Boolean    @default(true)
-  createdAt      DateTime   @default(now()) @db.Timestamp(3)
-  updatedAt      DateTime   @default(now()) @updatedAt @db.Timestamp(3)
+  timesUsed      Int      @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now()) @db.Timestamp(3)
+  updatedAt      DateTime @default(now()) @updatedAt @db.Timestamp(3)
 
-  bookings       Booking[]
+  bookings Booking[]
 }
 
 model Booking {
-  id        String   @id @db.VarChar(191)
-  userId    String   @db.VarChar(191)
-  user      User     @relation(fields: [userId], references: [id])
-  branchId  String   @db.VarChar(191)
-  branch    Branch   @relation(fields: [branchId], references: [id])
-  staffId   String?  @db.VarChar(191)
-  staff     User?    @relation("StaffBookings", fields: [staffId], references: [id])
-  couponId  String?  @db.VarChar(191)
-  coupon    Coupon?  @relation(fields: [couponId], references: [id])
-  serviceId String   @db.VarChar(191)
-  service   Service  @relation(fields: [serviceId], references: [id])
+  id        String  @id @db.VarChar(191)
+  userId    String  @db.VarChar(191)
+  user      User    @relation(fields: [userId], references: [id])
+  branchId  String  @db.VarChar(191)
+  branch    Branch  @relation(fields: [branchId], references: [id])
+  staffId   String? @db.VarChar(191)
+  staff     User?   @relation("StaffBookings", fields: [staffId], references: [id])
+  couponId  String? @db.VarChar(191)
+  coupon    Coupon? @relation(fields: [couponId], references: [id])
+  serviceId String  @db.VarChar(191)
+  service   Service @relation(fields: [serviceId], references: [id])
 
   status    String   @default("pending") @db.VarChar(191)
   date      DateTime @db.DateTime(3)
@@ -88,53 +88,51 @@ model Booking {
 }
 
 model ServiceCategory {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  description String?  @db.LongText
+  id          String       @id @default(uuid())
+  name        String       @unique
+  description String?      @db.LongText
   imageUrl    String?
-  order       Int      @default(0)
+  order       Int          @default(0)
   services    Service[]
   servicesNew ServiceNew[]
   caption     String?
 }
 
-
 model Service {
-  id                         String   @id @db.VarChar(191)
-  applicableTo               String   @map("applicable_to") @db.VarChar(191)
-  mainServiceName            String   @map("main_service_name") @db.VarChar(191)
-  mainServiceNameDescription String?  @map("main_service_name_description") @db.LongText   // CHANGED!
-  subCategory                String   @map("sub_category") @db.VarChar(191)
-  costCategory               String   @map("cost_category") @db.VarChar(191)
-  serviceDescription         String?  @map("service_description") @db.LongText             // CHANGED!
-  searchTags                 String?  @map("search_tags") @db.Text
-  imageUrl                   String?  @map("image_url") @db.VarChar(191)
-  categoryImageUrl           String?  @map("category_image_url") @db.VarChar(191)
+  id                         String           @id @db.VarChar(191)
+  applicableTo               String           @map("applicable_to") @db.VarChar(191)
+  mainServiceName            String           @map("main_service_name") @db.VarChar(191)
+  mainServiceNameDescription String?          @map("main_service_name_description") @db.LongText // CHANGED!
+  subCategory                String           @map("sub_category") @db.VarChar(191)
+  costCategory               String           @map("cost_category") @db.VarChar(191)
+  serviceDescription         String?          @map("service_description") @db.LongText // CHANGED!
+  searchTags                 String?          @map("search_tags") @db.Text
+  imageUrl                   String?          @map("image_url") @db.VarChar(191)
+  categoryImageUrl           String?          @map("category_image_url") @db.VarChar(191)
   duration                   Int
-  active                     Boolean  @default(true)
-  createdAt                  DateTime @default(now()) @db.Timestamp(3)
-  updatedAt                  DateTime @default(now()) @updatedAt @db.Timestamp(3)
-  order                      Int      @default(0)
+  active                     Boolean          @default(true)
+  createdAt                  DateTime         @default(now()) @db.Timestamp(3)
+  updatedAt                  DateTime         @default(now()) @updatedAt @db.Timestamp(3)
+  order                      Int              @default(0)
   category                   ServiceCategory? @relation(fields: [categoryId], references: [id])
   categoryId                 String?
-  images                     ServiceImage[]
   caption                    String?
 
-  bookings                   Booking[]
-  priceHistory               ServicePriceHistory[]
-  branchService              BranchService[]
+  bookings      Booking[]
+  priceHistory  ServicePriceHistory[]
+  branchService BranchService[]
 
   @@map("service")
 }
 
-
 model ServiceImage {
-  id        String   @id @default(uuid())
+  id        String     @id @default(uuid())
   imageUrl  String
   caption   String?
-  service   Service  @relation(fields: [serviceId], references: [id])
+  service   ServiceNew @relation(fields: [serviceId], references: [id])
   serviceId String
 }
+
 model ServicePriceHistory {
   id             String    @id @db.VarChar(191)
   serviceId      String    @map("serviceId") @db.VarChar(191)
@@ -142,38 +140,39 @@ model ServicePriceHistory {
   actualPrice    Float     @map("actual_price")
   offerPrice     Float?    @map("offer_price")
   offerStartDate DateTime? @map("offer_start_date") @db.DateTime(3)
-  offerEndDate   DateTime? @map("offer_end_date")   @db.DateTime(3)
+  offerEndDate   DateTime? @map("offer_end_date") @db.DateTime(3)
 
   @@map("servicepricehistory")
 }
 
 model BranchService {
-  branch     Branch  @relation(fields: [branchId], references: [id])
-  branchId   String  @db.VarChar(191)
-  service    Service @relation(fields: [serviceId], references: [id])
-  serviceId  String  @db.VarChar(191)
+  branch    Branch  @relation(fields: [branchId], references: [id])
+  branchId  String  @db.VarChar(191)
+  service   Service @relation(fields: [serviceId], references: [id])
+  serviceId String  @db.VarChar(191)
 
   @@id([branchId, serviceId])
   @@map("branch_service")
 }
 
 model ServiceNew {
-  id          String   @id @default(uuid())
+  id          String          @id @default(uuid())
   categoryId  String
   category    ServiceCategory @relation(fields: [categoryId], references: [id])
   name        String
   caption     String?
   description String?
   imageUrl    String?
+  images      ServiceImage[]
   tiers       ServiceTier[]
 }
 
 model ServiceTier {
-  id        String   @id @default(uuid())
-  serviceId String
-  service   ServiceNew @relation(fields: [serviceId], references: [id])
-  name      String
+  id          String     @id @default(uuid())
+  serviceId   String
+  service     ServiceNew @relation(fields: [serviceId], references: [id])
+  name        String
   actualPrice Float
   offerPrice  Float?
-  duration   Int?
+  duration    Int?
 }
