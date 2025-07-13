@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import fs from 'fs/promises';
-import path from 'path';
+import { v2 as cloudinary, type UploadApiResponse } from 'cloudinary';
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+  api_key: process.env.CLOUDINARY_API_KEY!,
+  api_secret: process.env.CLOUDINARY_API_SECRET!,
+});
 import type { Prisma } from '@prisma/client';
 
 export const config = {
@@ -29,14 +34,18 @@ export async function POST(req: Request) {
     let imageUrl: string | undefined;
     const imageFile = form.get('image') as File | null;
     if (imageFile && imageFile.size > 0) {
-      // Read binary data
       const buffer = Buffer.from(await imageFile.arrayBuffer());
-      // Unique filename: timestamp + original name
-      const fileName = `${Date.now()}_${imageFile.name}`;
-      const filePath = path.join(process.cwd(), 'public', 'uploads', 'staff', fileName);
-      // Write to disk
-      await fs.writeFile(filePath, buffer);
-      imageUrl = `/uploads/staff/${fileName}`;
+      const uploaded: UploadApiResponse = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { resource_type: 'image', folder: 'staff' },
+          (err, result) => {
+            if (err || !result) return reject(err);
+            resolve(result);
+          }
+        );
+        stream.end(buffer);
+      });
+      imageUrl = uploaded.secure_url;
     }
 
     // 3) Create record
