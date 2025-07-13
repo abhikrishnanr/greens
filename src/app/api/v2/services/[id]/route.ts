@@ -3,20 +3,27 @@ import { NextResponse } from 'next/server'
 
 const prisma = new PrismaClient()
 
-export async function GET(req, { params }) {
-  const { id } = await params
+export async function GET(req, { params }: { params: { id: string } }) {
+  const { id } = params
   try {
-    const service = await prisma.serviceNew.findUnique({
+    let service = await prisma.serviceNew.findUnique({
       where: { id },
-      include: { tiers: true }
+      include: { tiers: true },
     })
 
     if (!service) {
-      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+      const slug = id.toLowerCase().replace(/-/g, ' ')
+      service = await prisma.serviceNew.findFirst({
+        where: { name: { equals: slug, mode: 'insensitive' } },
+        include: { tiers: true },
+      })
+      if (!service) {
+        return NextResponse.json({ error: 'Not found' }, { status: 404 })
+      }
     }
 
     const images = await prisma.serviceImage.findMany({
-      where: { serviceId: id },
+      where: { serviceId: service.id },
       orderBy: { id: 'asc' },
     })
 
