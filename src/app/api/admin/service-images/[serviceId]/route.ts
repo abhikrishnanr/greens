@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(req: Request, { params }: { params: { serviceId: string } }) {
-  const { serviceId } = await params
+  const { serviceId } = params
   const images = await prisma.serviceImage.findMany({
     where: { serviceId },
     orderBy: { id: 'asc' },
@@ -11,7 +11,7 @@ export async function GET(req: Request, { params }: { params: { serviceId: strin
 }
 
 export async function POST(req: Request, { params }: { params: { serviceId: string } }) {
-  const { serviceId } = await params
+  const { serviceId } = params
   const data = await req.json()
   const image = await prisma.serviceImage.create({
     data: {
@@ -20,6 +20,13 @@ export async function POST(req: Request, { params }: { params: { serviceId: stri
       caption: data.caption || null,
     },
   })
+
+
+  await prisma.serviceNew.updateMany({
+    where: { id: serviceId, OR: [{ imageUrl: null }, { imageUrl: "" }] },
+    data: { imageUrl: data.imageUrl },
+  })
+
 
   const svc = await prisma.serviceNew.findUnique({
     where: { id: serviceId },
@@ -33,11 +40,12 @@ export async function POST(req: Request, { params }: { params: { serviceId: stri
     })
   }
 
+
   return NextResponse.json(image)
 }
 
 export async function PUT(req: Request, { params }: { params: { serviceId: string } }) {
-  const { serviceId } = await params
+  const { serviceId } = params
   const data = await req.json()
   const image = await prisma.serviceImage.update({
     where: { id: data.id },
@@ -50,7 +58,7 @@ export async function PUT(req: Request, { params }: { params: { serviceId: strin
 }
 
 export async function DELETE(req: Request, { params }: { params: { serviceId: string } }) {
-  const { serviceId } = await params
+  const { serviceId } = params
   const { id } = await req.json()
   await prisma.serviceImage.delete({ where: { id } })
   return NextResponse.json({ success: true })
