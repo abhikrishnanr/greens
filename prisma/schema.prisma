@@ -168,11 +168,23 @@ model ServiceNew {
 }
 
 model ServiceTier {
-  id          String     @id @default(uuid())
-  serviceId   String
-  service     ServiceNew @relation(fields: [serviceId], references: [id])
-  name        String
-  actualPrice Float
-  offerPrice  Float?
-  duration    Int?
+  id           String                    @id @default(uuid())
+  serviceId    String
+  service      ServiceNew                @relation(fields: [serviceId], references: [id])
+  name         String
+  actualPrice  Float
+  offerPrice   Float?
+  duration     Int?
+  priceHistory ServiceTierPriceHistory[]
+}
+
+model ServiceTierPriceHistory {
+  id          String      @id @default(uuid()) @db.VarChar(191)
+  tierId      String      @db.VarChar(191)
+  tier        ServiceTier @relation(fields: [tierId], references: [id])
+  actualPrice Float       @map("actual_price")
+  offerPrice  Float?      @map("offer_price")
+  changedAt   DateTime    @default(now()) @map("changed_at") @db.Timestamp(3)
+
+  @@map("servicetierpricehistory")
 }
