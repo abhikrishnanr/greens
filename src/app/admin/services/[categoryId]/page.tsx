@@ -12,7 +12,7 @@ const WysiwygEditor = dynamic(() => import('../../../components/WysiwygEditor'),
 export default function ServicesAdminPage() {
   const params = useParams();
   const router = useRouter();
-  const categoryId = params.categoryId as string;
+  const categoryId = params?.categoryId as string;
 
   const [services, setServices] = useState([]);
   const [form, setForm] = useState({
