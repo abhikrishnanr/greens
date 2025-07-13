@@ -15,6 +15,12 @@ interface Tier {
   duration?: number | null
 }
 
+interface Image {
+  id: string
+  imageUrl: string
+  caption?: string | null
+}
+
 interface Service {
   id: string
   name: string
@@ -40,6 +46,13 @@ export default function ServicesAdmin() {
   const [showTierModal, setShowTierModal] = useState(false)
   const [editingTier, setEditingTier] = useState(false)
   const [tierServiceId, setTierServiceId] = useState('')
+
+  const emptyImage: Partial<Image> = { id: '', imageUrl: '', caption: '' }
+  const [images, setImages] = useState<Image[]>([])
+  const [imageForm, setImageForm] = useState<Partial<Image>>(emptyImage)
+  const [showImageModal, setShowImageModal] = useState(false)
+  const [editingImage, setEditingImage] = useState(false)
+  const [imageServiceId, setImageServiceId] = useState('')
 
   const loadCategories = async () => {
     const res = await fetch('/api/admin/service-categories')
@@ -158,6 +171,59 @@ export default function ServicesAdmin() {
     setTiers(data)
   }
 
+  const openImageManager = async (svc: Service) => {
+    setImageServiceId(svc.id)
+    const res = await fetch(`/api/admin/service-images/${svc.id}`)
+    const data = await res.json()
+    setImages(data)
+    setShowImageModal(true)
+  }
+
+  const openAddImage = () => {
+    setImageForm({ ...emptyImage, id: crypto.randomUUID() })
+    setEditingImage(false)
+  }
+
+  const openEditImage = (img: Image) => {
+    setImageForm({ ...img })
+    setEditingImage(true)
+  }
+
+  const saveImage = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const body = { id: imageForm.id, imageUrl: imageForm.imageUrl, caption: imageForm.caption }
+    if (editingImage) {
+      await fetch(`/api/admin/service-images/${imageServiceId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      })
+    } else {
+      await fetch(`/api/admin/service-images/${imageServiceId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      })
+    }
+    const res = await fetch(`/api/admin/service-images/${imageServiceId}`)
+    const data = await res.json()
+    setImages(data)
+    setImageForm(emptyImage)
+    setEditingImage(false)
+  }
+
+  const deleteImage = async (id: string) => {
+    if (!confirm('Delete this image?')) return
+    await fetch(`/api/admin/service-images/${imageServiceId}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    })
+    const res = await fetch(`/api/admin/service-images/${imageServiceId}`)
+    const data = await res.json()
+    setImages(data)
+  }
+
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4">Services</h1>
@@ -196,6 +262,7 @@ export default function ServicesAdmin() {
                 <td className="space-x-2">
                   <button className="underline" onClick={() => openEditService(s)}>Edit</button>
                   <button className="underline" onClick={() => openTierManager(s)}>Manage Tiers</button>
+                  <button className="underline" onClick={() => openImageManager(s)}>Manage Images</button>
                 </td>
               </tr>
             ))}
@@ -308,6 +375,59 @@ export default function ServicesAdmin() {
             )}
             <div className="text-right mt-4">
               <button className="px-3 py-1 bg-gray-600 rounded" onClick={() => setShowTierModal(false)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showImageModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-gray-900 p-6 rounded w-full max-w-lg">
+            <h2 className="text-xl mb-4">Manage Images</h2>
+            <table className="w-full text-sm text-left mb-4">
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Caption</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {images.map(img => (
+                  <tr key={img.id} className="border-t border-gray-700">
+                    <td>{img.imageUrl}</td>
+                    <td>{img.caption ?? '—'}</td>
+                    <td className="space-x-2">
+                      <button className="underline" onClick={() => openEditImage(img)}>Edit</button>
+                      <button className="underline text-red-400" onClick={() => deleteImage(img.id)}>Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <button className="bg-green-600 px-3 py-1 rounded mb-4" onClick={openAddImage}>+ Add Image</button>
+            {imageForm.imageUrl !== undefined && (
+              <form onSubmit={saveImage} className="space-y-2">
+                <input
+                  className="w-full p-2 rounded bg-gray-800"
+                  placeholder="Image URL"
+                  value={imageForm.imageUrl || ''}
+                  onChange={e => setImageForm({ ...imageForm, imageUrl: e.target.value })}
+                  required
+                />
+                <input
+                  className="w-full p-2 rounded bg-gray-800"
+                  placeholder="Caption"
+                  value={imageForm.caption || ''}
+                  onChange={e => setImageForm({ ...imageForm, caption: e.target.value })}
+                />
+                <div className="text-right space-x-2 pt-2">
+                  <button type="submit" className="px-3 py-1 bg-green-600 rounded">{editingImage ? 'Update' : 'Add'} Image</button>
+                </div>
+              </form>
+            )}
+            <div className="text-right mt-4">
+              <button className="px-3 py-1 bg-gray-600 rounded" onClick={() => setShowImageModal(false)}>Close</button>
             </div>
           </div>
         </div>
