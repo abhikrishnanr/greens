@@ -59,7 +59,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </button>
       </header>
       <div className="flex flex-1">
-        <nav className="w-60 bg-gradient-to-b from-green-900 to-green-700 text-green-100 p-4 space-y-4 overflow-y-auto">
+<nav className="w-60 bg-green-900  text-white p-4 space-y-4 shadow-lg">
           {sections.map(sec => (
             <div key={sec.heading}>
               <div className="uppercase text-xs text-green-200 mb-1">{sec.heading}</div>
