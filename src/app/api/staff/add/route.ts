@@ -41,6 +41,7 @@ export async function POST(req: Request) {
     // 3) Create record
     const newStaff = await prisma.user.create({
       data: {
+        id:        crypto.randomUUID(),
         name,
         email,
         phone,
