@@ -14,6 +14,13 @@ export default async function ServiceDetailsPage({ params }) {
       {service.imageUrl && (
         <img src={service.imageUrl} alt={service.name} className="mb-6 rounded-xl w-full max-h-64 object-cover" />
       )}
+      {service.images && service.images.length > 0 && (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+          {service.images.map(img => (
+            <img key={img.id} src={img.imageUrl} alt={img.caption || service.name} className="rounded-xl object-cover w-full" />
+          ))}
+        </div>
+      )}
       <h1 className="text-3xl font-bold mb-2" style={{ color: '#41eb70' }}>{service.name}</h1>
       {service.caption && <p className="text-lg text-gray-300 mb-4">{service.caption}</p>}
       <div className="prose prose-invert mb-6" dangerouslySetInnerHTML={{ __html: service.description || '' }} />
@@ -26,8 +33,9 @@ export default async function ServiceDetailsPage({ params }) {
           </li>
         ))}
       </ul>
-      <div className="mt-6 text-center">
+      <div className="mt-8 flex justify-between items-center">
         <Link href="/" className="text-green-400 underline">Back to Home</Link>
+        <Link href={`/booking?service=${service.id}`} className="bg-green-600 text-gray-900 font-bold px-6 py-3 rounded-xl hover:bg-green-500 transition-colors">Book Now</Link>
       </div>
     </div>
   )
