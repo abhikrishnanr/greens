@@ -20,6 +20,19 @@ export async function POST(req: Request, { params }: { params: { serviceId: stri
       caption: data.caption || null,
     },
   })
+
+  const svc = await prisma.serviceNew.findUnique({
+    where: { id: serviceId },
+    select: { imageUrl: true },
+  })
+
+  if (!svc?.imageUrl) {
+    await prisma.serviceNew.update({
+      where: { id: serviceId },
+      data: { imageUrl: data.imageUrl },
+    })
+  }
+
   return NextResponse.json(image)
 }
 
