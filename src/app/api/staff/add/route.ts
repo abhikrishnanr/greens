@@ -52,7 +52,7 @@ export async function POST(req: Request) {
       experience,
       startDate: startRaw ? new Date(startRaw) : undefined,
       role,
-      active:  true,
+
       removed: false,
       imageUrl,
     };
