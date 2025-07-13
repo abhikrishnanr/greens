@@ -271,7 +271,7 @@ export default function HomePage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.5, delay: idx * 0.1 }}
-                    className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700/50 overflow-hidden hover:shadow-green-400/10 transition-all duration-300"
+                    className="bg-gradient-to-br from-gray-800/60 to-gray-700/60 backdrop-blur-md rounded-3xl shadow-lg border border-gray-700/50 overflow-hidden hover:shadow-green-400/20 hover:border-green-400/40 transform hover:scale-[1.02] transition-all duration-300"
                   >
                     <motion.button
                       onClick={() => setExpandedCat(isOpen ? null : cat.id)}
@@ -282,7 +282,7 @@ export default function HomePage() {
                         <div className="flex items-center gap-6">
                           <div className="relative">
                             <img
-                              src={cat.image || "/placeholder.svg?height=240&width=320"}
+                              src={cat.imageUrl || "/placeholder.svg?height=240&width=320"}
                               alt={cat.name}
                               className="w-24 h-18 rounded-2xl object-cover shadow-xl border border-gray-600/50"
                               style={{ aspectRatio: "4/3" }}
@@ -343,7 +343,11 @@ export default function HomePage() {
                                     )}
                                   </div>
                                 </div>
-                                <Link href={`/services/${svc.id}`} className="text-green-400 underline text-sm">
+                                <Link
+                                  href={`/services/${svc.id}`}
+                                  prefetch={false}
+                                  className="text-green-400 underline text-sm font-semibold hover:text-green-300"
+                                >
                                   View Details
                                 </Link>
                               </div>

@@ -1,11 +1,14 @@
 import Link from 'next/link'
 
-export default async function ServiceDetailsPage({ params }) {
-  const { id } = await params
+export default async function ServiceDetailsPage({ params }: { params: { id: string } }) {
+  const { id } = params
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL ||
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
-  const res = await fetch(`${baseUrl}/api/v2/services/${id}`)
+  const res = await fetch(`${baseUrl}/api/v2/services/${id}`, { cache: 'no-store' })
+  if (!res.ok) {
+    return <div className="text-red-500 text-xl p-8">Unable to load service details</div>
+  }
   const service = await res.json()
 
   if (!service || !service.id) {
