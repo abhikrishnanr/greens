@@ -2,7 +2,14 @@
 
 import { useState, useEffect, useMemo } from "react"
 import Link from 'next/link'
-import { FiShoppingCart, FiPhone, FiSearch, FiMapPin, FiMail, FiInstagram, FiX, FiEye } from "react-icons/fi"
+import {
+  FiShoppingCart,
+  FiPhone,
+  FiSearch,
+  FiMapPin,
+  FiMail,
+  FiInstagram
+} from "react-icons/fi"
 import { MdMale, MdFemale, MdStar, MdDiamond, MdEco } from "react-icons/md"
 import { motion, AnimatePresence } from "framer-motion"
 import Header from "@/components/Header"
@@ -30,20 +37,20 @@ const TIER_LABELS = {
 }
 
 export default function HomePage() {
-  const [categories, setCategories] = useState([])
+  const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [expandedCat, setExpandedCat] = useState(null)
-  const [cart, setCart] = useState([])
-  const [error, setError] = useState(null)
+  const [expandedCat, setExpandedCat] = useState<string | null>(null)
+  const [cart, setCart] = useState<any[]>([])
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     setLoading(true)
     fetch('/api/v2/service-categories')
-      .then((res) => {
+      .then(res => {
         if (!res.ok) throw new Error('API error')
         return res.json()
       })
-      .then((data) => {
+      .then(data => {
         setCategories(Array.isArray(data) ? data : [])
         setLoading(false)
       })
@@ -55,12 +62,16 @@ export default function HomePage() {
 
   const subServices = useMemo(() => {
     if (!expandedCat) return []
-    const cat = categories.find((c) => c.id === expandedCat)
+    const cat = categories.find(c => c.id === expandedCat)
     return cat ? cat.services : []
   }, [expandedCat, categories])
 
-  function addToCart(service) {
-    setCart((prev) => (prev.find((item) => item.id === service.id) ? prev : [...prev, { ...service, qty: 1 }]))
+  function addToCart(service: any) {
+    setCart(prev =>
+      prev.find(item => item.id === service.id)
+        ? prev
+        : [...prev, { ...service, qty: 1 }]
+    )
   }
 
   return (
@@ -198,54 +209,14 @@ export default function HomePage() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-6 max-w-7xl mx-auto">
             {[
-              {
-                icon: "ri-group-line",
-                title: "Family Salon",
-                desc: "Complete care for the whole family",
-                gradient: "from-blue-500 to-blue-600",
-              },
-              {
-                icon: "ri-magic-line",
-                title: "Beauty Studio",
-                desc: "Premium beauty treatments",
-                gradient: "from-purple-500 to-purple-600",
-              },
-              {
-                icon: "ri-vip-crown-line",
-                title: "Celebrity Salon",
-                desc: "Luxury styling experience",
-                gradient: "from-amber-500 to-amber-600",
-              },
-              {
-                icon: "ri-brush-line",
-                title: "Makeover Studio",
-                desc: "Complete transformation",
-                gradient: "from-pink-500 to-pink-600",
-              },
-              {
-                icon: "ri-hearts-line",
-                title: "Bridal Lounge",
-                desc: "Special bridal services",
-                gradient: "from-rose-500 to-rose-600",
-              },
-              {
-                icon: "ri-flower-line",
-                title: "Floral Studio",
-                desc: "Artistic floral designs",
-                gradient: "from-green-500 to-green-600",
-              },
-              {
-                icon: "ri-plant-line",
-                title: "Floral Decor",
-                desc: "Event decoration services",
-                gradient: "from-emerald-500 to-emerald-600",
-              },
-              {
-                icon: "ri-gallery-line",
-                title: "Event Portfolio",
-                desc: "Complete event solutions",
-                gradient: "from-indigo-500 to-indigo-600",
-              },
+              { icon: "ri-group-line", title: "Family Salon", desc: "Complete care for the whole family", gradient: "from-blue-500 to-blue-600" },
+              { icon: "ri-magic-line", title: "Beauty Studio", desc: "Premium beauty treatments", gradient: "from-purple-500 to-purple-600" },
+              { icon: "ri-vip-crown-line", title: "Celebrity Salon", desc: "Luxury styling experience", gradient: "from-amber-500 to-amber-600" },
+              { icon: "ri-brush-line", title: "Makeover Studio", desc: "Complete transformation", gradient: "from-pink-500 to-pink-600" },
+              { icon: "ri-hearts-line", title: "Bridal Lounge", desc: "Special bridal services", gradient: "from-rose-500 to-rose-600" },
+              { icon: "ri-flower-line", title: "Floral Studio", desc: "Artistic floral designs", gradient: "from-green-500 to-green-600" },
+              { icon: "ri-plant-line", title: "Floral Decor", desc: "Event decoration services", gradient: "from-emerald-500 to-emerald-600" },
+              { icon: "ri-gallery-line", title: "Event Portfolio", desc: "Complete event solutions", gradient: "from-indigo-500 to-indigo-600" },
             ].map((svc, idx) => (
               <motion.div
                 key={idx}
@@ -289,100 +260,105 @@ export default function HomePage() {
             </h2>
           </motion.div>
 
-            {/* Category Cards */}
-            <div className="space-y-8">
-              <AnimatePresence>
-                {categories.map((cat, idx) => {
-                  const isOpen = expandedCat === cat.id
-                  return (
-                    <motion.div
-                      key={cat.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.5, delay: idx * 0.1 }}
-                      className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700/50 overflow-hidden hover:shadow-green-400/10 transition-all duration-300"
+          <div className="space-y-8">
+            <AnimatePresence>
+              {categories.map((cat, idx) => {
+                const isOpen = expandedCat === cat.id
+                return (
+                  <motion.div
+                    key={cat.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.5, delay: idx * 0.1 }}
+                    className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700/50 overflow-hidden hover:shadow-green-400/10 transition-all duration-300"
+                  >
+                    <motion.button
+                      onClick={() => setExpandedCat(isOpen ? null : cat.id)}
+                      className="w-full p-8 focus:outline-none"
+                      whileHover={{ backgroundColor: "rgba(65, 235, 112, 0.05)" }}
                     >
-                      <motion.button
-                        onClick={() => setExpandedCat(isOpen ? null : cat.id)}
-                        className="w-full p-8 focus:outline-none"
-                        whileHover={{ backgroundColor: "rgba(65, 235, 112, 0.05)" }}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-6">
-                            <div className="relative">
-                              <img
-                                src={cat.image || "/placeholder.svg?height=240&width=320"}
-                                alt={cat.name}
-                                className="w-24 h-18 rounded-2xl object-cover shadow-xl border border-gray-600/50"
-                                style={{ aspectRatio: "4/3" }}
-                              />
-                              <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
-                                <MdStar className="text-white text-sm" />
-                              </div>
-                            </div>
-                            <div className="text-left">
-                              <h3 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: "#41eb70" }}>
-                                {cat.name}
-                              </h3>
-                              <p className="text-gray-300 text-lg mb-4">{cat.caption}</p>
-                              </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-6">
+                          <div className="relative">
+                            <img
+                              src={cat.image || "/placeholder.svg?height=240&width=320"}
+                              alt={cat.name}
+                              className="w-24 h-18 rounded-2xl object-cover shadow-xl border border-gray-600/50"
+                              style={{ aspectRatio: "4/3" }}
+                            />
+                            <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
+                              <MdStar className="text-white text-sm" />
                             </div>
                           </div>
-                          <motion.span
-                            className="text-3xl"
-                            style={{ color: "#41eb70" }}
-                            animate={{ rotate: isOpen ? 90 : 0 }}
-                            transition={{ duration: 0.3 }}
-                          >
-                            ▶
-                          </motion.span>
+                          <div className="text-left">
+                            <h3 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: "#41eb70" }}>
+                              {cat.name}
+                            </h3>
+                            <p className="text-gray-300 text-lg mb-4">{cat.caption}</p>
+                          </div>
                         </div>
-                      </motion.button>
+                        <motion.span
+                          className="text-3xl"
+                          style={{ color: "#41eb70" }}
+                          animate={{ rotate: isOpen ? 90 : 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          ▶
+                        </motion.span>
+                      </div>
+                    </motion.button>
 
-                      <AnimatePresence>
-                        {isOpen && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.4 }}
-                            className="px-8 pb-8"
-                          >
-                            <div className="space-y-6">
-                              {subServices.map((svc) => (
-                                <div key={svc.id} className="bg-gray-700/30 backdrop-blur-sm rounded-xl p-6 border border-gray-600/30 flex items-center justify-between">
-                                  <div className="flex items-center gap-6">
-                                    <img
-                                      src={svc.imageUrl || "/placeholder.svg?height=240&width=320"}
-                                      alt={svc.name}
-                                      className="w-24 h-18 object-cover rounded-xl shadow-lg border border-gray-600/50"
-                                      style={{ aspectRatio: "4/3" }}
-                                    />
-                                    <div>
-                                      <h4 className="font-bold text-xl" style={{ color: '#41eb70' }}>{svc.name}</h4>
-                                      <p className="text-gray-300 text-sm mb-1">{svc.caption}</p>
-                                      {svc.minPrice !== null && (
-                                        <span className="font-bold" style={{ color: '#41eb70' }}>From ₹{svc.minPrice}</span>
-                                      )}
-                                    </div>
+                    <AnimatePresence>
+                      {isOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.4 }}
+                          className="px-8 pb-8"
+                        >
+                          <div className="space-y-6">
+                            {subServices.map(svc => (
+                              <div
+                                key={svc.id}
+                                className="bg-gray-700/30 backdrop-blur-sm rounded-xl p-6 border border-gray-600/30 flex items-center justify-between"
+                              >
+                                <div className="flex items-center gap-6">
+                                  <img
+                                    src={svc.imageUrl || "/placeholder.svg?height=240&width=320"}
+                                    alt={svc.name}
+                                    className="w-24 h-18 object-cover rounded-xl shadow-lg border border-gray-600/50"
+                                    style={{ aspectRatio: "4/3" }}
+                                  />
+                                  <div>
+                                    <h4 className="font-bold text-xl" style={{ color: "#41eb70" }}>
+                                      {svc.name}
+                                    </h4>
+                                    <p className="text-gray-300 text-sm mb-1">{svc.caption}</p>
+                                    {svc.minPrice != null && (
+                                      <span className="font-bold" style={{ color: "#41eb70" }}>
+                                        From ₹{svc.minPrice}
+                                      </span>
+                                    )}
                                   </div>
-                                  <Link href={`/services/${svc.id}`} className="text-green-400 underline text-sm">View Details</Link>
                                 </div>
-                              ))
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </motion.div>
-                  )
-                })
-              </AnimatePresence>
-            </div>
+                                <Link href={`/services/${svc.id}`} className="text-green-400 underline text-sm">
+                                  View Details
+                                </Link>
+                              </div>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                )
+              })}
+            </AnimatePresence>
           </div>
         </div>
       </section>
-
 
       {/* CART BAR */}
       <AnimatePresence>
@@ -399,9 +375,7 @@ export default function HomePage() {
                 <FiShoppingCart className="text-xl" />
               </div>
               <div>
-                <span className="font-bold text-lg">
-                  {cart.length} service{cart.length > 1 ? "s" : ""} selected
-                </span>
+                <span className="font-bold text-lg">{cart.length} service{cart.length > 1 ? "s" : ""} selected</span>
                 <p className="text-sm opacity-90">Ready to book your appointment</p>
               </div>
             </div>
@@ -436,7 +410,7 @@ export default function HomePage() {
           </motion.div>
 
           <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            {Object.entries(TIER_LABELS).map(([k, { label, icon }], idx) => (
+            {Object.entries(TIER_LABELS).map(([k, { label, icon }], idx) => ( 
               <motion.div
                 key={k}
                 className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 text-center shadow-xl hover:shadow-2xl hover:shadow-green-400/10 transition-all duration-300 border border-gray-700/50"
@@ -507,7 +481,9 @@ export default function HomePage() {
               <h3 className="text-2xl font-bold mb-6 flex items-center gap-3" style={{ color: "#41eb70" }}>
                 <FiMapPin style={{ color: "#41eb70" }} /> Visit Us
               </h3>
-              <p className="text-gray-300 text-lg leading-relaxed">TC 45/215, Kunjalumood, Karamana PO, Trivandrum</p>
+              <p className="text-gray-300 text-lg leading-relaxed">
+                TC 45/215, Kunjalumood Junction, Karamana PO, Trivandrum
+              </p>
             </motion.div>
 
             <motion.div
@@ -526,15 +502,9 @@ export default function HomePage() {
                   className="flex items-center gap-4 bg-green-500/10 border border-green-500/30 rounded-xl px-4 py-3 hover:bg-green-500/20 transition-all group"
                   whileHover={{ scale: 1.02 }}
                 >
-                  <FiPhone
-                    className="text-xl group-hover:scale-110 transition-transform"
-                    style={{ color: "#41eb70" }}
-                  />
+                  <FiPhone className="text-xl group-hover:scale-110 transition-transform" style={{ color: "#41eb70" }} />
                   <span className="text-gray-200 font-medium">+91 8891 467678</span>
-                  <span
-                    className="ml-auto text-xs px-2 py-1 rounded-full font-bold"
-                    style={{ backgroundColor: "rgba(65, 235, 112, 0.2)", color: "#41eb70" }}
-                  >
+                  <span className="ml-auto text-xs px-2 py-1 rounded-full font-bold" style={{ backgroundColor: "rgba(65, 235, 112, 0.2)", color: "#41eb70" }}>
                     Call
                   </span>
                 </motion.a>
@@ -554,7 +524,7 @@ export default function HomePage() {
                 <motion.a
                   href="https://instagram.com/greensbeautysalon"
                   target="_blank"
-                  rel="noreferrer noopener"
+                  rel="noopener noreferrer"
                   className="flex items-center gap-4 bg-pink-500/10 border border-pink-500/30 rounded-xl px-4 py-3 hover:bg-pink-500/20 transition-all group"
                   whileHover={{ scale: 1.02 }}
                 >
