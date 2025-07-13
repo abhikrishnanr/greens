@@ -2,7 +2,10 @@ import Link from 'next/link'
 
 export default async function ServiceDetailsPage({ params }) {
   const { id } = params
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/v2/services/${id}`)
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+  const res = await fetch(`${baseUrl}/api/v2/services/${id}`)
   const service = await res.json()
 
   if (!service || !service.id) {
