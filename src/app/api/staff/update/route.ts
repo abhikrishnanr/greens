@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import fs from 'fs/promises';
-import path from 'path';
+import { v2 as cloudinary, type UploadApiResponse } from 'cloudinary';
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+  api_key: process.env.CLOUDINARY_API_KEY!,
+  api_secret: process.env.CLOUDINARY_API_SECRET!,
+});
 
 export const config = {
   api: { bodyParser: false },
@@ -34,10 +39,17 @@ export async function POST(req: Request) {
     const imageFile = form.get('image') as File | null;
     if (imageFile && imageFile.size > 0) {
       const buffer = Buffer.from(await imageFile.arrayBuffer());
-      const fileName = `${Date.now()}_${imageFile.name}`;
-      const filePath = path.join(process.cwd(), 'public', 'uploads', 'staff', fileName);
-      await fs.writeFile(filePath, buffer);
-      data.imageUrl = `/uploads/staff/${fileName}`;
+      const uploaded: UploadApiResponse = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { resource_type: 'image', folder: 'staff' },
+          (err, result) => {
+            if (err || !result) return reject(err);
+            resolve(result);
+          }
+        );
+        stream.end(buffer);
+      });
+      data.imageUrl = uploaded.secure_url;
     }
 
     await prisma.user.update({ where: { id }, data });

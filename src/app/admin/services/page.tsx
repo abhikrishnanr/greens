@@ -675,7 +675,7 @@ export default function ServicesAdmin() {
         {showImageModal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border-0">
-              <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
+              <CardHeader className="bg-purple-50 text-purple-800">
                 <CardTitle className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <ImageIcon className="h-5 w-5" />
@@ -685,7 +685,7 @@ export default function ServicesAdmin() {
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowImageModal(false)}
-                    className="text-white hover:bg-white/20"
+                    className="text-purple-800 hover:bg-purple-100"
                   >
                     <X className="h-4 w-4" />
                   </Button>
