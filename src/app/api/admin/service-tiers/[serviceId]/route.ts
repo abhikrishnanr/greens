@@ -4,15 +4,17 @@ import { NextResponse } from 'next/server'
 const prisma = new PrismaClient()
 
 export async function GET(req: Request, { params }: { params: { serviceId: string } }) {
-  const tiers = await prisma.serviceTier.findMany({ where: { serviceId: params.serviceId }, orderBy: { name: 'asc' } })
+  const { serviceId } = await params
+  const tiers = await prisma.serviceTier.findMany({ where: { serviceId }, orderBy: { name: 'asc' } })
   return NextResponse.json(tiers)
 }
 
 export async function POST(req: Request, { params }: { params: { serviceId: string } }) {
+  const { serviceId } = await params
   const data = await req.json()
   const tier = await prisma.serviceTier.create({
     data: {
-      serviceId: params.serviceId,
+      serviceId,
       name: data.name,
       actualPrice: Number(data.actualPrice || 0),
       offerPrice: data.offerPrice === null || data.offerPrice === undefined ? null : Number(data.offerPrice),

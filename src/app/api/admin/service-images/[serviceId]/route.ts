@@ -2,18 +2,20 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(req: Request, { params }: { params: { serviceId: string } }) {
+  const { serviceId } = await params
   const images = await prisma.serviceImage.findMany({
-    where: { serviceId: params.serviceId },
+    where: { serviceId },
     orderBy: { id: 'asc' },
   })
   return NextResponse.json(images)
 }
 
 export async function POST(req: Request, { params }: { params: { serviceId: string } }) {
+  const { serviceId } = await params
   const data = await req.json()
   const image = await prisma.serviceImage.create({
     data: {
-      serviceId: params.serviceId,
+      serviceId,
       imageUrl: data.imageUrl,
       caption: data.caption || null,
     },
@@ -22,6 +24,7 @@ export async function POST(req: Request, { params }: { params: { serviceId: stri
 }
 
 export async function PUT(req: Request, { params }: { params: { serviceId: string } }) {
+  const { serviceId } = await params
   const data = await req.json()
   const image = await prisma.serviceImage.update({
     where: { id: data.id },
@@ -34,6 +37,7 @@ export async function PUT(req: Request, { params }: { params: { serviceId: strin
 }
 
 export async function DELETE(req: Request, { params }: { params: { serviceId: string } }) {
+  const { serviceId } = await params
   const { id } = await req.json()
   await prisma.serviceImage.delete({ where: { id } })
   return NextResponse.json({ success: true })

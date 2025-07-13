@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 export default async function ServiceDetailsPage({ params }) {
-  const { id } = params
+  const { id } = await params
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL ||
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
