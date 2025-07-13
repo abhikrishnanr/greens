@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import fs from 'fs/promises';
 import path from 'path';
+import type { Prisma } from '@prisma/client';
 
 export const config = {
   api: { bodyParser: false }, 
@@ -22,7 +23,7 @@ export async function POST(req: Request) {
     const experience  = form.get('experience') as string;
     const startRaw    = form.get('startDate') as string;
     const role        = form.get('role') as string;
-    const branchId    = form.get('branchId') as string;
+    const branchId    = (form.get('branchId') as string) || undefined;
 
     // 2) Handle the image Blob
     let imageUrl: string | undefined;
@@ -39,25 +40,27 @@ export async function POST(req: Request) {
     }
 
     // 3) Create record
-    const newStaff = await prisma.user.create({
-      data: {
-        id:        crypto.randomUUID(),
-        name,
-        email,
-        phone,
-        gender,
-        dob:       dobRaw   ? new Date(dobRaw)   : undefined,
-        address,
-        designation,
-        experience,
-        startDate: startRaw ? new Date(startRaw) : undefined,
-        role,
-        branchId,
-        active:  true,
-        removed: false,
-        imageUrl,
-      },
-    });
+    const data: Prisma.UserUncheckedCreateInput = {
+      id:        crypto.randomUUID(),
+      name,
+      email,
+      phone,
+      gender,
+      dob:       dobRaw   ? new Date(dobRaw)   : undefined,
+      address,
+      designation,
+      experience,
+      startDate: startRaw ? new Date(startRaw) : undefined,
+      role,
+      removed: false,
+      imageUrl,
+    };
+
+    if (branchId) {
+      data.branchId = branchId;
+    }
+
+    const newStaff = await prisma.user.create({ data });
 
     return NextResponse.json({ success: true, staff: newStaff });
   } catch (err: any) {

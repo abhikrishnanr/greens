@@ -72,7 +72,6 @@ export async function POST(req: Request) {
             phone: customerPhone,
             gender: customerGender || null,
             role: 'customer',
-            active: true,
           }
         });
       } else {
