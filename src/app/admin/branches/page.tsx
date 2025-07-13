@@ -13,7 +13,7 @@ interface Branch {
 export default function BranchesAdmin() {
   const emptyForm = { id: '', name: '', address: '', phone: '', upiId: '', qrUrl: '' };
   const [branches, setBranches] = useState<Branch[]>([]);
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState<Branch>(emptyForm);
   const [editing, setEditing] = useState(false);
 
   const load = async () => {
@@ -38,7 +38,7 @@ export default function BranchesAdmin() {
   };
 
   const edit = (b: Branch) => {
-    setForm(b as any);
+    setForm(b);
     setEditing(true);
   };
 
