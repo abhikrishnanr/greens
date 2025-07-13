@@ -73,7 +73,7 @@ export default function PriceHistoryPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Price History</h1>
+      <h1 className="text-2xl font-bold mb-4 text-green-700">Price History</h1>
       <select className="bg-gray-800 p-2 rounded mb-4" value={selected} onChange={e => setSelected(e.target.value)}>
         <option value="">Select service</option>
         {services.map(s => (

@@ -74,41 +74,58 @@ export default function ServiceCategoriesPage() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Service Categories</h1>
-      <form onSubmit={save} className="space-y-2 bg-white p-4 rounded shadow border mb-6">
-        <input
-          className="w-full p-2 rounded border"
-          placeholder="Name"
-          value={form.name}
-          onChange={e => setForm({ ...form, name: e.target.value })}
-          required
-        />
-        <WysiwygEditor
-          value={form.description || ''}
-          onChange={desc => setForm({ ...form, description: desc })}
-        />
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleImage}
-          className="w-full p-2 rounded border"
-        />
-        {form.imageUrl && (
-          <img src={form.imageUrl} alt="preview" className="h-32 object-cover" />
-        )}
-        <input
-          className="w-full p-2 rounded border"
-          placeholder="Caption"
-          value={form.caption || ''}
-          onChange={e => setForm({ ...form, caption: e.target.value })}
-        />
-        <input
-          type="number"
-          className="w-full p-2 rounded border"
-          placeholder="Order"
-          value={form.order ?? 0}
-          onChange={e => setForm({ ...form, order: parseInt(e.target.value) })}
-        />
+      <h1 className="text-2xl font-bold mb-4 text-green-700">Service Categories</h1>
+      <form onSubmit={save} className="space-y-4 bg-white p-6 rounded shadow border mb-6">
+        <div>
+          <label className="block font-medium mb-1">Name</label>
+          <input
+            className="w-full p-2 rounded border"
+            value={form.name}
+            onChange={e => setForm({ ...form, name: e.target.value })}
+            required
+          />
+          <small className="text-gray-500">Service category name</small>
+        </div>
+        <div>
+          <label className="block font-medium mb-1">Description</label>
+          <WysiwygEditor
+            value={form.description || ''}
+            onChange={desc => setForm({ ...form, description: desc })}
+          />
+          <small className="text-gray-500">Detailed info about this category</small>
+        </div>
+        <div>
+          <label className="block font-medium mb-1">Image</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImage}
+            className="w-full p-2 rounded border"
+          />
+          {form.imageUrl && (
+            <img src={form.imageUrl} alt="preview" className="h-32 object-cover mt-2" />
+          )}
+          <small className="text-gray-500">Upload category thumbnail</small>
+        </div>
+        <div>
+          <label className="block font-medium mb-1">Caption</label>
+          <input
+            className="w-full p-2 rounded border"
+            value={form.caption || ''}
+            onChange={e => setForm({ ...form, caption: e.target.value })}
+          />
+          <small className="text-gray-500">Short tagline for this category</small>
+        </div>
+        <div>
+          <label className="block font-medium mb-1">Order</label>
+          <input
+            type="number"
+            className="w-full p-2 rounded border"
+            value={form.order ?? 0}
+            onChange={e => setForm({ ...form, order: parseInt(e.target.value) })}
+          />
+          <small className="text-gray-500">Display order in lists</small>
+        </div>
         <button className="bg-green-600 px-4 py-2 rounded text-white" type="submit">
           {editing ? 'Update' : 'Add'} Category
         </button>

@@ -41,7 +41,7 @@ export default function SchedulingPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Schedule Appointments</h1>
+      <h1 className="text-2xl font-bold mb-4 text-green-700">Schedule Appointments</h1>
       <select className="p-2 rounded border mb-4" value={branch} onChange={e => setBranch(e.target.value)}>
         <option value="">Select branch</option>
         {branches.map(b => (

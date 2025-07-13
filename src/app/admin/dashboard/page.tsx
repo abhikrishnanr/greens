@@ -20,7 +20,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+      <h1 className="text-2xl font-bold text-green-700">Admin Dashboard</h1>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded shadow border">
           <div className="text-sm text-gray-500">Bookings</div>

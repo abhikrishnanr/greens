@@ -33,7 +33,7 @@ export default function AppointmentPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Appointment Requests</h1>
+      <h1 className="text-2xl font-bold mb-4 text-green-700">Appointment Requests</h1>
       <table className="w-full text-sm text-left bg-white rounded shadow border">
         <thead className="bg-gray-50">
           <tr>

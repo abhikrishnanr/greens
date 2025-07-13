@@ -3,7 +3,8 @@ import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import TextStyle from '@tiptap/extension-text-style'
 import Color from '@tiptap/extension-color'
-import { useEffect } from "react";
+import { useEffect } from 'react'
+import { MdFormatBold, MdFormatItalic, MdLooksOne, MdLooksTwo } from 'react-icons/md'
 
 export default function WysiwygEditor({ value, onChange, className = '' }) {
   const editor = useEditor({
@@ -27,16 +28,46 @@ export default function WysiwygEditor({ value, onChange, className = '' }) {
   if (!editor) return <div>Loading editor...</div>;
 
   return (
-    <div className={`rounded border bg-black p-2 text-secondary ${className}`}>
+    <div className={`rounded border bg-white p-2 text-gray-800 ${className}`}>
       <div className="mb-2 flex gap-1 flex-wrap">
-        <button onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive('bold') ? 'font-bold text-primary' : ''}><b>B</b></button>
-        <button onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive('italic') ? 'italic text-primary' : ''}><i>I</i></button>
-        <button onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={editor.isActive('heading', { level: 1 }) ? 'text-primary underline' : ''}>H1</button>
-        <button onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={editor.isActive('heading', { level: 2 }) ? 'text-primary underline' : ''}>H2</button>
-        <input type="color" onChange={e => editor.chain().focus().setColor(e.target.value).run()} />
-        <button onClick={() => editor.chain().focus().unsetColor().run()}>No Color</button>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          className={`p-1 rounded hover:bg-green-100 ${editor.isActive('bold') ? 'bg-green-200' : ''}`}
+        >
+          <MdFormatBold />
+        </button>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          className={`p-1 rounded hover:bg-green-100 ${editor.isActive('italic') ? 'bg-green-200' : ''}`}
+        >
+          <MdFormatItalic />
+        </button>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          className={`p-1 rounded hover:bg-green-100 ${editor.isActive('heading', { level: 1 }) ? 'bg-green-200' : ''}`}
+        >
+          <MdLooksOne />
+        </button>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          className={`p-1 rounded hover:bg-green-100 ${editor.isActive('heading', { level: 2 }) ? 'bg-green-200' : ''}`}
+        >
+          <MdLooksTwo />
+        </button>
+        <input
+          type="color"
+          onChange={e => editor.chain().focus().setColor(e.target.value).run()}
+          className="h-8 w-8 p-0 border rounded"
+        />
+        <button type="button" onClick={() => editor.chain().focus().unsetColor().run()} className="p-1 rounded hover:bg-green-100">
+          Reset
+        </button>
       </div>
-      <EditorContent editor={editor} className="min-h-[120px] bg-black text-secondary p-2 rounded" />
+      <EditorContent editor={editor} className="min-h-[120px] bg-white text-gray-800 p-2 rounded border" />
     </div>
   )
 }
