@@ -18,7 +18,7 @@ interface Staff {
   role: string;
   branchId?: string;
   branch?: Branch;
-  active: boolean;
+  removed: boolean;
   createdAt: string;
   imageUrl?: string;
 }
@@ -27,7 +27,7 @@ export default function StaffPage() {
   // state
   const [staffList, setStaffList]         = useState<Staff[]>([]);
   const [branches, setBranches]           = useState<Branch[]>([]);
-  const [filter, setFilter]               = useState<'ALL'|'ACTIVE'|'INACTIVE'>('ALL');
+  const [filter, setFilter]               = useState<'ALL'|'AVAILABLE'|'REMOVED'>('ALL');
   const [searchTerm, setSearchTerm]       = useState('');
   const [showAddModal, setShowAddModal]   = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<Staff|null>(null);
@@ -52,26 +52,16 @@ export default function StaffPage() {
   const handleToggle = async(id:string, curr:boolean) => {
     await fetch('/api/staff/toggle', {
       method:'POST',
-      body: JSON.stringify({ id, active: !curr })
+      body: JSON.stringify({ id, removed: !curr })
     });
     fetchStaff();
   };
-
-  const handleRemove = async(id:string) => {
-    if (!confirm('Remove this staff?')) return;
-    await fetch('/api/staff/remove', {
-      method:'POST',
-      body: JSON.stringify({ id })
-    });
-    fetchStaff();
-  };
-
 
 const handleExport = () => {
   const headers = [
     'Name','Email','Phone','Gender','DOB','Address',
     'Designation','Experience','Start Date','Role',
-    'Branch','Active','Joined'
+    'Branch','Removed','Joined'
   ];
 
   const rows = staffList.map(s => [
@@ -86,7 +76,7 @@ const handleExport = () => {
     s.startDate,
     s.role,
     s.branch?.name,
-    s.active ? 'Yes' : 'No',
+    s.removed ? 'Yes' : 'No',
     new Date(s.createdAt).toLocaleDateString(),
   ]);
 
@@ -113,7 +103,10 @@ const handleExport = () => {
 
   // filtered & searched
   const filtered = staffList
-    .filter(s=> filter==='ALL' ? true : (filter==='ACTIVE'?s.active:!s.active))
+    .filter(s => {
+      if (filter === 'ALL') return true;
+      return filter === 'REMOVED' ? s.removed : !s.removed;
+    })
     .filter(s=> {
       const q = searchTerm.toLowerCase();
       return s.name.toLowerCase().includes(q) || s.email.toLowerCase().includes(q);
@@ -197,7 +190,7 @@ const handleExport = () => {
           className="flex-1 p-2 rounded bg-gray-700 border border-gray-600"
         />
         <div className="space-x-2">
-          {['ALL','ACTIVE','INACTIVE'].map(val=>(
+          {['ALL','AVAILABLE','REMOVED'].map(val=>(
             <button
               key={val}
               onClick={()=>setFilter(val as any)}
@@ -274,14 +267,8 @@ const handleExport = () => {
                   <td>{staff.branch?.name||'—'}</td>
                 </tr>
                 <tr>
-                  <th className="text-left pr-4 py-1 font-medium">Status</th>
-                  <td>
-                    <span className={`inline-block px-2 py-0.5 rounded-full text-sm ${
-                      staff.active?'bg-green-700':'bg-red-700'
-                    }`}>
-                      {staff.active?'Active':'Inactive'}
-                    </span>
-                  </td>
+                  <th className="text-left pr-4 py-1 font-medium">Removed</th>
+                  <td>{staff.removed ? 'Yes' : 'No'}</td>
                 </tr>
               </tbody>
             </table>
@@ -294,14 +281,14 @@ const handleExport = () => {
                 Edit
               </button>
               <button
-                onClick={()=>handleToggle(staff.id, staff.active)}
+                onClick={()=>handleToggle(staff.id, staff.removed)}
                 className={`flex-1 py-2 rounded text-lg ${
-                  staff.active
-                    ? 'bg-red-600 hover:bg-red-700'
-                    : 'bg-green-600 hover:bg-green-700'
+                  staff.removed
+                    ? 'bg-green-600 hover:bg-green-700'
+                    : 'bg-red-600 hover:bg-red-700'
                 }`}
               >
-                {staff.active?'Deactivate':'Activate'}
+                {staff.removed ? 'Restore' : 'Remove'}
               </button>
             </div>
           </div>
