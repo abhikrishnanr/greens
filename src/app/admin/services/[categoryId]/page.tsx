@@ -7,7 +7,7 @@ import {
   FiSearch, FiEdit, FiTrash2, FiPlus, FiMove, FiArrowLeft
 } from "react-icons/fi";
 
-const WysiwygEditor = dynamic(() => import('../../components/WysiwygEditor'), { ssr: false });
+const WysiwygEditor = dynamic(() => import('../../../components/WysiwygEditor'), { ssr: false });
 
 export default function ServicesAdminPage() {
   const params = useParams();

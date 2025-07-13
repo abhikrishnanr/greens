@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect } from 'react'
 import {
   getProviders,
@@ -8,7 +10,7 @@ import {
   ClientSafeProvider
 } from 'next-auth/react'
 import { BuiltInProviderType } from 'next-auth/providers'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
 export default function SignInPage() {
   const [providers, setProviders] = useState<Record<string,ClientSafeProvider>>({})
@@ -18,9 +20,13 @@ export default function SignInPage() {
   const [otp, setOtp]     = useState('')
   const [error, setError] = useState('')
 
-  const router      = useRouter()
-  const params      = useSearchParams()
-  const callbackUrl = params.get('callbackUrl') || '/customer/dashboard'
+  const router = useRouter()
+  const [callbackUrl, setCallbackUrl] = useState('/customer/dashboard')
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    setCallbackUrl(params.get('callbackUrl') || '/customer/dashboard')
+  }, [])
 
   useEffect(() => {
     getProviders().then((provs:any) => setProviders(provs))
