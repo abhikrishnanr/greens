@@ -17,8 +17,49 @@ async function main() {
   // fetch all branch IDs once
   const branches = await prisma.branch.findMany({ select: { id: true } });
 
+  const categoryMap = new Map();
+  const serviceMap = new Map();
+
   for (const row of data) {
     const id = row.service_id;
+
+    const categoryName = row['Main Service Name'];
+    let category = categoryMap.get(categoryName);
+    if (!category) {
+      category = await prisma.serviceCategory.upsert({
+        where: { name: categoryName },
+        create: {
+          name: categoryName,
+          description: row['Main Service Name Description'] || null,
+        },
+        update: {},
+      });
+      categoryMap.set(categoryName, category);
+    }
+
+    const svcKey = `${category.id}-${row['Sub category']}`;
+    let svc = serviceMap.get(svcKey);
+    if (!svc) {
+      svc = await prisma.serviceNew.create({
+        data: {
+          categoryId: category.id,
+          name: row['Sub category'],
+          caption: row['Service Description']?.slice(0, 120) || null,
+          description: row['Service Description'] || null,
+        },
+      });
+      serviceMap.set(svcKey, svc);
+    }
+
+    await prisma.serviceTier.create({
+      data: {
+        serviceId: svc.id,
+        name: row['Cost Category'],
+        actualPrice: parseFloat(row['Actual Price'] || '0'),
+        offerPrice: row['Offer Price'] ? parseFloat(row['Offer Price']) : null,
+        duration: parseInt(row.Duration || '0', 10),
+      },
+    });
     // 1) Upsert service
     await prisma.service.upsert({
       where: { id },

@@ -90,10 +90,11 @@ model Booking {
 model ServiceCategory {
   id          String   @id @default(uuid())
   name        String   @unique
-  description String?  @db.LongText  
+  description String?  @db.LongText
   imageUrl    String?
   order       Int      @default(0)
   services    Service[]
+  servicesNew ServiceNew[]
   caption     String?
 }
 
@@ -154,4 +155,25 @@ model BranchService {
 
   @@id([branchId, serviceId])
   @@map("branch_service")
+}
+
+model ServiceNew {
+  id          String   @id @default(uuid())
+  categoryId  String
+  category    ServiceCategory @relation(fields: [categoryId], references: [id])
+  name        String
+  caption     String?
+  description String?
+  imageUrl    String?
+  tiers       ServiceTier[]
+}
+
+model ServiceTier {
+  id        String   @id @default(uuid())
+  serviceId String
+  service   ServiceNew @relation(fields: [serviceId], references: [id])
+  name      String
+  actualPrice Float
+  offerPrice  Float?
+  duration   Int?
 }
