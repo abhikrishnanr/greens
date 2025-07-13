@@ -43,17 +43,17 @@ const sections: {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   return (
-    <div className="min-h-screen flex text-gray-900 bg-gray-50">
+    <div className="min-h-screen flex text-gray-900 bg-green-50">
       <nav className="w-60 bg-white border-r border-gray-200 p-4 space-y-4 overflow-y-auto">
         {sections.map(sec => (
           <div key={sec.heading}>
-            <div className="uppercase text-xs text-gray-500 mb-1">{sec.heading}</div>
+            <div className="uppercase text-xs text-green-700 mb-1">{sec.heading}</div>
             <div className="space-y-1">
               {sec.items.map(item => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-100 ${pathname === item.href ? 'bg-gray-100 font-semibold' : ''}`}
+                  className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-green-100 ${pathname === item.href ? 'bg-green-100 font-semibold' : ''}`}
                 >
                   <item.icon className="text-lg" />
                   <span>{item.label}</span>

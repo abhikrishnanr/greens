@@ -248,7 +248,7 @@ export default function ServicesAdmin() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Services</h1>
+      <h1 className="text-2xl font-bold mb-4 text-green-700">Services</h1>
       <div className="flex items-center gap-2 mb-4">
         <select
           className="p-2 rounded border"
@@ -296,33 +296,46 @@ export default function ServicesAdmin() {
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded shadow w-full max-w-lg">
             <h2 className="text-xl mb-4">{editingService ? 'Edit' : 'Add'} Service</h2>
-            <form onSubmit={saveService} className="space-y-2">
-              <input
-                className="w-full p-2 rounded border"
-                placeholder="Name"
-                value={serviceForm.name || ''}
-                onChange={e => setServiceForm({ ...serviceForm, name: e.target.value })}
-                required
-              />
-              <input
-                className="w-full p-2 rounded border"
-                placeholder="Caption"
-                value={serviceForm.caption || ''}
-                onChange={e => setServiceForm({ ...serviceForm, caption: e.target.value })}
-              />
-              <WysiwygEditor
-                value={serviceForm.description || ''}
-                onChange={desc => setServiceForm({ ...serviceForm, description: desc })}
-              />
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleServiceImage}
-                className="w-full p-2 rounded border"
-              />
-              {serviceForm.imageUrl && (
-                <img src={serviceForm.imageUrl} alt="preview" className="h-32 object-cover" />
-              )}
+            <form onSubmit={saveService} className="space-y-4">
+              <div>
+                <label className="block font-medium mb-1">Name</label>
+                <input
+                  className="w-full p-2 rounded border"
+                  value={serviceForm.name || ''}
+                  onChange={e => setServiceForm({ ...serviceForm, name: e.target.value })}
+                  required
+                />
+                <small className="text-gray-500">Service name</small>
+              </div>
+              <div>
+                <label className="block font-medium mb-1">Caption</label>
+                <input
+                  className="w-full p-2 rounded border"
+                  value={serviceForm.caption || ''}
+                  onChange={e => setServiceForm({ ...serviceForm, caption: e.target.value })}
+                />
+                <small className="text-gray-500">Short tagline</small>
+              </div>
+              <div>
+                <label className="block font-medium mb-1">Description</label>
+                <WysiwygEditor
+                  value={serviceForm.description || ''}
+                  onChange={desc => setServiceForm({ ...serviceForm, description: desc })}
+                />
+              </div>
+              <div>
+                <label className="block font-medium mb-1">Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleServiceImage}
+                  className="w-full p-2 rounded border"
+                />
+                {serviceForm.imageUrl && (
+                  <img src={serviceForm.imageUrl} alt="preview" className="h-32 object-cover mt-2" />
+                )}
+                <small className="text-gray-500">Main display image</small>
+              </div>
               <div className="text-right space-x-2 pt-2">
                 <button type="button" className="px-3 py-1 bg-gray-300 rounded" onClick={() => setShowServiceForm(false)}>Cancel</button>
                 <button type="submit" className="px-3 py-1 bg-green-600 text-white rounded">Save</button>
@@ -363,36 +376,44 @@ export default function ServicesAdmin() {
             </table>
             <button className="bg-green-600 px-3 py-1 rounded text-white mb-4" onClick={openAddTier}>+ Add Tier</button>
             {tierForm.name !== undefined && (
-              <form onSubmit={saveTier} className="space-y-2">
-                <input
-                  className="w-full p-2 rounded border"
-                  placeholder="Name"
-                  value={tierForm.name || ''}
-                  onChange={e => setTierForm({ ...tierForm, name: e.target.value })}
-                  required
-                />
-                <input
-                  type="number"
-                  className="w-full p-2 rounded border"
-                  placeholder="Actual Price"
-                  value={tierForm.actualPrice ?? 0}
-                  onChange={e => setTierForm({ ...tierForm, actualPrice: parseFloat(e.target.value) })}
-                  required
-                />
-                <input
-                  type="number"
-                  className="w-full p-2 rounded border"
-                  placeholder="Offer Price"
-                  value={tierForm.offerPrice ?? ''}
-                  onChange={e => setTierForm({ ...tierForm, offerPrice: e.target.value ? parseFloat(e.target.value) : null })}
-                />
-                <input
-                  type="number"
-                  className="w-full p-2 rounded border"
-                  placeholder="Duration (min)"
-                  value={tierForm.duration ?? ''}
-                  onChange={e => setTierForm({ ...tierForm, duration: e.target.value ? parseInt(e.target.value) : null })}
-                />
+              <form onSubmit={saveTier} className="space-y-4">
+                <div>
+                  <label className="block font-medium mb-1">Name</label>
+                  <input
+                    className="w-full p-2 rounded border"
+                    value={tierForm.name || ''}
+                    onChange={e => setTierForm({ ...tierForm, name: e.target.value })}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium mb-1">Actual Price</label>
+                  <input
+                    type="number"
+                    className="w-full p-2 rounded border"
+                    value={tierForm.actualPrice ?? 0}
+                    onChange={e => setTierForm({ ...tierForm, actualPrice: parseFloat(e.target.value) })}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium mb-1">Offer Price</label>
+                  <input
+                    type="number"
+                    className="w-full p-2 rounded border"
+                    value={tierForm.offerPrice ?? ''}
+                    onChange={e => setTierForm({ ...tierForm, offerPrice: e.target.value ? parseFloat(e.target.value) : null })}
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium mb-1">Duration (min)</label>
+                  <input
+                    type="number"
+                    className="w-full p-2 rounded border"
+                    value={tierForm.duration ?? ''}
+                    onChange={e => setTierForm({ ...tierForm, duration: e.target.value ? parseInt(e.target.value) : null })}
+                  />
+                </div>
                 <div className="text-right space-x-2 pt-2">
                   <button type="submit" className="px-3 py-1 bg-green-600 text-white rounded">{editingTier ? 'Update' : 'Add'} Tier</button>
                 </div>
@@ -420,11 +441,7 @@ export default function ServicesAdmin() {
               <tbody>
                 {images.map(img => (
                   <tr key={img.id} className="border-t">
-
                     <td>{img.imageUrl ? <img src={img.imageUrl} className="h-10"/> : '—'}</td>
-
-                    <td>{img.imageUrl}</td>
-
                     <td>{img.caption ?? '—'}</td>
                     <td className="space-x-2">
                       <button className="underline" onClick={() => openEditImage(img)}>Edit</button>
@@ -436,31 +453,37 @@ export default function ServicesAdmin() {
             </table>
             <button className="bg-green-600 px-3 py-1 rounded text-white mb-4" onClick={openAddImage}>+ Add Image</button>
             {imageForm.imageUrl !== undefined && (
-              <form onSubmit={saveImage} className="space-y-2">
-                <input
-
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="w-full p-2 rounded border"
-                />
+              <form onSubmit={saveImage} className="space-y-4">
+                <div>
+                  <label className="block font-medium mb-1">Image File</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="w-full p-2 rounded border"
+                  />
+                </div>
                 {imageForm.imageUrl && (
                   <img src={imageForm.imageUrl} alt="preview" className="h-24 object-cover" />
                 )}
-
-                  className="w-full p-2 rounded border"
-                  placeholder="Image URL"
-                  value={imageForm.imageUrl || ''}
-                  onChange={e => setImageForm({ ...imageForm, imageUrl: e.target.value })}
-                  required
-                />
-
-                <input
-                  className="w-full p-2 rounded border"
-                  placeholder="Caption"
-                  value={imageForm.caption || ''}
-                  onChange={e => setImageForm({ ...imageForm, caption: e.target.value })}
-                />
+                <div>
+                  <label className="block font-medium mb-1">Image URL</label>
+                  <input
+                    className="w-full p-2 rounded border"
+                    value={imageForm.imageUrl || ''}
+                    onChange={e => setImageForm({ ...imageForm, imageUrl: e.target.value })}
+                    required
+                  />
+                  <small className="text-gray-500">Direct link to image</small>
+                </div>
+                <div>
+                  <label className="block font-medium mb-1">Caption</label>
+                  <input
+                    className="w-full p-2 rounded border"
+                    value={imageForm.caption || ''}
+                    onChange={e => setImageForm({ ...imageForm, caption: e.target.value })}
+                  />
+                </div>
                 <div className="text-right space-x-2 pt-2">
                   <button type="submit" className="px-3 py-1 bg-green-600 text-white rounded">{editingImage ? 'Update' : 'Add'} Image</button>
                 </div>
