@@ -16,6 +16,13 @@ export default function Header({ cartCount = 0 }: { cartCount?: number }) {
         >
           <FiPhone className="text-lg" /> Call
         </a>
+        {/* Admin login link */}
+        <a
+          href="/login"
+          className="flex items-center gap-1 bg-[#052b1e] hover:bg-primary/10 px-3 py-2 rounded-full text-green-100 font-medium shadow transition"
+        >
+          <FiUser className="text-lg" /> Admin
+        </a>
         {/* Cart icon */}
         <a href="/cart" className="relative">
           <FiShoppingCart className="text-2xl text-primary" />

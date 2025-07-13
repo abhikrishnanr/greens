@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { FiShoppingCart, FiPhone, FiSearch, FiMapPin, FiMail, FiInstagram } from "react-icons/fi";
 import { MdMale, MdFemale, MdStar, MdDiamond, MdEco } from "react-icons/md";
+import Header from "@/components/Header";
 
 // ---- Tier/Type labels & badge colors ----
 const TIER_LABELS = {
@@ -104,72 +105,54 @@ export default function HomePage() {
   return (
     <main className="bg-[#052b1e] min-h-screen font-sans text-green-50">
       {/* HEADER */}
-      <header className="sticky top-0 z-50 bg-[#03150d] bg-opacity-98 shadow flex items-center justify-between px-3 py-2">
-        <a href="/" className="flex items-center">
-          <img src="/logo.png" alt="Greens Beauty Salon Logo" className="w-auto h-11" />
-        </a>
-        <div className="flex items-center gap-3">
-          <a href="tel:+918891467678" className="flex items-center gap-1 bg-[#052b1e] hover:bg-primary/10 px-3 py-2 rounded-full text-green-100 font-medium shadow transition">
-            <FiPhone className="text-lg" /> Call
-          </a>
-          <a href="/cart" className="relative">
-            <FiShoppingCart className="text-2xl text-primary" />
-            {cart.length > 0 && (
-              <span className="absolute -top-2 -right-2 text-xs bg-yellow-400 text-black rounded-full px-1 font-bold">{cart.length}</span>
-            )}
-          </a>
-        </div>
-      </header>
+      <Header cartCount={cart.length} />
 
       {/* HERO SECTION WITH VIDEO */}
-<section className="relative min-h-[420px] md:min-h-[520px] flex items-center justify-center overflow-hidden">
-  <div className="absolute inset-0 z-0">
-    <video
-      autoPlay
-      loop
-      muted
-      playsInline
-      className="w-full h-full object-cover"
-      poster="/salon_bg_poster.jpg"
-    >
-      <source src="/home-bg-video.mp4" type="video/mp4" />
-    </video>
-    <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/20"></div>
-  </div>
-  <div className="relative z-10 flex flex-col items-center justify-center w-full">
-    <img src="/logo.png" alt="Greens Beauty Salon Logo" className="h-16 mb-4 drop-shadow-lg" />
-    <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 text-center drop-shadow">Greens Beauty Salon</h1>
-    <p className="text-xl md:text-2xl font-light text-primary mb-2 text-center drop-shadow">
-      Luxury Beauty Experience
-    </p>
-    <p className="text-base md:text-lg text-gray-200 max-w-xl text-center mb-6">
-      Discover a world of premium beauty treatments and services designed to enhance your natural beauty and provide ultimate relaxation.
-    </p>
-    <div className="flex flex-col sm:flex-row gap-3">
-      <a href="#services"
-        className="px-6 py-2 rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-[#03150d] transition-colors font-medium bg-opacity-80 text-center"
-      >
-        Explore Services
-      </a>
-      <a href="tel:+918891467678"
-        className="px-6 py-2 rounded-full bg-primary text-[#03150d] font-medium hover:bg-opacity-90 transition-colors text-center"
-      >
-        Book Now
-      </a>
-    </div>
-  </div>
-</section>
+      <section className="relative h-[80vh] flex items-center justify-center overflow-hidden text-center">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+          poster="/salon_bg_poster.jpg"
+        >
+          <source src="/home-bg-video.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-black/60" />
+        <div className="relative z-10 space-y-4 px-4">
+          <img src="/logo.png" alt="Greens Beauty Salon Logo" className="h-20 mx-auto drop-shadow-lg" />
+          <h1 className="text-5xl font-bold tracking-wide text-primary font-[Pacifico]">Greens Beauty Salon</h1>
+          <p className="text-lg text-gray-200 max-w-2xl mx-auto">
+            Discover a world of premium beauty treatments and services designed to enhance your natural beauty and provide ultimate relaxation.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href="#services"
+              className="px-6 py-2 rounded-full border border-primary text-primary hover:bg-primary hover:text-[#03150d] transition-colors font-medium"
+            >
+              Explore Services
+            </a>
+            <a
+              href="tel:+918891467678"
+              className="px-6 py-2 rounded-full bg-primary text-[#03150d] font-medium hover:bg-opacity-90 transition-colors"
+            >
+              Book Now
+            </a>
+          </div>
+        </div>
+      </section>
 
 
 
-<section className="py-16 bg-primary-800 pattern-bg-1 relative">
+<section className="py-16 bg-[#0e3524] pattern-bg-1 relative">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center text-white mb-12">
+        <h2 className="text-3xl font-bold text-center text-primary mb-12">
           Our Service Divisions
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
  
-          <div className="service-card bg-gray-900 rounded-lg p-6 text-center">
+          <div className="service-card bg-[#163020] rounded-lg p-6 text-center">
             <div
               className="w-16 h-16 mx-auto mb-4 rounded-full icon-gradient-1 flex items-center justify-center"
             >
@@ -181,7 +164,7 @@ export default function HomePage() {
             </p>
           </div>
     
-          <div className="service-card bg-gray-900 rounded-lg p-6 text-center">
+          <div className="service-card bg-[#163020] rounded-lg p-6 text-center">
             <div
               className="w-16 h-16 mx-auto mb-4 rounded-full icon-gradient-2 flex items-center justify-center"
             >
@@ -191,7 +174,7 @@ export default function HomePage() {
             <p className="text-gray-400 text-sm">Premium beauty treatments</p>
           </div>
         
-          <div className="service-card bg-gray-900 rounded-lg p-6 text-center">
+          <div className="service-card bg-[#163020] rounded-lg p-6 text-center">
             <div
               className="w-16 h-16 mx-auto mb-4 rounded-full icon-gradient-3 flex items-center justify-center"
             >
@@ -203,7 +186,7 @@ export default function HomePage() {
             <p className="text-gray-400 text-sm">Luxury styling experience</p>
           </div>
        
-          <div className="service-card bg-gray-900 rounded-lg p-6 text-center">
+          <div className="service-card bg-[#163020] rounded-lg p-6 text-center">
             <div
               className="w-16 h-16 mx-auto mb-4 rounded-full icon-gradient-4 flex items-center justify-center"
             >
@@ -215,7 +198,7 @@ export default function HomePage() {
             <p className="text-gray-400 text-sm">Complete transformation</p>
           </div>
     
-          <div className="service-card bg-gray-900 rounded-lg p-6 text-center">
+          <div className="service-card bg-[#163020] rounded-lg p-6 text-center">
             <div
               className="w-16 h-16 mx-auto mb-4 rounded-full icon-gradient-5 flex items-center justify-center"
             >
@@ -225,7 +208,7 @@ export default function HomePage() {
             <p className="text-gray-400 text-sm">Special bridal services</p>
           </div>
         
-          <div className="service-card bg-gray-900 rounded-lg p-6 text-center">
+          <div className="service-card bg-[#163020] rounded-lg p-6 text-center">
             <div
               className="w-16 h-16 mx-auto mb-4 rounded-full icon-gradient-6 flex items-center justify-center"
             >
@@ -235,7 +218,7 @@ export default function HomePage() {
             <p className="text-gray-400 text-sm">Artistic floral designs</p>
           </div>
 
-          <div className="service-card bg-gray-900 rounded-lg p-6 text-center">
+          <div className="service-card bg-[#163020] rounded-lg p-6 text-center">
             <div
               className="w-16 h-16 mx-auto mb-4 rounded-full icon-gradient-7 flex items-center justify-center"
             >
@@ -245,7 +228,7 @@ export default function HomePage() {
             <p className="text-gray-400 text-sm">Event decoration services</p>
           </div>
        
-          <div className="service-card bg-gray-900 rounded-lg p-6 text-center">
+          <div className="service-card bg-[#163020] rounded-lg p-6 text-center">
             <div
               className="w-16 h-16 mx-auto mb-4 rounded-full icon-gradient-8 flex items-center justify-center"
             >
@@ -387,7 +370,7 @@ export default function HomePage() {
             return (
               <div
                 key={cat.name}
-                className={`rounded-2xl shadow bg-[#0d1c14] border border-[#24432a] mb-2`}
+                className={`rounded-2xl shadow bg-[#11281d] border border-[#24432a] mb-2`}
               >
                 <button
                   onClick={() => setExpandedCat(isOpen ? null : cat.name)}
@@ -548,8 +531,8 @@ export default function HomePage() {
       )}
 
       {/* ---- ABOUT ---- */}
-      <section className="max-w-xl mx-auto w-full px-4 mt-7">
-        <div className="bg-[#17301e] rounded-2xl shadow-xl p-6 mb-6 border-2 border-[#25442a]">
+      <section className="max-w-2xl mx-auto w-full px-4 mt-8">
+        <div className="bg-[#0e3524] rounded-2xl shadow-xl p-6 mb-6 border-2 border-[#25442a]">
           <h2 className="text-primary text-2xl font-bold mb-2 flex items-center gap-2">
             <span role="img" aria-label="Sparkle">💫</span> About Greens Beauty Salon
           </h2>
@@ -576,8 +559,8 @@ export default function HomePage() {
       </section>
 
       {/* ---- CONTACT ---- */}
-      <section className="max-w-xl mx-auto w-full px-4 mb-10">
-        <div className="bg-[#14361c] rounded-2xl shadow-xl p-6 border-2 border-[#20412a]">
+      <section className="max-w-2xl mx-auto w-full px-4 mb-10">
+        <div className="bg-[#0e3524] rounded-2xl shadow-xl p-6 border-2 border-[#20412a]">
           <h2 className="text-primary text-2xl font-bold mb-3 flex items-center gap-2">
             <FiPhone className="text-xl text-[#41eb70]" /> Contact Us
           </h2>
