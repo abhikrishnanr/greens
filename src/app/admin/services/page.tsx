@@ -69,7 +69,7 @@ export default function ServicesAdmin() {
     if (!file) return
     const fd = new FormData()
     fd.append("file", file)
-    const res = await fetch("/api/upload", { method: "POST", body: fd })
+    const res = await fetch("/api/upload-local", { method: "POST", body: fd })
     const data = await res.json()
     setServiceForm({ ...serviceForm, imageUrl: data.url })
   }
@@ -93,7 +93,7 @@ export default function ServicesAdmin() {
     if (!file) return
     const fd = new FormData()
     fd.append("file", file)
-    const res = await fetch("/api/upload", { method: "POST", body: fd })
+    const res = await fetch("/api/upload-local", { method: "POST", body: fd })
     const data = await res.json()
     setImageForm({ ...imageForm, imageUrl: data.url })
   }
