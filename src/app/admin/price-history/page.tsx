@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { Pencil, Trash2 } from 'lucide-react'
 
 interface Service {
   id: string
@@ -74,7 +75,7 @@ export default function PriceHistoryPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4 text-green-700">Price History</h1>
-      <select className="bg-gray-800 p-2 rounded mb-4" value={selected} onChange={e => setSelected(e.target.value)}>
+      <select className="bg-white p-2 rounded mb-4 border" value={selected} onChange={e => setSelected(e.target.value)}>
         <option value="">Select service</option>
         {services.map(s => (
           <option key={s.id} value={s.id}>{s.main_service_name}</option>
@@ -132,9 +133,19 @@ export default function PriceHistoryPage() {
                     <td className="px-3 py-2">{e.offerPrice ?? '—'}</td>
                     <td className="px-3 py-2">{e.offerStartDate ? new Date(e.offerStartDate).toLocaleDateString() : '—'}</td>
                     <td className="px-3 py-2">{e.offerEndDate ? new Date(e.offerEndDate).toLocaleDateString() : '—'}</td>
-                    <td className="space-x-2 px-3 py-2">
-                      <button className="underline" onClick={() => edit(e)}>Edit</button>
-                      <button className="underline text-red-600" onClick={() => del(e.id)}>Delete</button>
+                    <td className="flex gap-2 px-3 py-2">
+                      <button
+                        className="flex items-center gap-1 px-2 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded"
+                        onClick={() => edit(e)}
+                      >
+                        <Pencil className="h-4 w-4" /> Edit
+                      </button>
+                      <button
+                        className="flex items-center gap-1 px-2 py-1 text-sm bg-red-600 hover:bg-red-700 text-white rounded"
+                        onClick={() => del(e.id)}
+                      >
+                        <Trash2 className="h-4 w-4" /> Delete
+                      </button>
                     </td>
                   </tr>
                 ))}

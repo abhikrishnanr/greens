@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import WysiwygEditor from '@/app/components/WysiwygEditor'
+import { Pencil, Trash2 } from 'lucide-react'
 
 interface Category {
   id: string
@@ -145,9 +146,19 @@ export default function ServiceCategoriesPage() {
               <td className="px-3 py-2">{c.name}</td>
               <td className="px-3 py-2">{c.caption ?? '—'}</td>
               <td className="px-3 py-2">{c.imageUrl ? <img src={c.imageUrl} className="h-10"/> : '—'}</td>
-              <td className="space-x-2 px-3 py-2">
-                <button className="underline" onClick={() => edit(c)}>Edit</button>
-                <button className="underline text-red-600" onClick={() => del(c.id)}>Delete</button>
+              <td className="flex gap-2 px-3 py-2">
+                <button
+                  className="flex items-center gap-1 px-2 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded"
+                  onClick={() => edit(c)}
+                >
+                  <Pencil className="h-4 w-4" /> Edit
+                </button>
+                <button
+                  className="flex items-center gap-1 px-2 py-1 text-sm bg-red-600 hover:bg-red-700 text-white rounded"
+                  onClick={() => del(c.id)}
+                >
+                  <Trash2 className="h-4 w-4" /> Delete
+                </button>
               </td>
             </tr>
           ))}
