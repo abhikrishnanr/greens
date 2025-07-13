@@ -34,24 +34,24 @@ export default function AppointmentPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4">Appointment Requests</h1>
-      <table className="w-full text-sm text-left">
-        <thead>
+      <table className="w-full text-sm text-left bg-white rounded shadow border">
+        <thead className="bg-gray-50">
           <tr>
-            <th>Date</th>
-            <th>Customer</th>
-            <th>Service</th>
-            <th>Status</th>
+            <th className="px-3 py-2">Date</th>
+            <th className="px-3 py-2">Customer</th>
+            <th className="px-3 py-2">Service</th>
+            <th className="px-3 py-2">Status</th>
           </tr>
         </thead>
         <tbody>
           {bookings.map(b => (
-            <tr key={b.id} className="border-t border-gray-700">
-              <td>{new Date(b.date).toLocaleString()}</td>
-              <td>{b.user?.name || '—'}</td>
-              <td>{b.service.name}</td>
+            <tr key={b.id} className="border-t">
+              <td className="px-3 py-2">{new Date(b.date).toLocaleString()}</td>
+              <td className="px-3 py-2">{b.user?.name || '—'}</td>
+              <td className="px-3 py-2">{b.service.name}</td>
               <td>
                 <select
-                  className="bg-gray-800 p-1 rounded"
+                  className="p-1 rounded border"
                   value={b.status}
                   onChange={e => update(b.id, e.target.value)}
                 >

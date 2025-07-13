@@ -55,30 +55,30 @@ export default function BranchesAdmin() {
   return (
     <div className="max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Branch Management</h1>
-      <form onSubmit={save} className="space-y-2 bg-black p-4 rounded mb-6">
-        <input className="w-full p-2 rounded bg-gray-800" placeholder="Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
-        <input className="w-full p-2 rounded bg-gray-800" placeholder="Address" value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} required />
-        <input className="w-full p-2 rounded bg-gray-800" placeholder="Phone" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} required />
-        <input className="w-full p-2 rounded bg-gray-800" placeholder="UPI ID" value={form.upiId} onChange={e => setForm({ ...form, upiId: e.target.value })} />
-        <input className="w-full p-2 rounded bg-gray-800" placeholder="QR URL" value={form.qrUrl} onChange={e => setForm({ ...form, qrUrl: e.target.value })} />
-        <button className="bg-green-600 px-4 py-2 rounded" type="submit">{editing ? 'Update' : 'Add'} Branch</button>
+      <form onSubmit={save} className="space-y-2 bg-white p-4 rounded shadow border mb-6">
+        <input className="w-full p-2 rounded border" placeholder="Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
+        <input className="w-full p-2 rounded border" placeholder="Address" value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} required />
+        <input className="w-full p-2 rounded border" placeholder="Phone" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} required />
+        <input className="w-full p-2 rounded border" placeholder="UPI ID" value={form.upiId} onChange={e => setForm({ ...form, upiId: e.target.value })} />
+        <input className="w-full p-2 rounded border" placeholder="QR URL" value={form.qrUrl} onChange={e => setForm({ ...form, qrUrl: e.target.value })} />
+        <button className="bg-green-600 px-4 py-2 rounded text-white" type="submit">{editing ? 'Update' : 'Add'} Branch</button>
       </form>
-      <table className="w-full text-left text-sm">
-        <thead>
+      <table className="w-full text-left text-sm bg-white rounded shadow border">
+        <thead className="bg-gray-50">
           <tr>
-            <th>Name</th>
-            <th>Phone</th>
-            <th>Actions</th>
+            <th className="px-3 py-2">Name</th>
+            <th className="px-3 py-2">Phone</th>
+            <th className="px-3 py-2">Actions</th>
           </tr>
         </thead>
         <tbody>
           {branches.map(b => (
-            <tr key={b.id} className="border-t border-gray-700">
-              <td>{b.name}</td>
-              <td>{b.phone}</td>
-              <td className="space-x-2">
+            <tr key={b.id} className="border-t">
+              <td className="px-3 py-2">{b.name}</td>
+              <td className="px-3 py-2">{b.phone}</td>
+              <td className="space-x-2 px-3 py-2">
                 <button className="underline" onClick={() => edit(b)}>Edit</button>
-                <button className="underline text-red-400" onClick={() => del(b.id)}>Delete</button>
+                <button className="underline text-red-600" onClick={() => del(b.id)}>Delete</button>
               </td>
             </tr>
           ))}

@@ -82,10 +82,10 @@ export default function PriceHistoryPage() {
       </select>
       {selected && (
         <div className="space-y-4">
-          <form onSubmit={save} className="space-y-2 bg-black p-4 rounded">
+          <form onSubmit={save} className="space-y-2 bg-white p-4 rounded shadow border">
             <input
               type="number"
-              className="w-full p-2 rounded bg-gray-800"
+              className="w-full p-2 rounded border"
               placeholder="Actual price"
               value={form.actualPrice ?? 0}
               onChange={e => setForm({ ...form, actualPrice: parseFloat(e.target.value) })}
@@ -93,48 +93,48 @@ export default function PriceHistoryPage() {
             />
             <input
               type="number"
-              className="w-full p-2 rounded bg-gray-800"
+              className="w-full p-2 rounded border"
               placeholder="Offer price"
               value={form.offerPrice ?? ''}
               onChange={e => setForm({ ...form, offerPrice: e.target.value })}
             />
             <input
               type="date"
-              className="w-full p-2 rounded bg-gray-800"
+              className="w-full p-2 rounded border"
               value={form.offerStartDate || ''}
               onChange={e => setForm({ ...form, offerStartDate: e.target.value })}
             />
             <input
               type="date"
-              className="w-full p-2 rounded bg-gray-800"
+              className="w-full p-2 rounded border"
               value={form.offerEndDate || ''}
               onChange={e => setForm({ ...form, offerEndDate: e.target.value })}
             />
-            <button className="bg-green-600 px-4 py-2 rounded" type="submit">
+            <button className="bg-green-600 px-4 py-2 rounded text-white" type="submit">
               {editing ? 'Update' : 'Add'} Entry
             </button>
           </form>
           {entries.length > 0 && (
-            <table className="w-full text-sm text-left">
-              <thead>
+            <table className="w-full text-sm text-left bg-white rounded shadow border">
+              <thead className="bg-gray-50">
                 <tr>
-                  <th>Actual</th>
-                  <th>Offer</th>
-                  <th>Start</th>
-                  <th>End</th>
-                  <th></th>
+                  <th className="px-3 py-2">Actual</th>
+                  <th className="px-3 py-2">Offer</th>
+                  <th className="px-3 py-2">Start</th>
+                  <th className="px-3 py-2">End</th>
+                  <th className="px-3 py-2"></th>
                 </tr>
               </thead>
               <tbody>
                 {entries.map(e => (
-                  <tr key={e.id} className="border-t border-gray-700">
-                    <td>{e.actualPrice}</td>
-                    <td>{e.offerPrice ?? '—'}</td>
-                    <td>{e.offerStartDate ? new Date(e.offerStartDate).toLocaleDateString() : '—'}</td>
-                    <td>{e.offerEndDate ? new Date(e.offerEndDate).toLocaleDateString() : '—'}</td>
-                    <td className="space-x-2">
+                  <tr key={e.id} className="border-t">
+                    <td className="px-3 py-2">{e.actualPrice}</td>
+                    <td className="px-3 py-2">{e.offerPrice ?? '—'}</td>
+                    <td className="px-3 py-2">{e.offerStartDate ? new Date(e.offerStartDate).toLocaleDateString() : '—'}</td>
+                    <td className="px-3 py-2">{e.offerEndDate ? new Date(e.offerEndDate).toLocaleDateString() : '—'}</td>
+                    <td className="space-x-2 px-3 py-2">
                       <button className="underline" onClick={() => edit(e)}>Edit</button>
-                      <button className="underline text-red-400" onClick={() => del(e.id)}>Delete</button>
+                      <button className="underline text-red-600" onClick={() => del(e.id)}>Delete</button>
                     </td>
                   </tr>
                 ))}

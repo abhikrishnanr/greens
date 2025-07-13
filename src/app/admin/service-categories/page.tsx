@@ -75,9 +75,9 @@ export default function ServiceCategoriesPage() {
   return (
     <div className="max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Service Categories</h1>
-      <form onSubmit={save} className="space-y-2 bg-black p-4 rounded mb-6">
+      <form onSubmit={save} className="space-y-2 bg-white p-4 rounded shadow border mb-6">
         <input
-          className="w-full p-2 rounded bg-gray-800"
+          className="w-full p-2 rounded border"
           placeholder="Name"
           value={form.name}
           onChange={e => setForm({ ...form, name: e.target.value })}
@@ -91,46 +91,46 @@ export default function ServiceCategoriesPage() {
           type="file"
           accept="image/*"
           onChange={handleImage}
-          className="w-full p-2 rounded bg-gray-800"
+          className="w-full p-2 rounded border"
         />
         {form.imageUrl && (
           <img src={form.imageUrl} alt="preview" className="h-32 object-cover" />
         )}
         <input
-          className="w-full p-2 rounded bg-gray-800"
+          className="w-full p-2 rounded border"
           placeholder="Caption"
           value={form.caption || ''}
           onChange={e => setForm({ ...form, caption: e.target.value })}
         />
         <input
           type="number"
-          className="w-full p-2 rounded bg-gray-800"
+          className="w-full p-2 rounded border"
           placeholder="Order"
           value={form.order ?? 0}
           onChange={e => setForm({ ...form, order: parseInt(e.target.value) })}
         />
-        <button className="bg-green-600 px-4 py-2 rounded" type="submit">
+        <button className="bg-green-600 px-4 py-2 rounded text-white" type="submit">
           {editing ? 'Update' : 'Add'} Category
         </button>
       </form>
-      <table className="w-full text-left text-sm">
-        <thead>
+      <table className="w-full text-left text-sm bg-white rounded shadow border">
+        <thead className="bg-gray-50">
           <tr>
-            <th>Name</th>
-            <th>Caption</th>
-            <th>Image</th>
-            <th>Actions</th>
+            <th className="px-3 py-2">Name</th>
+            <th className="px-3 py-2">Caption</th>
+            <th className="px-3 py-2">Image</th>
+            <th className="px-3 py-2">Actions</th>
           </tr>
         </thead>
         <tbody>
           {cats.map(c => (
-            <tr key={c.id} className="border-t border-gray-700">
-              <td>{c.name}</td>
-              <td>{c.caption ?? '—'}</td>
-              <td>{c.imageUrl ? <img src={c.imageUrl} className="h-10"/> : '—'}</td>
-              <td className="space-x-2">
+            <tr key={c.id} className="border-t">
+              <td className="px-3 py-2">{c.name}</td>
+              <td className="px-3 py-2">{c.caption ?? '—'}</td>
+              <td className="px-3 py-2">{c.imageUrl ? <img src={c.imageUrl} className="h-10"/> : '—'}</td>
+              <td className="space-x-2 px-3 py-2">
                 <button className="underline" onClick={() => edit(c)}>Edit</button>
-                <button className="underline text-red-400" onClick={() => del(c.id)}>Delete</button>
+                <button className="underline text-red-600" onClick={() => del(c.id)}>Delete</button>
               </td>
             </tr>
           ))}
