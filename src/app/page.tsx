@@ -369,14 +369,14 @@ export default function HomePage() {
                                   </div>
                                   <Link href={`/services/${svc.id}`} className="text-green-400 underline text-sm">View Details</Link>
                                 </div>
-                              ))}
+                              ))
                             </div>
                           </motion.div>
                         )}
                       </AnimatePresence>
                     </motion.div>
                   )
-                })}
+                })
               </AnimatePresence>
             </div>
           </div>
@@ -578,3 +578,4 @@ export default function HomePage() {
       </footer>
     </main>
   )
+}
