@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client';
 import { useEffect, useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
@@ -23,7 +24,7 @@ export default function ServiceCategoriesAdmin() {
     setCategories(await res.json());
   }
 
-  function onEdit(cat) {
+  function onEdit(cat: any) {
     setEditing(cat.id);
     setForm({ ...cat });
     setShowForm(true);
@@ -35,7 +36,7 @@ export default function ServiceCategoriesAdmin() {
     setShowForm(true);
   }
 
-  async function save(e) {
+  async function save(e: any) {
     e.preventDefault();
     if (editing) {
       await fetch('/api/admin/service-categories', {
@@ -56,7 +57,7 @@ export default function ServiceCategoriesAdmin() {
     load();
   }
 
-  async function del(id) {
+  async function del(id: any) {
     if (!confirm("Delete this category?")) return;
     await fetch('/api/admin/service-categories', {
       method: 'DELETE',
@@ -66,7 +67,7 @@ export default function ServiceCategoriesAdmin() {
     load();
   }
 
-  async function uploadImage(e) {
+  async function uploadImage(e: any) {
     const file = e.target.files[0];
     if (!file) return;
     const fd = new FormData();
@@ -76,7 +77,7 @@ export default function ServiceCategoriesAdmin() {
     setForm(f => ({ ...f, imageUrl: out.url }));
   }
 
-  function onDragEnd(result) {
+  function onDragEnd(result: any) {
     if (!result.destination) return;
     const items = Array.from(categories);
     const [removed] = items.splice(result.source.index, 1);

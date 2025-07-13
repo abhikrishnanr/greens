@@ -7,12 +7,12 @@ import {
   FiSearch, FiEdit, FiTrash2, FiPlus, FiMove, FiArrowLeft
 } from "react-icons/fi";
 
-const WysiwygEditor = dynamic(() => import('../../components/WysiwygEditor'), { ssr: false });
+const WysiwygEditor = dynamic(() => import('../../../components/WysiwygEditor'), { ssr: false });
 
 export default function ServicesAdminPage() {
   const params = useParams();
   const router = useRouter();
-  const categoryId = params.categoryId as string;
+  const categoryId = params?.categoryId as string;
 
   const [services, setServices] = useState([]);
   const [form, setForm] = useState({

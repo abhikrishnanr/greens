@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 
 // ── GET /api/bookings?userId=…&status=… ───────────────────────────────────────
 export async function GET(request: Request) {
@@ -9,14 +9,8 @@ export async function GET(request: Request) {
   const userId = searchParams.get('userId');
   const status = searchParams.get('status'); // optional
 
-  if (!userId) {
-    return NextResponse.json(
-      { success: false, error: 'userId required' },
-      { status: 400 }
-    );
-  }
-
-  const where: any = { userId };
+  const where: any = {};
+  if (userId) where.userId = userId;
   if (status) where.status = status;
 
   try {
@@ -26,6 +20,7 @@ export async function GET(request: Request) {
         service: { select: { id: true, name: true, duration: true } },
         staff:   { select: { id: true, name: true } },
         branch:  { select: { id: true, name: true } },
+        user:    { select: { id: true, name: true } },
       },
       orderBy: { date: 'asc' }
     });
@@ -119,5 +114,31 @@ export async function POST(req: Request) {
       { success: false, error: err.message || 'Could not save booking' },
       { status: 500 }
     );
+  }
+}
+
+export async function PUT(req: Request) {
+  try {
+    const { id, ...data } = await req.json();
+    const booking = await prisma.booking.update({
+      where: { id },
+      data,
+      include: { service: true, staff: true, branch: true, user: true },
+    });
+    return NextResponse.json({ success: true, booking });
+  } catch (err: any) {
+    console.error('PUT /api/bookings error', err);
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const { id } = await req.json();
+    await prisma.booking.delete({ where: { id } });
+    return NextResponse.json({ success: true });
+  } catch (err: any) {
+    console.error('DELETE /api/bookings error', err);
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
