@@ -4,8 +4,9 @@ import { NextResponse } from 'next/server'
 const prisma = new PrismaClient()
 
 export async function GET(req: Request, { params }: { params: { categoryId: string } }) {
+  const { categoryId } = await params
   const services = await prisma.serviceNew.findMany({
-    where: { categoryId: params.categoryId },
+    where: { categoryId },
     include: { tiers: true },
     orderBy: { name: 'asc' },
   })
@@ -13,10 +14,11 @@ export async function GET(req: Request, { params }: { params: { categoryId: stri
 }
 
 export async function POST(req: Request, { params }: { params: { categoryId: string } }) {
+  const { categoryId } = await params
   const data = await req.json()
   const service = await prisma.serviceNew.create({
     data: {
-      categoryId: params.categoryId,
+      categoryId,
       name: data.name,
       caption: data.caption || null,
       description: data.description || null,

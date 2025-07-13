@@ -4,9 +4,10 @@ import { NextResponse } from 'next/server'
 const prisma = new PrismaClient()
 
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
+  const { id } = await params
   const data = await req.json()
   const service = await prisma.serviceNew.update({
-    where: { id: params.id },
+    where: { id },
     data: {
       name: data.name,
       caption: data.caption || null,
@@ -18,7 +19,8 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 }
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
-  await prisma.serviceTier.deleteMany({ where: { serviceId: params.id } })
-  await prisma.serviceNew.delete({ where: { id: params.id } })
+  const { id } = await params
+  await prisma.serviceTier.deleteMany({ where: { serviceId: id } })
+  await prisma.serviceNew.delete({ where: { id } })
   return NextResponse.json({ success: true })
 }

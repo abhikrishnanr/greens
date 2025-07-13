@@ -2,16 +2,18 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(req: Request, { params }: { params: { serviceId: string } }) {
+  const { serviceId } = await params
   const entries = await prisma.servicePriceHistory.findMany({
-    where: { serviceId: params.serviceId },
+    where: { serviceId },
     orderBy: { offerStartDate: 'desc' },
   })
   return NextResponse.json(entries)
 }
 
 export async function POST(req: Request, { params }: { params: { serviceId: string } }) {
+  const { serviceId } = await params
   const data = await req.json()
-  const entry = await prisma.servicePriceHistory.create({ data: { ...data, serviceId: params.serviceId } })
+  const entry = await prisma.servicePriceHistory.create({ data: { ...data, serviceId } })
   return NextResponse.json(entry)
 }
 
