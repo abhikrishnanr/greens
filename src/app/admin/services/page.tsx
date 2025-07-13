@@ -64,6 +64,7 @@ export default function ServicesAdmin() {
   const [editingImage, setEditingImage] = useState(false)
   const [imageServiceId, setImageServiceId] = useState('')
 
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -73,6 +74,7 @@ export default function ServicesAdmin() {
     const data = await res.json()
     setImageForm({ ...imageForm, imageUrl: data.url })
   }
+
 
   const loadCategories = async () => {
     const res = await fetch('/api/admin/service-categories')
@@ -418,7 +420,11 @@ export default function ServicesAdmin() {
               <tbody>
                 {images.map(img => (
                   <tr key={img.id} className="border-t border-gray-700">
+
                     <td>{img.imageUrl ? <img src={img.imageUrl} className="h-10"/> : '—'}</td>
+
+                    <td>{img.imageUrl}</td>
+
                     <td>{img.caption ?? '—'}</td>
                     <td className="space-x-2">
                       <button className="underline" onClick={() => openEditImage(img)}>Edit</button>
@@ -432,6 +438,7 @@ export default function ServicesAdmin() {
             {imageForm.imageUrl !== undefined && (
               <form onSubmit={saveImage} className="space-y-2">
                 <input
+
                   type="file"
                   accept="image/*"
                   onChange={handleImageUpload}
@@ -440,6 +447,14 @@ export default function ServicesAdmin() {
                 {imageForm.imageUrl && (
                   <img src={imageForm.imageUrl} alt="preview" className="h-24 object-cover" />
                 )}
+
+                  className="w-full p-2 rounded bg-gray-800"
+                  placeholder="Image URL"
+                  value={imageForm.imageUrl || ''}
+                  onChange={e => setImageForm({ ...imageForm, imageUrl: e.target.value })}
+                  required
+                />
+
                 <input
                   className="w-full p-2 rounded bg-gray-800"
                   placeholder="Caption"
