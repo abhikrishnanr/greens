@@ -74,7 +74,7 @@ export default function HomePage() {
       if (!map.has(s.main_service_name)) {
         map.set(s.main_service_name, {
           name: s.main_service_name,
-          caption: s.caption,
+          caption: s.main_service_name_description || s.caption,
           image: s.category_image_url,
           tiers: new Set(s.tier ? [s.tier] : [])
         });
@@ -419,7 +419,7 @@ export default function HomePage() {
                                   {TIER_LABELS[svc.tier]?.icon}{TIER_LABELS[svc.tier]?.label}
                                 </span>
                               )}
-                              {svc.offer_price && svc.offer_price < svc.min_price && (
+                        {svc.offer_price && svc.offer_price < svc.original_price && (
                                 <span className="bg-yellow-200 text-yellow-800 px-2 py-0.5 rounded text-xs font-bold">OFFER</span>
                               )}
                             </div>
@@ -430,13 +430,13 @@ export default function HomePage() {
                         </div>
                         <div className="flex items-center justify-between gap-2 mt-2">
                           {/* Price display */}
-                          {(svc.offer_price && svc.offer_price < svc.min_price) ? (
+                            {(svc.offer_price && svc.offer_price < svc.original_price) ? (
                             <div>
-                              <span className="line-through text-sm text-green-100 opacity-60">₹{svc.min_price}</span>
+                              <span className="line-through text-sm text-green-100 opacity-60">₹{svc.original_price}</span>
                               <span className="font-bold text-yellow-200 ml-2">₹{svc.offer_price}</span>
                             </div>
                           ) : (
-                            <span className="font-bold text-yellow-200 text-base">₹{svc.min_price}</span>
+                              <span className="font-bold text-yellow-200 text-base">₹{svc.original_price}</span>
                           )}
                           <div className="flex gap-2">
                             <button
@@ -489,16 +489,16 @@ export default function HomePage() {
                   {TIER_LABELS[expandedService.tier]?.label}
                 </span>
               )}
-              {expandedService.offer_price && expandedService.offer_price < expandedService.min_price && (
+              {expandedService.offer_price && expandedService.offer_price < expandedService.original_price && (
                 <span className="bg-yellow-200 text-yellow-800 px-2 py-0.5 rounded text-xs font-bold">OFFER</span>
               )}
-              {(expandedService.offer_price && expandedService.offer_price < expandedService.min_price) ? (
+              {(expandedService.offer_price && expandedService.offer_price < expandedService.original_price) ? (
                 <>
-                  <span className="text-green-100 line-through opacity-70 ml-2">₹{expandedService.min_price}</span>
+                  <span className="text-green-100 line-through opacity-70 ml-2">₹{expandedService.original_price}</span>
                   <span className="text-yellow-200 font-extrabold text-base">₹{expandedService.offer_price}</span>
                 </>
               ) : (
-                <span className="text-yellow-200 font-bold text-base ml-2">₹{expandedService.min_price}</span>
+                <span className="text-yellow-200 font-bold text-base ml-2">₹{expandedService.original_price}</span>
               )}
             </div>
             <div className="text-xs text-green-100 mb-4 text-center" dangerouslySetInnerHTML={{ __html: expandedService.description }} />

@@ -37,6 +37,7 @@ export async function GET(req: Request) {
     return {
       id: svc.id,
       main_service_name: svc.mainServiceName,
+      main_service_name_description: svc.mainServiceNameDescription ?? null,
       sub_category: svc.subCategory,
       caption: svc.caption,
       description: svc.serviceDescription,
