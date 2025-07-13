@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { v2 as cloudinary, type UploadApiResponse } from "cloudinary";
+import streamifier from "streamifier";
+
+export const runtime = "nodejs";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
@@ -27,10 +30,10 @@ export async function POST(req: NextRequest) {
           resolve(result);
         }
       );
-      stream.end(buffer);
+      streamifier.createReadStream(buffer).pipe(stream);
     });
 
-    return NextResponse.json({ url: uploaded.secure_url });
+    return NextResponse.json({ url: uploaded.secure_url, publicId: uploaded.public_id });
   } catch (err) {
     console.error("Upload error:", err);
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
