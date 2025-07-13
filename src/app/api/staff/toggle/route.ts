@@ -2,11 +2,11 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(req: Request) {
-  const { id, active } = await req.json();
+  const { id, removed } = await req.json();
   try {
     await prisma.user.update({
       where: { id },
-      data: { active },
+      data: { removed },
     });
     return NextResponse.json({ success: true });
   } catch (e) {

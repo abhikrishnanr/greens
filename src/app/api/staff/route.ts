@@ -8,27 +8,15 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const branchId = searchParams.get('branchId');
 
-    if (!branchId) {
-      return Response.json({ success: false, error: 'Missing branchId' }, { status: 400 });
-    }
+    const where: any = { role: 'staff' };
+    if (branchId) where.branchId = branchId;
 
     const staff = await prisma.user.findMany({
-      where: {
-        role: 'STAFF',
-        branchId: branchId,
-        removed: false,
+      where,
+      include: {
+        branch: { select: { id: true, name: true } },
       },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        gender: true,
-        designation: true,
-      },
-      orderBy: {
-        name: 'asc',
-      },
+      orderBy: { name: 'asc' },
     });
 
     return Response.json({ success: true, staff });
