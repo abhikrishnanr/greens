@@ -76,14 +76,14 @@ export default function ServicesAdmin() {
 
   const emptyTier: Partial<Tier> = { id: "", name: "", actualPrice: 0, offerPrice: null, duration: null }
   const [tiers, setTiers] = useState<Tier[]>([])
-  const [tierForm, setTierForm] = useState<Partial<Tier>>(emptyTier)
+  const [tierForm, setTierForm] = useState<Partial<Tier>>({})
   const [showTierModal, setShowTierModal] = useState(false)
   const [editingTier, setEditingTier] = useState(false)
   const [tierServiceId, setTierServiceId] = useState("")
 
   const emptyImage: Partial<Image> = { id: "", imageUrl: "", caption: "" }
   const [images, setImages] = useState<Image[]>([])
-  const [imageForm, setImageForm] = useState<Partial<Image>>(emptyImage)
+  const [imageForm, setImageForm] = useState<Partial<Image>>({})
   const [showImageModal, setShowImageModal] = useState(false)
   const [editingImage, setEditingImage] = useState(false)
   const [imageServiceId, setImageServiceId] = useState("")
@@ -165,6 +165,7 @@ export default function ServicesAdmin() {
   const openTierManager = (svc: Service) => {
     setTierServiceId(svc.id)
     setTiers(svc.tiers)
+    setTierForm({} as Partial<Tier>)
     setShowTierModal(true)
   }
 
@@ -204,7 +205,7 @@ export default function ServicesAdmin() {
     const res = await fetch(`/api/admin/service-tiers/${tierServiceId}`)
     const data = await res.json()
     setTiers(data)
-    setTierForm(emptyTier)
+    setTierForm({} as Partial<Tier>)
     setEditingTier(false)
   }
 
@@ -225,6 +226,7 @@ export default function ServicesAdmin() {
     const res = await fetch(`/api/admin/service-images/${svc.id}`)
     const data = await res.json()
     setImages(data)
+    setImageForm({} as Partial<Image>)
     setShowImageModal(true)
   }
 
@@ -257,7 +259,7 @@ export default function ServicesAdmin() {
     const res = await fetch(`/api/admin/service-images/${imageServiceId}`)
     const data = await res.json()
     setImages(data)
-    setImageForm(emptyImage)
+    setImageForm({} as Partial<Image>)
     setEditingImage(false)
   }
 
@@ -646,7 +648,7 @@ export default function ServicesAdmin() {
                             type="button"
                             variant="outline"
                             onClick={() => {
-                              setTierForm(emptyTier)
+                              setTierForm({} as Partial<Tier>)
                               setEditingTier(false)
                             }}
                           >
@@ -791,7 +793,6 @@ export default function ServicesAdmin() {
                             value={imageForm.imageUrl || ""}
                             onChange={(e) => setImageForm({ ...imageForm, imageUrl: e.target.value })}
                             placeholder="Direct link to image"
-                            required
                           />
                         </div>
 
@@ -810,7 +811,7 @@ export default function ServicesAdmin() {
                             type="button"
                             variant="outline"
                             onClick={() => {
-                              setImageForm(emptyImage)
+                              setImageForm({} as Partial<Image>)
                               setEditingImage(false)
                             }}
                           >
