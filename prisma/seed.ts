@@ -78,17 +78,7 @@ async function main() {
       update: {}
     });
 
-    // 2) Create price history
-    await prisma.servicePriceHistory.create({
-      data: {
-        id: `${id}-${row['Offer Start Date'] || 'base'}`,
-        serviceId: id,
-        actualPrice: parseFloat(row['Actual Price'] || '0'),
-        offerPrice: row['Offer Price'] ? parseFloat(row['Offer Price']) : null,
-        offerStartDate: row['Offer Start Date'] ? new Date(row['Offer Start Date']) : null,
-        offerEndDate: row['Offer End Date'] ? new Date(row['Offer End Date']) : null,
-      }
-    });
+    // Legacy price history removed
 
     // 3) Link service to all branches (global catalog)
     for (const { id: branchId } of branches) {

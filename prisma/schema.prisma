@@ -119,7 +119,6 @@ model Service {
   caption                    String?
 
   bookings      Booking[]
-  priceHistory  ServicePriceHistory[]
   branchService BranchService[]
 
   @@map("service")
@@ -133,17 +132,6 @@ model ServiceImage {
   serviceId String
 }
 
-model ServicePriceHistory {
-  id             String    @id @db.VarChar(191)
-  serviceId      String    @map("serviceId") @db.VarChar(191)
-  service        Service   @relation(fields: [serviceId], references: [id])
-  actualPrice    Float     @map("actual_price")
-  offerPrice     Float?    @map("offer_price")
-  offerStartDate DateTime? @map("offer_start_date") @db.DateTime(3)
-  offerEndDate   DateTime? @map("offer_end_date") @db.DateTime(3)
-
-  @@map("servicepricehistory")
-}
 
 model BranchService {
   branch    Branch  @relation(fields: [branchId], references: [id])
@@ -184,6 +172,8 @@ model ServiceTierPriceHistory {
   tier        ServiceTier @relation(fields: [tierId], references: [id])
   actualPrice Float       @map("actual_price")
   offerPrice  Float?      @map("offer_price")
+  startDate   DateTime    @default(now()) @map("start_date") @db.Timestamp(3)
+  endDate     DateTime?   @map("end_date") @db.Timestamp(3)
   changedAt   DateTime    @default(now()) @map("changed_at") @db.Timestamp(3)
 
   @@map("servicetierpricehistory")
