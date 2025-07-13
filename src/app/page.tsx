@@ -14,12 +14,6 @@ import { MdMale, MdFemale, MdStar, MdDiamond, MdEco } from "react-icons/md"
 import { motion, AnimatePresence } from "framer-motion"
 import Header from "@/components/Header"
 
-function slugify(text: string) {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
-}
 
 // ---- Tier/Type labels & badge colors ----
 const TIER_LABELS = {
@@ -351,7 +345,7 @@ export default function HomePage() {
                                   </div>
                                 </div>
                                 <Link
-                                  href={`/services/${slugify(svc.name)}`}
+                                  href={`/services/${svc.id}`}
                                   prefetch={false}
                                   className="text-green-400 underline text-sm font-semibold hover:text-green-300"
                                 >
