@@ -1,49 +1,39 @@
-'use client';
-import { useEffect, useState } from 'react';
+'use client'
+import { useEffect, useState } from 'react'
 
 interface Booking {
-  id: string;
-  date: string;
-  status: string;
-  service: { name: string };
-  branch: { name: string };
-  user: { name: string };
-  staff?: { name: string } | null;
+  id: string
+  date: string
+  status: string
+  service: { name: string }
+  branch: { name: string }
+  user: { name: string }
+  staff?: { name: string } | null
 }
 
-export default function AdminBookings() {
-  const [bookings, setBookings] = useState<Booking[]>([]);
+export default function AppointmentPage() {
+  const [bookings, setBookings] = useState<Booking[]>([])
 
   const load = async () => {
-    const res = await fetch('/api/bookings');
-    const data = await res.json();
-    if (data.success) setBookings(data.bookings);
-  };
+    const res = await fetch('/api/bookings')
+    const data = await res.json()
+    if (data.success) setBookings(data.bookings)
+  }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load() }, [])
 
   const update = async (id: string, status: string) => {
     await fetch('/api/bookings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, status })
-    });
-    load();
-  };
-
-  const del = async (id: string) => {
-    if (!confirm('Delete booking?')) return;
-    await fetch('/api/bookings', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id })
-    });
-    load();
-  };
+      body: JSON.stringify({ id, status }),
+    })
+    load()
+  }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">All Bookings</h1>
+    <div>
+      <h1 className="text-2xl font-bold mb-4">Appointment Requests</h1>
       <table className="w-full text-sm text-left">
         <thead>
           <tr>
@@ -51,7 +41,6 @@ export default function AdminBookings() {
             <th>Customer</th>
             <th>Service</th>
             <th>Status</th>
-            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -72,13 +61,10 @@ export default function AdminBookings() {
                   <option value="cancelled">cancelled</option>
                 </select>
               </td>
-              <td>
-                <button className="underline text-red-400" onClick={() => del(b.id)}>Delete</button>
-              </td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
-  );
+  )
 }
