@@ -21,10 +21,25 @@ export async function POST(req: Request, { params }: { params: { serviceId: stri
     },
   })
 
+
   await prisma.serviceNew.updateMany({
     where: { id: serviceId, OR: [{ imageUrl: null }, { imageUrl: "" }] },
     data: { imageUrl: data.imageUrl },
   })
+
+
+  const svc = await prisma.serviceNew.findUnique({
+    where: { id: serviceId },
+    select: { imageUrl: true },
+  })
+
+  if (!svc?.imageUrl) {
+    await prisma.serviceNew.update({
+      where: { id: serviceId },
+      data: { imageUrl: data.imageUrl },
+    })
+  }
+
 
   return NextResponse.json(image)
 }
