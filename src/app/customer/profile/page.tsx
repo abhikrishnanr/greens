@@ -4,6 +4,7 @@ import React, { useState, useEffect, FormEvent } from 'react';
 import { useSession, signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Toaster, toast } from 'sonner';
+import LoadingOverlay from '@/components/LoadingOverlay';
 
 const MENU = [
   { label: 'My Profile', icon: 'ri-user-3-line', path: '/customer/profile' },
@@ -108,16 +109,10 @@ export default function CustomerProfile() {
     }
   }
 
-  if (status === 'loading' || loading) {
-    return (
-      <div className="min-h-screen bg-[#052b1e] flex items-center justify-center">
-        <p className="text-primary">Loading profile…</p>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#052b1e] flex">
+      <LoadingOverlay show={status === 'loading' || loading} />
       <Toaster richColors position="top-center" />
 
       {/* Sidebar */}

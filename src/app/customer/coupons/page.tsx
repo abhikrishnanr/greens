@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useSession, signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Toaster, toast } from 'sonner';
+import LoadingOverlay from '@/components/LoadingOverlay';
 
 interface Coupon {
   id: string;
@@ -40,6 +41,7 @@ export default function MyCouponsPage() {
 
   return (
     <div className="min-h-screen bg-[#052b1e] flex">
+      <LoadingOverlay show={loading} />
       <Toaster richColors position="top-center" />
 
       {/* reuse same Sidebar component as other pages */}

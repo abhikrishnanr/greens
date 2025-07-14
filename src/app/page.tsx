@@ -13,6 +13,7 @@ import {
 import { MdMale, MdFemale, MdStar, MdDiamond, MdEco } from "react-icons/md"
 import { motion, AnimatePresence } from "framer-motion"
 import Header from "@/components/Header"
+import LoadingOverlay from '@/components/LoadingOverlay'
 
 
 // ---- Tier/Type labels & badge colors ----
@@ -77,6 +78,7 @@ export default function HomePage() {
 
   return (
     <main className="bg-gray-900 min-h-screen font-sans text-gray-100">
+      <LoadingOverlay show={loading} />
       {/* HEADER */}
       <Header cartCount={cart.length} />
 
