@@ -129,7 +129,13 @@ export default function TierPriceHistoryPage() {
               <td className="px-3 py-2">{row.categoryName}</td>
               <td className="px-3 py-2">{row.serviceName}</td>
               <td className="px-3 py-2">{row.tierName}</td>
-              <td className="px-3 py-2">{row.current ? row.current.actualPrice : '—'}</td>
+              <td className="px-3 py-2">
+                {row.current ? (
+                  row.current.actualPrice
+                ) : (
+                  <span className="text-red-600">Not set</span>
+                )}
+              </td>
               <td className="px-3 py-2">{row.current?.endDate ? new Date(row.current.endDate).toLocaleDateString() : '—'}</td>
               <td className="px-3 py-2">{row.upcoming ? row.upcoming.actualPrice : '—'}</td>
               <td className="px-3 py-2">{row.upcoming?.startDate ? new Date(row.upcoming.startDate).toLocaleDateString() : '—'}</td>
