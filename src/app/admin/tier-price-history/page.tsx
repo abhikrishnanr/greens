@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { Pencil, Trash2 } from 'lucide-react'
+import { Label } from '@/components/ui/label'
 
 interface TierRow {
   id: string
@@ -154,36 +155,54 @@ export default function TierPriceHistoryPage() {
           <div className="bg-white rounded shadow w-full max-w-xl p-4 space-y-4">
             <h2 className="text-lg font-semibold">Edit Price History</h2>
             <form onSubmit={save} className="space-y-2">
-              <input
-                type="number"
-                className="w-full p-2 rounded border"
-                placeholder="Actual price"
-                value={form.actualPrice ?? 0}
-                onChange={e => setForm({ ...form, actualPrice: parseFloat(e.target.value) })}
-                required
-              />
-              <input
-                type="number"
-                className="w-full p-2 rounded border"
-                placeholder="Offer price (optional)"
-                value={form.offerPrice ?? ''}
-                onChange={e => setForm({ ...form, offerPrice: e.target.value ? parseFloat(e.target.value) : null })}
-              />
-              <input
-                type="date"
-                className="w-full p-2 rounded border"
-                value={form.startDate || ''}
-                onChange={e => setForm({ ...form, startDate: e.target.value })}
-                required
-              />
-              <p className="text-xs text-gray-500">Start date when this price becomes effective</p>
-              <input
-                type="date"
-                className="w-full p-2 rounded border"
-                value={form.endDate || ''}
-                onChange={e => setForm({ ...form, endDate: e.target.value || null })}
-              />
-              <p className="text-xs text-gray-500">Leave blank if this price has no planned end date</p>
+              <div className="space-y-1">
+                <Label htmlFor="actual">Actual Price</Label>
+                <input
+                  id="actual"
+                  type="number"
+                  className="w-full p-2 rounded border"
+                  placeholder="Enter actual price"
+                  value={form.actualPrice ?? 0}
+                  onChange={e => setForm({ ...form, actualPrice: parseFloat(e.target.value) })}
+                  required
+                />
+                <p className="text-xs text-gray-500">Base price for this tier</p>
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="offer">Offer Price</Label>
+                <input
+                  id="offer"
+                  type="number"
+                  className="w-full p-2 rounded border"
+                  placeholder="Optional discount price"
+                  value={form.offerPrice ?? ''}
+                  onChange={e => setForm({ ...form, offerPrice: e.target.value ? parseFloat(e.target.value) : null })}
+                />
+                <p className="text-xs text-gray-500">Leave blank if no discount</p>
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="start">Start Date</Label>
+                <input
+                  id="start"
+                  type="date"
+                  className="w-full p-2 rounded border"
+                  value={form.startDate || ''}
+                  onChange={e => setForm({ ...form, startDate: e.target.value })}
+                  required
+                />
+                <p className="text-xs text-gray-500">Start date when this price becomes effective</p>
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="end">End Date</Label>
+                <input
+                  id="end"
+                  type="date"
+                  className="w-full p-2 rounded border"
+                  value={form.endDate || ''}
+                  onChange={e => setForm({ ...form, endDate: e.target.value || null })}
+                />
+                <p className="text-xs text-gray-500">Leave blank if this price has no planned end date</p>
+              </div>
               <div className="flex gap-2 justify-end pt-2">
                 <button type="button" className="px-3 py-1 rounded border" onClick={() => { setSelected(''); setEntries([]) }}>
                   Close

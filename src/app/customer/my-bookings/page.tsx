@@ -4,6 +4,7 @@ import { useSession, signIn } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Toaster, toast } from 'sonner';
+import LoadingOverlay from '@/components/LoadingOverlay';
 
 export default function MyBookings() {
   const { data: session, status } = useSession();
@@ -33,6 +34,7 @@ export default function MyBookings() {
 
   return (
     <div className="min-h-screen bg-[#052b1e] flex">
+      <LoadingOverlay show={loading} />
       <Toaster richColors position="top-center" />
 
       {/* Sidebar */}
