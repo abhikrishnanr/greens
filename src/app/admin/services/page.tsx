@@ -34,9 +34,8 @@ interface Category {
 interface Tier {
   id: string
   name: string
-  actualPrice: number
-  offerPrice?: number | null
   duration?: number | null
+  currentPrice?: { actualPrice: number; offerPrice?: number | null } | null
 }
 
 interface Image {
@@ -74,7 +73,7 @@ export default function ServicesAdmin() {
     setServiceForm({ ...serviceForm, imageUrl: data.url })
   }
 
-  const emptyTier: Partial<Tier> = { id: "", name: "", actualPrice: 0, offerPrice: null, duration: null }
+  const emptyTier: Partial<Tier> = { id: "", name: "", duration: null }
   const [tiers, setTiers] = useState<Tier[]>([])
   const [tierForm, setTierForm] = useState<Partial<Tier>>({})
   const [showTierModal, setShowTierModal] = useState(false)
@@ -162,9 +161,11 @@ export default function ServicesAdmin() {
     loadServices()
   }
 
-  const openTierManager = (svc: Service) => {
+  const openTierManager = async (svc: Service) => {
     setTierServiceId(svc.id)
-    setTiers(svc.tiers)
+    const res = await fetch(`/api/admin/service-tiers/${svc.id}`)
+    const data = await res.json()
+    setTiers(data)
     setTierForm({} as Partial<Tier>)
     setShowTierModal(true)
   }
@@ -184,9 +185,6 @@ export default function ServicesAdmin() {
     const body = {
       id: tierForm.id,
       name: tierForm.name,
-      actualPrice: Number(tierForm.actualPrice),
-      offerPrice:
-        tierForm.offerPrice !== null && tierForm.offerPrice !== undefined ? Number(tierForm.offerPrice) : null,
       duration: tierForm.duration ? Number(tierForm.duration) : null,
     }
     if (editingTier) {
@@ -393,7 +391,7 @@ export default function ServicesAdmin() {
         {showServiceForm && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border-0">
-              <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-slate-800">
                 <CardTitle className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <Settings className="h-5 w-5" />
@@ -403,7 +401,7 @@ export default function ServicesAdmin() {
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowServiceForm(false)}
-                    className="text-white hover:bg-white/20"
+                    className="text-slate-800 hover:bg-white/20"
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -494,7 +492,7 @@ export default function ServicesAdmin() {
         {showTierModal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border-0">
-              <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-600 text-white">
+              <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-600 text-slate-800">
                 <CardTitle className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <DollarSign className="h-5 w-5" />
@@ -504,7 +502,7 @@ export default function ServicesAdmin() {
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowTierModal(false)}
-                    className="text-white hover:bg-white/20"
+                    className="text-slate-800 hover:bg-white/20"
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -554,13 +552,19 @@ export default function ServicesAdmin() {
                             <div className="flex items-center gap-2">
                               <DollarSign className="h-3 w-3 text-slate-500" />
                               <span className="text-slate-600">Current Price:</span>
-                              <span className="font-medium">
-                                ₹{tier.offerPrice ?? tier.actualPrice}
-                              </span>
-                              {tier.offerPrice && (
-                                <Badge variant="secondary" className="text-xs">
-                                  MRP ₹{tier.actualPrice}
-                                </Badge>
+                              {tier.currentPrice ? (
+                                <span className="font-medium">
+                                  ₹{tier.currentPrice.offerPrice ?? tier.currentPrice.actualPrice}
+                                </span>
+                              ) : (
+                                <span className="text-red-600 font-medium">
+                                  Not set
+                                </span>
+                              )}
+                              {!tier.currentPrice && (
+                                <a href="/admin/tier-price-history" className="text-blue-600 underline ml-2 text-xs">
+                                  Update price
+                                </a>
                               )}
                             </div>
                             {tier.duration && (
@@ -598,36 +602,6 @@ export default function ServicesAdmin() {
                           />
                         </div>
 
-                        <div className="space-y-2">
-                          <Label htmlFor="actualPrice">Actual Price ($)</Label>
-                          <Input
-                            id="actualPrice"
-                            type="number"
-                            step="0.01"
-                            value={tierForm.actualPrice ?? 0}
-                            onChange={(e) =>
-                              setTierForm({ ...tierForm, actualPrice: Number.parseFloat(e.target.value) })
-                            }
-                            required
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="offerPrice">Offer Price ($)</Label>
-                          <Input
-                            id="offerPrice"
-                            type="number"
-                            step="0.01"
-                            value={tierForm.offerPrice ?? ""}
-                            onChange={(e) =>
-                              setTierForm({
-                                ...tierForm,
-                                offerPrice: e.target.value ? Number.parseFloat(e.target.value) : null,
-                              })
-                            }
-                            placeholder="Optional discount price"
-                          />
-                        </div>
 
                         <div className="space-y-2">
                           <Label htmlFor="duration">Duration (minutes)</Label>
