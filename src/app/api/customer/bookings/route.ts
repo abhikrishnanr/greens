@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { branchId, preferredDate, items } = await req.json();
+  const { branchId, preferredDate, items, notes } = await req.json();
   if (!branchId || !preferredDate || !Array.isArray(items) || items.length === 0) {
     return NextResponse.json(
       { success: false, error: 'branchId, date and items are required' },
@@ -47,6 +47,7 @@ export async function POST(req: NextRequest) {
             preferredDate: new Date(preferredDate),
             date: null,
             paid: false,
+            notes: notes || null,
           },
         })
       )

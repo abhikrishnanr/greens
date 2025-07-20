@@ -40,7 +40,7 @@ export async function GET(request: Request) {
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    const { preferredDate, date, customerName, customerPhone, customerGender, items, branchId, coupon } = await req.json();
+    const { preferredDate, date, customerName, customerPhone, customerGender, items, branchId, coupon, notes } = await req.json();
 
     let customer;
 
@@ -101,6 +101,7 @@ export async function POST(req: Request) {
             date: it.date && it.slot ? new Date(`${it.date}T${it.slot}:00`) : null,
             paid: false,
             coupon: coupon || null,
+            notes: notes || null,
           },
         })
       )
