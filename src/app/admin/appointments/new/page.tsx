@@ -33,29 +33,25 @@ export default function NewAppointment() {
       });
   }, []);
 
+  const loadBranchData = (id: string) => {
+    fetch(`/api/branch/${encodeURIComponent(id)}/data`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success) {
+          setServices(d.services);
+          setStaff(d.staff);
+        }
+      })
+      .catch(() => {});
+  };
+
   useEffect(() => {
     if (!branch) {
       setServices([]);
       setStaff([]);
-      return;
+    } else {
+      loadBranchData(branch);
     }
-    const current = branch;
-    fetch(`/api/services?branchId=${encodeURIComponent(current)}`)
-      .then((r) => r.json())
-      .then((d) => {
-        if (current === branch && d.success !== false) {
-          setServices(d.services ?? d);
-        }
-      })
-      .catch(() => {});
-    fetch(`/api/staff?branchId=${encodeURIComponent(current)}`)
-      .then((r) => r.json())
-      .then((d) => {
-        if (current === branch && d.success !== false) {
-          setStaff(d.staff ?? d);
-        }
-      })
-      .catch(() => {});
   }, [branch]);
 
   const submit = async (e: FormEvent<HTMLFormElement>) => {
