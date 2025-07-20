@@ -57,8 +57,6 @@ interface StaffMember { id: string; name: string }
 type SelectedService = {
   id: string;
   service: Service;
-  staff: string;
-  slot: string;
   price: number;
   duration: number;
 };
@@ -76,9 +74,6 @@ export default function BookingPage() {
   const [date, setDate]                   = useState('');
   const [serviceQuery, setServiceQuery]   = useState('');
   const [selServiceId, setSelServiceId]   = useState('');
-  const [selStaff, setSelStaff]           = useState('');
-  const [selSlot, setSelSlot]             = useState('');
-  const [availableSlots, setAvailableSlots] = useState<{ time: string; available: boolean }[]>([]);
   const [selected, setSelected]           = useState<SelectedService[]>([]);
 
   // Coupon state
@@ -154,14 +149,14 @@ export default function BookingPage() {
 
   // Add service
   const handleAdd = () => {
-    if (!selServiceId || !selSlot) return;
+    if (!selServiceId) return;
     const svc = services.find(s => s.id === selServiceId)!;
     const price = getCurrentPrice(svc.priceHistory, date||getToday());
     setSelected(prev => [
       ...prev,
-      { id: crypto.randomUUID(), service: svc, staff: selStaff, slot: selSlot, price, duration: svc.duration }
+      { id: crypto.randomUUID(), service: svc, price, duration: svc.duration }
     ]);
-    setServiceQuery(''); setSelServiceId(''); setSelStaff(''); setSelSlot('');
+    setServiceQuery(''); setSelServiceId('');
   };
 
   // Compute totals
@@ -196,11 +191,9 @@ export default function BookingPage() {
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         branchId,
-        date,
+        preferredDate: date,
         items: selected.map(s=>({
-          serviceId: s.service.id,
-          staffId:   s.staff||undefined,
-          slot:      s.slot
+          serviceId: s.service.id
         })),
         couponCode: appliedCoupon?.code
       })
@@ -276,38 +269,10 @@ export default function BookingPage() {
                   )}
                 </div>
 
-                <label className="text-primary">Staff</label>
-                <select
-                  className={inputClass + ' mb-2'}
-                  value={selStaff}
-                  onChange={e=>setSelStaff(e.target.value)}
-                >
-                  <option value="">Any</option>
-                  {staff.map(s=>(
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                  ))}
-                </select>
-
-                <label className="text-primary">Time Slot</label>
-                <div className="grid grid-cols-3 gap-2 mb-2">
-                  {availableSlots.map(slot=>(
-                    <button
-                      key={slot.time}
-                      disabled={!slot.available}
-                      className={`rounded py-1 text-sm ${
-                        selSlot===slot.time ? 'bg-primary text-black':'bg-gray-800 text-white'
-                      } ${!slot.available?'opacity-50 cursor-not-allowed':''}`}
-                      onClick={()=>setSelSlot(slot.time)}
-                    >
-                      {slot.time}
-                    </button>
-                  ))}
-                </div>
-
                 <button
                   className="bg-primary text-black px-4 py-2 rounded font-semibold"
                   onClick={handleAdd}
-                  disabled={!selServiceId||!selSlot}
+                  disabled={!selServiceId}
                 >
                   Add Service
                 </button>
@@ -322,9 +287,6 @@ export default function BookingPage() {
                   >
                     <div>
                       <div className="font-semibold text-primary">{item.service.name}</div>
-                      <div className="text-sm text-secondary">
-                        {item.slot}{item.staff&&` · ${staff.find(x=>x.id===item.staff)?.name}`}
-                      </div>
                       <div className="text-sm text-secondary">
                         ₹{item.price} · {item.duration} mins
                       </div>

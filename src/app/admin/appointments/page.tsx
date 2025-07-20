@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react'
 
 interface Booking {
   id: string
-  date: string
+  date: string | null
+  preferredDate: string | null
   status: string
   service: { name: string }
   branch: { name: string }
@@ -22,11 +23,11 @@ export default function AppointmentPage() {
 
   useEffect(() => { load() }, [])
 
-  const update = async (id: string, status: string) => {
+  const update = async (id: string, status: string, date?: string) => {
     await fetch('/api/bookings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, status }),
+      body: JSON.stringify({ id, status, date: date ? new Date(date) : undefined }),
     })
     load()
   }
@@ -37,7 +38,8 @@ export default function AppointmentPage() {
       <table className="w-full text-sm text-left bg-white rounded shadow border">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-3 py-2">Date</th>
+            <th className="px-3 py-2">Preferred Date</th>
+            <th className="px-3 py-2">Scheduled Time</th>
             <th className="px-3 py-2">Customer</th>
             <th className="px-3 py-2">Service</th>
             <th className="px-3 py-2">Status</th>
@@ -46,7 +48,15 @@ export default function AppointmentPage() {
         <tbody>
           {bookings.map(b => (
             <tr key={b.id} className="border-t">
-              <td className="px-3 py-2">{new Date(b.date).toLocaleString()}</td>
+              <td className="px-3 py-2">{b.preferredDate ? new Date(b.preferredDate).toLocaleDateString() : '—'}</td>
+              <td className="px-3 py-2">
+                <input
+                  type="datetime-local"
+                  className="p-1 border rounded"
+                  value={b.date ? b.date.slice(0,16) : ''}
+                  onChange={e => update(b.id, 'confirmed', e.target.value)}
+                />
+              </td>
               <td className="px-3 py-2">{b.user?.name || '—'}</td>
               <td className="px-3 py-2">{b.service.name}</td>
               <td>

@@ -7,10 +7,12 @@ import { authOptions } from '@/lib/auth';
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get('userId');
+  const staffId = searchParams.get('staffId');
   const status = searchParams.get('status'); // optional
 
   const where: any = {};
   if (userId) where.userId = userId;
+  if (staffId) where.staffId = staffId;
   if (status) where.status = status;
 
   try {
@@ -38,7 +40,7 @@ export async function GET(request: Request) {
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    const { date, customerName, customerPhone, customerGender, items, branchId, coupon } = await req.json();
+    const { preferredDate, date, customerName, customerPhone, customerGender, items, branchId, coupon } = await req.json();
 
     let customer;
 
@@ -87,7 +89,7 @@ export async function POST(req: Request) {
 
     // Create booking(s) for each item
     const created = await Promise.all(
-      items.map((it: { serviceId: string; staffId?: string; slot: string; date?: string }) =>
+      items.map((it: { serviceId: string; staffId?: string; slot?: string; date?: string }) =>
         prisma.booking.create({
           data: {
             userId: customer.id,
@@ -95,9 +97,8 @@ export async function POST(req: Request) {
             branchId,
             staffId: it.staffId || null,
             status: 'pending',
-            date: it.date 
-              ? new Date(`${it.date}T${it.slot}:00`) 
-              : new Date(`${date}T${it.slot}:00`),
+            preferredDate: preferredDate ? new Date(preferredDate) : (date ? new Date(date) : null),
+            date: it.date && it.slot ? new Date(`${it.date}T${it.slot}:00`) : null,
             paid: false,
             coupon: coupon || null,
           },
@@ -118,10 +119,10 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
-    const { id, ...data } = await req.json();
+    const { id, date, ...data } = await req.json();
     const booking = await prisma.booking.update({
       where: { id },
-      data,
+      data: { ...data, ...(date ? { date: new Date(date) } : {}) },
       include: { service: true, staff: true, branch: true, user: true },
     });
     return NextResponse.json({ success: true, booking });

@@ -80,11 +80,12 @@ model Booking {
   serviceId String  @db.VarChar(191)
   service   Service @relation(fields: [serviceId], references: [id])
 
-  status    String   @default("pending") @db.VarChar(191)
-  date      DateTime @db.DateTime(3)
-  paid      Boolean  @default(false)
-  createdAt DateTime @default(now()) @db.Timestamp(3)
-  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(3)
+  preferredDate DateTime? @db.DateTime(3)
+  status        String    @default("pending") @db.VarChar(191)
+  date          DateTime? @db.DateTime(3)
+  paid          Boolean   @default(false)
+  createdAt     DateTime  @default(now()) @db.Timestamp(3)
+  updatedAt     DateTime  @default(now()) @updatedAt @db.Timestamp(3)
 }
 
 model ServiceCategory {
@@ -131,7 +132,6 @@ model ServiceImage {
   service   ServiceNew @relation(fields: [serviceId], references: [id])
   serviceId String
 }
-
 
 model BranchService {
   branch    Branch  @relation(fields: [branchId], references: [id])

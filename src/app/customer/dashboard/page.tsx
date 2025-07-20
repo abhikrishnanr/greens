@@ -59,12 +59,14 @@ export default function CustomerDashboard() {
   }, [status, session]);
 
   const today = new Date().toISOString().slice(0, 10);
-  const upcoming = bookings.filter(b =>
-    b.date.slice(0, 10) >= today && ['pending', 'confirmed'].includes(b.status)
-  );
-  const past = bookings.filter(b =>
-    b.date.slice(0, 10) < today || ['completed', 'cancelled'].includes(b.status)
-  );
+  const upcoming = bookings.filter(b => {
+    const d = b.date || b.preferredDate;
+    return d.slice(0,10) >= today && ['pending','confirmed'].includes(b.status);
+  });
+  const past = bookings.filter(b => {
+    const d = b.date || b.preferredDate;
+    return d.slice(0,10) < today || ['completed','cancelled'].includes(b.status);
+  });
 
   return (
     <div className="min-h-screen bg-[#052b1e] flex">
@@ -167,7 +169,7 @@ export default function CustomerDashboard() {
                 >
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-primary font-bold text-lg">
-                      {new Date(booking.date).toLocaleDateString('en-IN', {
+                      {new Date((booking.date||booking.preferredDate)).toLocaleDateString('en-IN', {
                         day: '2-digit', month: 'short', year: 'numeric'
                       })}
                     </span>
@@ -184,6 +186,11 @@ export default function CustomerDashboard() {
                   {booking.staff && (
                     <p className="text-sm text-secondary">Staff: {booking.staff.name}</p>
                   )}
+
+                  <p className="text-sm text-secondary">
+                    Preferred: {new Date(booking.preferredDate).toLocaleDateString('en-IN')}
+                    {booking.date && ` · Scheduled at ${new Date(booking.date).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`}
+                  </p>
 
                   {/* Payment Status */}
                   <p className="text-sm mt-2">
