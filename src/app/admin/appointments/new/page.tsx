@@ -19,7 +19,7 @@ export default function NewAppointment() {
       .then((d) => {
         if (d.success) {
           setBranches(d.branches)
-          if (d.branches.length === 1) setBranch(d.branches[0].id)
+          if (d.branches.length === 1) setBranch(String(d.branches[0].id))
         }
       })
   }, [])
@@ -60,21 +60,27 @@ export default function NewAppointment() {
         <label className="block mb-1">Branch</label>
         <select name="branchId" value={branch} onChange={e => setBranch(e.target.value)} required className="p-2 border rounded w-full">
           <option value="">Select branch</option>
-          {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+          {branches.map(b => (
+            <option key={b.id} value={String(b.id)}>{b.name}</option>
+          ))}
         </select>
       </div>
       <div>
         <label className="block mb-1">Service</label>
         <select name="serviceId" required className="p-2 border rounded w-full">
           <option value="">Select service</option>
-          {services.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+          {services.map(s => (
+            <option key={s.id} value={String(s.id)}>{s.name}</option>
+          ))}
         </select>
       </div>
       <div>
         <label className="block mb-1">Staff (optional)</label>
         <select name="staffId" className="p-2 border rounded w-full">
           <option value="">Any</option>
-          {staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+          {staff.map(s => (
+            <option key={s.id} value={String(s.id)}>{s.name}</option>
+          ))}
         </select>
       </div>
       <div>
