@@ -14,8 +14,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { branchId, date, items } = await req.json();
-  if (!branchId || !date || !Array.isArray(items) || items.length === 0) {
+  const { branchId, preferredDate, items } = await req.json();
+  if (!branchId || !preferredDate || !Array.isArray(items) || items.length === 0) {
     return NextResponse.json(
       { success: false, error: 'branchId, date and items are required' },
       { status: 400 }
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
 
     // create bookings
     const created = await Promise.all(
-      items.map((it: { serviceId: string; staffId?: string; slot: string }) =>
+      items.map((it: { serviceId: string; staffId?: string }) =>
         prisma.booking.create({
           data: {
             userId: customer.id,
@@ -44,7 +44,8 @@ export async function POST(req: NextRequest) {
             serviceId: it.serviceId,
             staffId: it.staffId || null,
             status: 'pending',
-            date: new Date(`${date}T${it.slot}:00`),
+            preferredDate: new Date(preferredDate),
+            date: null,
             paid: false,
           },
         })
