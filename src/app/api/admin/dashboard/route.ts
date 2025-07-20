@@ -3,13 +3,12 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
-    const [bookings, services, staff, branches] = await Promise.all([
-      prisma.booking.count(),
+    const [services, staff, branches] = await Promise.all([
       prisma.service.count(),
       prisma.user.count({ where: { role: 'STAFF', removed: false } }),
       prisma.branch.count(),
     ])
-    return NextResponse.json({ bookings, services, staff, branches })
+    return NextResponse.json({ services, staff, branches })
   } catch (err: any) {
     console.error('dashboard api error', err)
     return NextResponse.json({ error: 'failed' }, { status: 500 })

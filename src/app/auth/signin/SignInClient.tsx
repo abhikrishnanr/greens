@@ -20,7 +20,7 @@ export default function SignInClient() {
 
   const router = useRouter()
   const params = useSearchParams()
-  const callbackUrl = params.get('callbackUrl') || '/customer/dashboard'
+  const callbackUrl = params.get('callbackUrl') || '/'
 
   useEffect(() => {
     getProviders().then((provs: any) => setProviders(provs))
