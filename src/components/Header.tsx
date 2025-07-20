@@ -74,7 +74,7 @@ export default function Header() {
           {items.length > 0 && (
             <motion.button
               className="relative hover:text-green-400 transition-colors"
-              onClick={() => alert("Go to cart page!")}
+              onClick={() => (window.location.href = '/cart')}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
