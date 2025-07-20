@@ -86,6 +86,7 @@ export default function BookingPage() {
     minAmount?: number;
   } | null>(null);
   const [couponError, setCouponError]     = useState('');
+  const [notes, setNotes]                 = useState('');
 
   // Require login
   useEffect(() => {
@@ -195,7 +196,8 @@ export default function BookingPage() {
         items: selected.map(s=>({
           serviceId: s.service.id
         })),
-        couponCode: appliedCoupon?.code
+        couponCode: appliedCoupon?.code,
+        notes
       })
     });
     const d = await res.json();
@@ -324,21 +326,32 @@ export default function BookingPage() {
                       </button>
                     </div>
                     {couponError && <p className="text-red-400 mt-1">{couponError}</p>}
-                    {appliedCoupon && (
-                      <p className="text-green-400 mt-1">
-                        Applied {appliedCoupon.code}: −
-                        {appliedCoupon.discountType==='percent'
-                          ? `${appliedCoupon.discountValue}%`
-                          : `₹${appliedCoupon.discountValue}`}
-                      </p>
-                    )}
-                  </div>
+                  {appliedCoupon && (
+                    <p className="text-green-400 mt-1">
+                      Applied {appliedCoupon.code}: −
+                      {appliedCoupon.discountType==='percent'
+                        ? `${appliedCoupon.discountValue}%`
+                        : `₹${appliedCoupon.discountValue}`}
+                    </p>
+                  )}
+                </div>
 
-                  <div className="mt-6 text-right">
-                    <button
-                      className="bg-primary text-black px-6 py-2 rounded font-semibold"
-                      onClick={handleConfirm}
-                    >
+                {/* Notes */}
+                <div className="mt-4">
+                  <label className="text-primary">Notes</label>
+                  <textarea
+                    className={inputClass + ' h-24'}
+                    value={notes}
+                    onChange={e=>setNotes(e.target.value)}
+                    placeholder="Any special requests? (optional)"
+                  />
+                </div>
+
+                <div className="mt-6 text-right">
+                  <button
+                    className="bg-primary text-black px-6 py-2 rounded font-semibold"
+                    onClick={handleConfirm}
+                  >
                       Confirm Booking
                     </button>
                   </div>

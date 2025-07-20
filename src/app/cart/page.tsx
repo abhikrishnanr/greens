@@ -27,6 +27,7 @@ export default function CartPage() {
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string, desc: string, discount: number } | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [notes, setNotes] = useState("");
 
   function isDayDisabled(d: Date) {
     // Disable past dates and Tuesdays
@@ -72,6 +73,7 @@ export default function CartPage() {
   function handleConfirmBooking() {
     setShowConfirmModal(true);
     clear();
+    setNotes("");
   }
   function handleLogout() {
     logout();
@@ -247,6 +249,17 @@ export default function CartPage() {
                     Coupon <b>{appliedCoupon.code}</b> applied!
                   </div>
                 )}
+              </div>
+
+              {/* Notes */}
+              <div className="my-4">
+                <label className="block font-semibold mb-1 text-green-100">Notes</label>
+                <textarea
+                  className="w-full rounded-md p-2 bg-[#12281a] border border-lime-700 text-white h-24"
+                  placeholder="Any special requests? (optional)"
+                  value={notes}
+                  onChange={e=>setNotes(e.target.value)}
+                />
               </div>
 
               <button
