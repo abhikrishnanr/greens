@@ -1,5 +1,7 @@
 'use client'
 import React, { useState } from "react";
+import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FiTrash, FiLogOut } from "react-icons/fi";
@@ -7,17 +9,14 @@ import { MdDashboard, MdCheckCircle } from "react-icons/md";
 import Header from "@/components/Header";
 
 const holidays = [2]; // 2: Tuesday (holiday)
-const dummyCart = [
-  { id: 'svc_hydrafacial', name: "Hydra Facial Deluxe", price: 2500, desc: "Advanced hydration and deep cleansing facial." },
-  { id: 'svc_haircut', name: "Premium Haircut", price: 600, desc: "Precision haircut by senior stylist." },
-];
 const availableCoupons = [
   { code: "WELCOME100", desc: "₹100 off for new customers!", discount: 100 },
   { code: "FREESHINE", desc: "Get a free Shine Serum with Hydra Facial.", discount: 0 }
 ];
 
 export default function CartPage() {
-  const [cart, setCart] = useState(dummyCart);
+  const { items: cart, remove, clear } = useCart();
+  const { logout } = useAuth();
   const [date, setDate] = useState<Date | null>(null);
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
@@ -37,7 +36,7 @@ export default function CartPage() {
   }
 
   function handleRemove(id: string) {
-    setCart(c => c.filter(x => x.id !== id));
+    remove(id);
   }
   function handleSendOtp() {
     if (!/^\d{10}$/.test(mobile)) {
@@ -72,8 +71,10 @@ export default function CartPage() {
   }
   function handleConfirmBooking() {
     setShowConfirmModal(true);
+    clear();
   }
   function handleLogout() {
+    logout();
     window.location.href = "/";
   }
   function gotoDashboard() {
@@ -86,7 +87,7 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#05241a] via-[#03150d] to-[#0f3b27] text-white pb-12">
-      <Header cartCount={cart.length} />
+      <Header />
 
       <main className="max-w-lg mx-auto p-2 flex flex-col gap-6">
         {/* CART */}

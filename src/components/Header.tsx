@@ -4,9 +4,13 @@ import Link from "next/link"
 import { FiShoppingCart, FiMenu, FiX } from "react-icons/fi"
 import { motion, AnimatePresence } from "framer-motion"
 import { useState } from "react"
+import { useCart } from "@/contexts/CartContext"
+import { useAuth } from "@/contexts/AuthContext"
 
-export default function Header({ cartCount }) {
+export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { items } = useCart()
+  const { user, logout } = useAuth()
 
   return (
     <header className="bg-gray-900/90 backdrop-blur-xl text-gray-100 py-4 shadow-lg sticky top-0 z-50 border-b border-green-400/20">
@@ -37,12 +41,12 @@ export default function Header({ cartCount }) {
             <li>
               <motion.button
                 className="relative hover:text-green-400 transition-colors"
-                onClick={() => alert("Go to cart page!")}
+                onClick={() => (window.location.href = '/cart')}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <FiShoppingCart className="text-2xl" />
-                {cartCount > 0 && (
+                {items.length > 0 && (
                   <motion.span
                     className="absolute -top-2 -right-2 text-gray-900 rounded-full text-xs font-bold px-2 py-0.5"
                     style={{ backgroundColor: "#41eb70" }}
@@ -50,17 +54,24 @@ export default function Header({ cartCount }) {
                     animate={{ scale: 1 }}
                     transition={{ type: "spring", stiffness: 500 }}
                   >
-                    {cartCount}
+                    {items.length}
                   </motion.span>
                 )}
               </motion.button>
+            </li>
+            <li>
+              {user ? (
+                <button onClick={logout} className="hover:text-green-400 font-medium">Logout</button>
+              ) : (
+                <Link href="/auth/signin" className="hover:text-green-400 font-medium">Login</Link>
+              )}
             </li>
           </ul>
         </nav>
 
         {/* Mobile Menu Button */}
         <div className="md:hidden flex items-center gap-4">
-          {cartCount > 0 && (
+          {items.length > 0 && (
             <motion.button
               className="relative hover:text-green-400 transition-colors"
               onClick={() => alert("Go to cart page!")}
@@ -75,7 +86,7 @@ export default function Header({ cartCount }) {
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 500 }}
               >
-                {cartCount}
+                {items.length}
               </motion.span>
             </motion.button>
           )}
@@ -127,6 +138,13 @@ export default function Header({ cartCount }) {
                     </Link>
                   </li>
                 </ul>
+                <div className="mt-4">
+                  {user ? (
+                    <button onClick={() => { setIsMenuOpen(false); logout(); }} className="block w-full text-left hover:text-green-400 font-medium">Logout</button>
+                  ) : (
+                    <Link href="/auth/signin" onClick={() => setIsMenuOpen(false)} className="block hover:text-green-400 font-medium">Login</Link>
+                  )}
+                </div>
               </nav>
             </motion.div>
           )}
