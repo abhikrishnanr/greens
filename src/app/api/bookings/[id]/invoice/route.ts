@@ -9,7 +9,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     const booking = await prisma.booking.findUnique({
       where: { id: params.id },
       include: {
-        service: { select: { name: true } },
+        service: { select: { mainServiceName: true } },
         branch: { select: { name: true } },
         staff: { select: { name: true } },
         user: { select: { name: true } },
@@ -28,7 +28,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     draw('Greens Salon Invoice', 16)
     draw(`Booking ID: ${booking.id}`)
     draw(`Customer: ${booking.user?.name || 'N/A'}`)
-    draw(`Service: ${booking.service.name}`)
+    draw(`Service: ${booking.service.mainServiceName}`)
     if (booking.staff) draw(`Staff: ${booking.staff.name}`)
     draw(`Branch: ${booking.branch.name}`)
     if (booking.date) draw(`Date: ${new Date(booking.date).toLocaleString()}`)
