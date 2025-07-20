@@ -14,7 +14,14 @@ export default function NewAppointment() {
   const [branch, setBranch] = useState('')
 
   useEffect(() => {
-    fetch('/api/branch').then(r => r.json()).then(d => d.success && setBranches(d.branches))
+    fetch('/api/branch')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success) {
+          setBranches(d.branches)
+          if (d.branches.length === 1) setBranch(d.branches[0].id)
+        }
+      })
   }, [])
 
   useEffect(() => {
