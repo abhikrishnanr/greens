@@ -6,10 +6,12 @@ interface Booking {
   date: string | null
   preferredDate: string | null
   status: string
+  paid: boolean
   service: { name: string }
   branch: { name: string }
   user: { name: string }
   staff?: { name: string } | null
+  invoiceUrl?: string
 }
 
 export default function AppointmentPage() {
@@ -23,18 +25,21 @@ export default function AppointmentPage() {
 
   useEffect(() => { load() }, [])
 
-  const update = async (id: string, status: string, date?: string) => {
+  const update = async (id: string, status: string, date?: string, paid?: boolean) => {
     await fetch('/api/bookings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, status, date: date ? new Date(date) : undefined }),
+      body: JSON.stringify({ id, status, paid, date: date ? new Date(date) : undefined }),
     })
     load()
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4 text-green-700">Appointment Requests</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold text-green-700">Appointment Requests</h1>
+        <a href="/admin/appointments/new" className="bg-green-600 text-white px-3 py-1 rounded">New</a>
+      </div>
       <table className="w-full text-sm text-left bg-white rounded shadow border">
         <thead className="bg-gray-50">
           <tr>
@@ -43,6 +48,8 @@ export default function AppointmentPage() {
             <th className="px-3 py-2">Customer</th>
             <th className="px-3 py-2">Service</th>
             <th className="px-3 py-2">Status</th>
+            <th className="px-3 py-2">Paid</th>
+            <th className="px-3 py-2">Invoice</th>
           </tr>
         </thead>
         <tbody>
@@ -70,6 +77,18 @@ export default function AppointmentPage() {
                   <option value="completed">completed</option>
                   <option value="cancelled">cancelled</option>
                 </select>
+              </td>
+              <td className="px-3 py-2">
+                {b.paid ? 'Yes' : (
+                  <button className="text-sm text-green-700 underline" onClick={() => update(b.id, b.status, undefined, true)}>
+                    Mark Paid
+                  </button>
+                )}
+              </td>
+              <td className="px-3 py-2">
+                {b.invoiceUrl && (
+                  <a href={b.invoiceUrl} target="_blank" className="text-blue-600 underline">Download</a>
+                )}
               </td>
             </tr>
           ))}

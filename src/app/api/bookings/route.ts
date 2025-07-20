@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   if (status) where.status = status;
 
   try {
-    const bookings = await prisma.booking.findMany({
+    const bookingsData = await prisma.booking.findMany({
       where,
       include: {
         service: { select: { id: true, name: true, duration: true } },
@@ -24,9 +24,15 @@ export async function GET(request: Request) {
         branch:  { select: { id: true, name: true } },
         user:    { select: { id: true, name: true } },
       },
-      orderBy: { date: 'asc' }
-    });
-    return NextResponse.json({ success: true, bookings });
+      orderBy: { date: 'asc' },
+    })
+
+    const bookings = bookingsData.map(b => ({
+      ...b,
+      invoiceUrl: `/api/bookings/${b.id}/invoice`,
+    }))
+
+    return NextResponse.json({ success: true, bookings })
   } catch (err: any) {
     console.error('GET /api/bookings error', err);
     return NextResponse.json(
