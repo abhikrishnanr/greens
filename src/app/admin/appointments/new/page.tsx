@@ -23,33 +23,33 @@ export default function NewAppointment() {
   const [branch, setBranch] = useState("");
 
   useEffect(() => {
-    fetch("/api/branch")
+    fetch('/api/branch')
       .then((r) => r.json())
       .then((d) => {
         if (d.success) {
-          const br = d.branches.map((b: Branch) => ({
-            ...b,
-            id: String(b.id),
-          }));
-          setBranches(br);
-          if (br.length === 1) {
-            setBranch(br[0].id);
-            loadBranchData(br[0].id);
-          }
+          const br = d.branches.map((b: Branch) => ({ ...b, id: String(b.id) }))
+          setBranches(br)
+          if (br.length === 1) setBranch(br[0].id)
         }
-      });
-  }, []);
+      })
+      .catch(() => {})
+  }, [])
 
   const loadBranchData = (id: string) => {
+    if (!id) return
     fetch(`/api/branch/${encodeURIComponent(id)}/data`)
       .then((r) => r.json())
       .then((d) => {
         if (d.success) {
-          setServices(d.services);
-          setStaff(d.staff);
+          setServices(d.services)
+          setStaff(d.staff)
+        } else if (d.services && d.staff) {
+          // tolerate responses without success flag
+          setServices(d.services)
+          setStaff(d.staff)
         }
       })
-      .catch(() => {});
+      .catch(() => {})
   };
 
   useEffect(() => {
