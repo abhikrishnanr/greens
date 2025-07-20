@@ -27,8 +27,15 @@ export default function NewAppointment() {
       .then((r) => r.json())
       .then((d) => {
         if (d.success) {
-          setBranches(d.branches);
-          if (d.branches.length === 1) setBranch(String(d.branches[0].id));
+          const br = d.branches.map((b: Branch) => ({
+            ...b,
+            id: String(b.id),
+          }));
+          setBranches(br);
+          if (br.length === 1) {
+            setBranch(br[0].id);
+            loadBranchData(br[0].id);
+          }
         }
       });
   }, []);
