@@ -39,16 +39,23 @@ export default function NewAppointment() {
       setStaff([]);
       return;
     }
-    fetch(`/api/services?branchId=${encodeURIComponent(branch)}`)
+    const current = branch;
+    fetch(`/api/services?branchId=${encodeURIComponent(current)}`)
       .then((r) => r.json())
       .then((d) => {
-        if (d.success !== false) setServices(d.services ?? d);
-      });
-    fetch(`/api/staff?branchId=${encodeURIComponent(branch)}`)
+        if (current === branch && d.success !== false) {
+          setServices(d.services ?? d);
+        }
+      })
+      .catch(() => {});
+    fetch(`/api/staff?branchId=${encodeURIComponent(current)}`)
       .then((r) => r.json())
       .then((d) => {
-        if (d.success !== false) setStaff(d.staff ?? d);
-      });
+        if (current === branch && d.success !== false) {
+          setStaff(d.staff ?? d);
+        }
+      })
+      .catch(() => {});
   }, [branch]);
 
   const submit = async (e: FormEvent<HTMLFormElement>) => {
