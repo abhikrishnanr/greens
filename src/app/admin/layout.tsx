@@ -2,6 +2,8 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { useState } from 'react'
+import { LoadingProvider } from '@/contexts/LoadingContext'
+import Loader from '@/components/Loader'
 import { signOut } from 'next-auth/react'
 import {
   MdDashboard,
@@ -47,7 +49,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   return (
-    <div className="min-h-screen flex flex-col text-gray-900 bg-green-50">
+    <LoadingProvider>
+      <Loader />
+      <div className="min-h-screen flex flex-col text-gray-900 bg-green-50">
       <header className="flex items-center justify-between bg-green-800 text-green-100 px-4 md:px-6 py-3">
         <div className="flex items-center gap-2">
           <button
@@ -102,6 +106,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {children}
         </main>
       </div>
-    </div>
+      </div>
+    </LoadingProvider>
   )
 }
