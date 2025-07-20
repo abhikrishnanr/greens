@@ -2,6 +2,8 @@
 import './globals.css'
 import React from 'react'
 import { Providers } from './providers'
+import { CartProvider } from '../contexts/CartContext'
+import { AuthProvider } from '../contexts/AuthContext'
 import "react-datepicker/dist/react-datepicker.css";
 
 export const metadata = {
@@ -67,7 +69,11 @@ export default function RootLayout({
         `}</style>
       </head>
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          <AuthProvider>
+            <CartProvider>{children}</CartProvider>
+          </AuthProvider>
+        </Providers>
       </body>
     </html>
   )

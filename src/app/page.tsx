@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
+import { useCart } from "@/contexts/CartContext"
 import Link from 'next/link'
 import {
   FiShoppingCart,
@@ -38,10 +39,10 @@ const TIER_LABELS = {
 }
 
 export default function HomePage() {
+  const { items, add } = useCart()
   const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedCat, setExpandedCat] = useState<string | null>(null)
-  const [cart, setCart] = useState<any[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -68,17 +69,13 @@ export default function HomePage() {
   }, [expandedCat, categories])
 
   function addToCart(service: any) {
-    setCart(prev =>
-      prev.find(item => item.id === service.id)
-        ? prev
-        : [...prev, { ...service, qty: 1 }]
-    )
+    add({ id: service.id, name: service.name, price: service.offerPrice ?? service.mrp })
   }
 
   return (
     <main className="bg-gray-900 min-h-screen font-sans text-gray-100">
       {/* HEADER */}
-      <Header cartCount={cart.length} />
+      <Header />
 
       {/* HERO SECTION WITH VIDEO */}
       <section className="relative h-[90vh] flex items-center justify-center overflow-hidden">
@@ -367,7 +364,7 @@ export default function HomePage() {
 
       {/* CART BAR */}
       <AnimatePresence>
-        {cart.length > 0 && (
+        {items.length > 0 && (
           <motion.div
             className="fixed left-6 right-6 bottom-6 bg-gradient-to-r from-green-600 via-emerald-600 to-green-700 text-white py-4 px-6 rounded-2xl shadow-2xl z-50 flex items-center justify-between backdrop-blur-sm"
             initial={{ y: 100, opacity: 0 }}
@@ -380,13 +377,13 @@ export default function HomePage() {
                 <FiShoppingCart className="text-xl" />
               </div>
               <div>
-                <span className="font-bold text-lg">{cart.length} service{cart.length > 1 ? "s" : ""} selected</span>
+                <span className="font-bold text-lg">{items.length} service{items.length > 1 ? "s" : ""} selected</span>
                 <p className="text-sm opacity-90">Ready to book your appointment</p>
               </div>
             </div>
             <motion.button
               className="bg-white text-green-600 px-6 py-3 rounded-xl font-bold hover:bg-gray-100 transition-colors shadow-lg"
-              onClick={() => alert("Proceeding to cart!")}
+              onClick={() => (window.location.href = '/cart')}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
