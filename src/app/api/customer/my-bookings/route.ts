@@ -20,16 +20,21 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
     }
 
-    const bookings = await prisma.booking.findMany({
+    const bookingsData = await prisma.booking.findMany({
       where: { userId: user.id },
       orderBy: { date: 'desc' },
       include: {
-        service: { select: { name: true } },
+        service: { select: { mainServiceName: true } },
         branch: { select: { name: true } },
         staff: { select: { name: true } },
         coupon: { select: { code: true } },
       },
     });
+
+    const bookings = bookingsData.map(b => ({
+      ...b,
+      service: { name: b.service.mainServiceName },
+    }));
 
     return NextResponse.json({ success: true, bookings });
   } catch (error) {

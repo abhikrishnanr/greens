@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     const bookingsData = await prisma.booking.findMany({
       where,
       include: {
-        service: { select: { id: true, name: true, duration: true } },
+        service: { select: { id: true, mainServiceName: true, duration: true } },
         staff:   { select: { id: true, name: true } },
         branch:  { select: { id: true, name: true } },
         user:    { select: { id: true, name: true } },
@@ -29,6 +29,11 @@ export async function GET(request: Request) {
 
     const bookings = bookingsData.map(b => ({
       ...b,
+      service: {
+        id: b.service.id,
+        duration: b.service.duration,
+        name: b.service.mainServiceName,
+      },
       invoiceUrl: `/api/bookings/${b.id}/invoice`,
     }))
 
