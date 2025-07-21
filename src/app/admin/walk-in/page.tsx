@@ -87,12 +87,14 @@ export default function WalkIn() {
   }
 
   const loadBookings = async() => {
+
     const res = await fetch(`/api/bookings?date=${date}`)
     if(res.ok) {
       const data = await res.json()
       setBookings(data)
     } else {
       console.error('Failed loading bookings')
+
     }
   }
 
@@ -104,6 +106,7 @@ export default function WalkIn() {
     const svc = services.find(s=>s.id===selectedSvc)
     setTiers(svc?.tiers||[])
   },[selectedSvc])
+  useEffect(()=>{ localStorage.setItem('walkin-bookings', JSON.stringify(bookings)) },[bookings])
 
   const addItem = () => {
     const tier = tiers.find(t=>t.id===selectedTier)
@@ -137,13 +140,17 @@ export default function WalkIn() {
       if(res.ok) {
         const booking: Booking = await res.json()
         setBookings(b => [...b, booking])
+
         setResult({success:true, message:'Booking saved successfully'})
+
       } else {
         throw new Error('Request failed')
       }
     } catch(err) {
+
       console.error('Failed saving booking', err)
       setResult({success:false, message:'Failed to save booking'})
+
     } finally {
       setCustomer(''); setPhone(''); setItems([]); setStaffId(''); setStart('')
     }
