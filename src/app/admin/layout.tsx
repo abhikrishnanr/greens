@@ -30,8 +30,6 @@ const sections: {
   {
     heading: 'Salon Management',
     items: [
-      { href: '/admin/appointments', label: 'Appointments', icon: MdEvent },
-      { href: '/admin/scheduling', label: 'Scheduling', icon: MdSchedule },
       { href: '/admin/staff', label: 'Staff', icon: MdPeople },
       { href: '/admin/branches', label: 'Branches', icon: MdStore },
       {

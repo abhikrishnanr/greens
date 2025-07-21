@@ -30,8 +30,6 @@ model User {
   createdAt   DateTime  @default(now()) @db.Timestamp(3)
   updatedAt   DateTime  @default(now()) @updatedAt @db.Timestamp(3)
 
-  bookings      Booking[]
-  staffBookings Booking[] @relation("StaffBookings")
 }
 
 model Branch {
@@ -44,50 +42,11 @@ model Branch {
   createdAt DateTime @default(now()) @db.Timestamp(3)
   updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(3)
 
-  bookings      Booking[]
   users         User[]
   branchService BranchService[]
 }
 
-model Coupon {
-  id             String   @id @db.VarChar(191)
-  code           String   @unique @db.VarChar(191)
-  description    String?  @db.VarChar(191)
-  discountType   String   @db.VarChar(191)
-  discountValue  Float
-  startDate      DateTime @db.Timestamp(3)
-  endDate        DateTime @db.DateTime(3)
-  minAmount      Float?
-  maxRedemptions Int?
-  timesUsed      Int      @default(0)
-  isActive       Boolean  @default(true)
-  createdAt      DateTime @default(now()) @db.Timestamp(3)
-  updatedAt      DateTime @default(now()) @updatedAt @db.Timestamp(3)
 
-  bookings Booking[]
-}
-
-model Booking {
-  id        String  @id @db.VarChar(191)
-  userId    String  @db.VarChar(191)
-  user      User    @relation(fields: [userId], references: [id])
-  branchId  String  @db.VarChar(191)
-  branch    Branch  @relation(fields: [branchId], references: [id])
-  staffId   String? @db.VarChar(191)
-  staff     User?   @relation("StaffBookings", fields: [staffId], references: [id])
-  couponId  String? @db.VarChar(191)
-  coupon    Coupon? @relation(fields: [couponId], references: [id])
-  serviceId String  @db.VarChar(191)
-  service   Service @relation(fields: [serviceId], references: [id])
-
-  preferredDate DateTime? @db.DateTime(3)
-  status        String    @default("pending") @db.VarChar(191)
-  date          DateTime? @db.DateTime(3)
-  paid          Boolean   @default(false)
-  notes         String?   @db.Text
-  createdAt     DateTime  @default(now()) @db.Timestamp(3)
-  updatedAt     DateTime  @default(now()) @updatedAt @db.Timestamp(3)
-}
 
 model ServiceCategory {
   id          String       @id @default(uuid())
@@ -120,7 +79,6 @@ model Service {
   categoryId                 String?
   caption                    String?
 
-  bookings      Booking[]
   branchService BranchService[]
 
   @@map("service")
