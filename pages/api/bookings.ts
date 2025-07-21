@@ -49,6 +49,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     })
     return res.status(200).json(booking)
   }
-  res.setHeader('Allow', ['GET', 'POST'])
+  if (req.method === 'PUT') {
+    const { id, staffId, start } = req.body
+    const booking = await prisma.booking.update({
+      where: { id },
+      data: { staffId, start },
+      include: { items: true },
+    })
+    return res.status(200).json(booking)
+  }
+  if (req.method === 'DELETE') {
+    const id = (req.query.id as string) || req.body.id
+    await prisma.bookingItem.deleteMany({ where: { bookingId: id } })
+    await prisma.booking.delete({ where: { id } })
+    return res.status(204).end()
+  }
+  res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE'])
   return res.status(405).end(`Method ${req.method} Not Allowed`)
 }
