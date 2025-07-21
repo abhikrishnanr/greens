@@ -30,6 +30,8 @@ model User {
   createdAt   DateTime  @default(now()) @db.Timestamp(3)
   updatedAt   DateTime  @default(now()) @updatedAt @db.Timestamp(3)
 
+  walkinBookings WalkinBooking[]
+
   
 }
 
@@ -152,4 +154,20 @@ model ServiceTierPriceHistory {
   changedAt   DateTime    @default(now()) @map("changed_at") @db.Timestamp(3)
 
   @@map("servicetierpricehistory")
+}
+
+model WalkinBooking {
+  id            String   @id @default(uuid()) @db.VarChar(191)
+  customerName  String   @db.VarChar(191)
+  customerPhone String   @db.VarChar(191)
+  services      String   @db.Text
+  totalAmount   Float
+  startTime     DateTime @db.Timestamp(3)
+  duration      Int
+  staffId       String?  @db.VarChar(191)
+  staff         User?    @relation(fields: [staffId], references: [id])
+  createdAt     DateTime @default(now()) @db.Timestamp(3)
+  updatedAt     DateTime @default(now()) @updatedAt @db.Timestamp(3)
+
+  @@map("walkin_booking")
 }
