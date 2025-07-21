@@ -65,6 +65,7 @@ export default function WalkIn() {
   const [start,setStart] = useState('')
 
   const [bookings,setBookings] = useState<Booking[]>([])
+  const [result,setResult] = useState<{success:boolean,message:string}|null>(null)
 
   const loadCategories = async() => {
     const res = await fetch('/api/admin/service-categories')
@@ -87,8 +88,12 @@ export default function WalkIn() {
 
   const loadBookings = async() => {
     const res = await fetch(`/api/bookings?date=${date}`)
-    const data = await res.json()
-    setBookings(data)
+    if(res.ok) {
+      const data = await res.json()
+      setBookings(data)
+    } else {
+      console.error('Failed loading bookings')
+    }
   }
 
   useEffect(()=>{ loadCategories(); loadStaff(); },[])
@@ -123,14 +128,23 @@ export default function WalkIn() {
     if(!customer||!phone||!items.length||!staffId||!start) return
     if(!window.confirm(`Total amount ₹${totalAmount}. Confirm booking?`)) return
     const color = COLORS[bookings.length % COLORS.length]
-    const res = await fetch('/api/bookings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ customer, phone, staffId, date, start, color, items })
-    })
-    if(res.ok) {
-      const booking: Booking = await res.json()
-      setBookings(b => [...b, booking])
+    try {
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customer, phone, staffId, date, start, color, items })
+      })
+      if(res.ok) {
+        const booking: Booking = await res.json()
+        setBookings(b => [...b, booking])
+        setResult({success:true, message:'Booking saved successfully'})
+      } else {
+        throw new Error('Request failed')
+      }
+    } catch(err) {
+      console.error('Failed saving booking', err)
+      setResult({success:false, message:'Failed to save booking'})
+    } finally {
       setCustomer(''); setPhone(''); setItems([]); setStaffId(''); setStart('')
     }
   }
@@ -225,6 +239,14 @@ export default function WalkIn() {
           </tbody>
         </table>
       </div>
+      {result && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50">
+          <div className="bg-white p-4 rounded shadow space-y-2">
+            <p>{result.message}</p>
+            <button onClick={() => setResult(null)} className="bg-green-700 text-white px-4 py-2 rounded">Close</button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
