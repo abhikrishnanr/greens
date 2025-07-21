@@ -207,6 +207,7 @@ export default function WalkIn() {
 
     } finally {
       setCustomer(''); setPhone(''); setItems([])
+
     }
   }
 
@@ -231,6 +232,7 @@ export default function WalkIn() {
     if(res.ok){
       setBookings(bs=>bs.filter(b=>b.id!==edit.id))
       setEdit(null)
+
     }
   }
 
@@ -285,6 +287,7 @@ export default function WalkIn() {
             </div>
           )}
           {items.length>0 && (
+
             <div className="space-y-1">
               <label className="text-sm font-medium">Items</label>
               <ul className="space-y-2 text-sm">
@@ -316,17 +319,20 @@ export default function WalkIn() {
               </ul>
               <p className="text-xs text-gray-500">Assign staff and time for each service</p>
             </div>
+
           )}
           {items.length>0 && (
             <div className="text-sm font-medium">Total: {totalDuration}m ₹{totalAmount}</div>
           )}
         </div>
         <div className="space-y-2">
+
           <div className="space-y-1">
             <label className="text-sm font-medium">Date</label>
             <input type="date" min={format(new Date(),'yyyy-MM-dd')} value={date} onChange={e=>setDate(e.target.value)} className="w-full p-2 border rounded" />
             <p className="text-xs text-gray-500">Booking date</p>
           </div>
+
           <button onClick={saveBooking} className="bg-green-700 text-white px-4 py-2 rounded">Confirm Booking</button>
         </div>
       </div>
