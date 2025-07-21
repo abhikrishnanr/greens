@@ -125,7 +125,7 @@ model ServiceNew {
   category    ServiceCategory @relation(fields: [categoryId], references: [id])
   name        String
   caption     String?
-  description String?
+  description String?  @db.LongText
   imageUrl    String?
   images      ServiceImage[]
   tiers       ServiceTier[]
