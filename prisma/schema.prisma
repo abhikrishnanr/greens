@@ -177,4 +177,6 @@ model BookingItem {
   name      String  @db.VarChar(191)
   duration  Int
   price     Float
+  staffId   String  @db.VarChar(191)
+  start     String  @db.VarChar(5)
 }
