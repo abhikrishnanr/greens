@@ -27,6 +27,7 @@ export const Select = ({ value, onValueChange, children, className, ...props }: 
       React.Children.forEach(child.props.children, (c) => {
         if (React.isValidElement(c) && c.type === SelectItem) {
           options.push(c as React.ReactElement<SelectItemProps>)
+
         }
       })
     }
@@ -48,6 +49,7 @@ export const Select = ({ value, onValueChange, children, className, ...props }: 
         </option>
       )}
       {options}
+
     </select>
   )
 }
