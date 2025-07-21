@@ -13,6 +13,7 @@ import {
   MdDesignServices,
   MdHistory,
   MdLogout,
+  MdEvent,
   MdMenu,
 } from 'react-icons/md'
 import type { IconType } from 'react-icons'
@@ -37,6 +38,7 @@ const sections: {
       },
       { href: '/admin/services', label: 'Services', icon: MdDesignServices },
       { href: '/admin/tier-price-history', label: 'Tier Price History', icon: MdHistory },
+      { href: '/admin/walk-in', label: 'Walk-in', icon: MdEvent },
     ],
   },
 ]
