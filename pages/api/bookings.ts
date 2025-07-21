@@ -15,28 +15,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
   if (req.method === 'POST') {
     const data = req.body
+    const firstItem = data.items?.[0]
     const booking = await prisma.booking.create({
       data: {
         customer: data.customer,
         phone: data.phone,
-        staffId: data.staffId,
+        staffId: firstItem?.staffId || data.staffId,
         date: data.date,
-        start: data.start,
+        start: firstItem?.start || data.start,
         color: data.color,
         items: {
-          create: (data.items as {
-            serviceId: string
-            tierId: string
-            name: string
-            duration: number
-            price: number
-          }[] | undefined)?.map((i) => ({
-            serviceId: i.serviceId,
-            tierId: i.tierId,
-            name: i.name,
-            duration: i.duration,
-            price: i.price,
-          })) || [],
+          create:
+            (data.items as {
+              serviceId: string
+              tierId: string
+              name: string
+              duration: number
+              price: number
+              staffId: string
+              start: string
+            }[] | undefined)?.map((i) => ({
+              serviceId: i.serviceId,
+              tierId: i.tierId,
+              name: i.name,
+              duration: i.duration,
+              price: i.price,
+              staffId: i.staffId,
+              start: i.start,
+            })) || [],
         },
       },
       include: { items: true },
