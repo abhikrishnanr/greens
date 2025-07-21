@@ -30,7 +30,8 @@ model User {
   createdAt   DateTime  @default(now()) @db.Timestamp(3)
   updatedAt   DateTime  @default(now()) @updatedAt @db.Timestamp(3)
 
-  
+  bookings    Booking[]
+
 }
 
 model Branch {
@@ -152,4 +153,28 @@ model ServiceTierPriceHistory {
   changedAt   DateTime    @default(now()) @map("changed_at") @db.Timestamp(3)
 
   @@map("servicetierpricehistory")
+}
+
+model Booking {
+  id        String   @id @default(uuid())
+  customer  String   @db.VarChar(191)
+  phone     String   @db.VarChar(191)
+  staffId   String   @db.VarChar(191)
+  staff     User     @relation(fields: [staffId], references: [id])
+  date      String   @db.VarChar(10)
+  start     String   @db.VarChar(5)
+  color     String   @db.VarChar(191)
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  items     BookingItem[]
+}
+
+model BookingItem {
+  id        String  @id @default(uuid())
+  bookingId String  @db.VarChar(191)
+  booking   Booking @relation(fields: [bookingId], references: [id])
+  serviceId String  @db.VarChar(191)
+  tierId    String  @db.VarChar(191)
+  name      String  @db.VarChar(191)
+  duration  Int
+  price     Float
 }

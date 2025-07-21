@@ -39,7 +39,7 @@ interface Booking {
   id: string
   customer: string
   phone: string
-  services: Selected[]
+  items: Selected[]
   staffId: string
   date: string
   start: string
@@ -85,22 +85,20 @@ export default function WalkIn() {
     setStaff((staffData as StaffApi[]).filter(s=>!s.removed))
   }
 
-  useEffect(()=>{ loadCategories(); loadStaff();
-    const stored = localStorage.getItem('walkin-bookings')
-    if(stored) {
-      try {
-        const parsed: Booking[] = JSON.parse(stored)
-        setBookings(parsed.map(b => ({ date: b.date ?? format(new Date(),'yyyy-MM-dd'), ...b })))
-      } catch {}
-    }
-  },[])
+  const loadBookings = async() => {
+    const res = await fetch(`/api/bookings?date=${date}`)
+    const data = await res.json()
+    setBookings(data)
+  }
+
+  useEffect(()=>{ loadCategories(); loadStaff(); },[])
+  useEffect(()=>{ loadBookings() },[date])
   useEffect(()=>{ loadServices(); setSelectedSvc(''); setTiers([]); },[category])
   useEffect(()=>{
     if(!selectedSvc) return
     const svc = services.find(s=>s.id===selectedSvc)
     setTiers(svc?.tiers||[])
   },[selectedSvc])
-  useEffect(()=>{ localStorage.setItem('walkin-bookings',JSON.stringify(bookings)) },[bookings])
 
   const addItem = () => {
     const tier = tiers.find(t=>t.id===selectedTier)
@@ -121,14 +119,20 @@ export default function WalkIn() {
     times.push(format(new Date(base.getTime()+i*15*60000),'HH:mm'))
   }
 
-  const saveBooking = () => {
+  const saveBooking = async() => {
     if(!customer||!phone||!items.length||!staffId||!start) return
+    if(!window.confirm(`Total amount ₹${totalAmount}. Confirm booking?`)) return
     const color = COLORS[bookings.length % COLORS.length]
-    const id = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-      ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random()}`
-    setBookings(b => [...b,{ id, customer, phone, services:items, staffId, date, start, color }])
-    setCustomer(''); setPhone(''); setItems([]); setStaffId(''); setStart('')
+    const res = await fetch('/api/bookings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ customer, phone, staffId, date, start, color, items })
+    })
+    if(res.ok) {
+      const booking: Booking = await res.json()
+      setBookings(b => [...b, booking])
+      setCustomer(''); setPhone(''); setItems([]); setStaffId(''); setStart('')
+    }
   }
 
   const bookingsFor = (id:string, time:string) => bookings.filter(b=>b.staffId===id && b.date===date && b.start===time)
@@ -211,7 +215,7 @@ export default function WalkIn() {
                           width: `${100/arr.length}%`,
                           left: `${(i*100)/arr.length}%`,
                         }}
-                        title={`${b.customer} - ₹${b.services.reduce((a,i)=>a+i.price,0)}`}
+                        title={`${b.customer} - ₹${b.items.reduce((a,i)=>a+i.price,0)}`}
                       ></div>
                     ))}
                   </td>
