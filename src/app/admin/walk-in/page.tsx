@@ -33,6 +33,8 @@ interface Selected {
   name: string
   duration: number
   price: number
+  staffId: string
+  start: string
 }
 
 interface Booking {
@@ -58,11 +60,9 @@ export default function WalkIn() {
   const [items,setItems] = useState<Selected[]>([])
 
   const [staff,setStaff] = useState<Staff[]>([])
-  const [staffId,setStaffId] = useState('')
   const [customer,setCustomer] = useState('')
   const [phone,setPhone] = useState('')
   const [date,setDate] = useState(() => format(new Date(),'yyyy-MM-dd'))
-  const [start,setStart] = useState('')
 
   const [bookings,setBookings] = useState<Booking[]>([])
   const [result,setResult] = useState<{success:boolean,message:string}|null>(null)
@@ -76,8 +76,16 @@ export default function WalkIn() {
   const loadServices = async() => {
     if(!category) return
     const res = await fetch(`/api/admin/services-new/${category}`)
-    const data = await res.json()
-    setServices(data)
+    const data: Service[] = await res.json()
+    const enriched: Service[] = []
+    for(const svc of data){
+      const tRes = await fetch(`/api/admin/service-tiers/${svc.id}`)
+      const tiers: Tier[] = await tRes.json()
+      if(tiers.some(t=>t.currentPrice)){
+        enriched.push({...svc, tiers})
+      }
+    }
+    setServices(enriched)
   }
 
   const loadStaff = async() => {
@@ -113,29 +121,71 @@ export default function WalkIn() {
     if(!tier) return
     const price = tier.currentPrice?.offerPrice ?? tier.currentPrice?.actualPrice ?? 0
     const duration = tier.duration || 0
-    setItems([...items,{ serviceId:selectedSvc,tierId:tier.id,name:`${services.find(s=>s.id===selectedSvc)?.name} - ${tier.name}`,duration,price }])
+    setItems([...items,{ serviceId:selectedSvc,tierId:tier.id,name:`${services.find(s=>s.id===selectedSvc)?.name} - ${tier.name}`,duration,price,staffId:'',start:'' }])
     setSelectedTier('')
   }
 
   const totalDuration = items.reduce((acc,i)=>acc+i.duration,0)
   const totalAmount = items.reduce((acc,i)=>acc+i.price,0)
 
-  const times = [] as string[]
+  const allTimes = [] as string[]
   const base = new Date(date)
   base.setHours(9,0,0,0)
   for(let i=0;i<48;i++) {
-    times.push(format(new Date(base.getTime()+i*15*60000),'HH:mm'))
+    allTimes.push(format(new Date(base.getTime()+i*15*60000),'HH:mm'))
+  }
+
+  const timeOptionsFor = (duration:number) => {
+    const slots:string[] = []
+    const startBase = new Date(date)
+    startBase.setHours(9,0,0,0)
+    const endBase = new Date(date)
+    endBase.setHours(21,0,0,0)
+    const todayStr = format(new Date(),'yyyy-MM-dd')
+    const now = new Date()
+    for(let t=new Date(startBase); t.getTime()+duration*60000<=endBase.getTime(); t=new Date(t.getTime()+15*60000)) {
+      if(date===todayStr && t<now) continue
+      slots.push(format(t,'HH:mm'))
+    }
+    return slots
+  }
+
+  const toMin = (s:string) => {
+    const [h,m] = s.split(':').map(Number)
+    return h*60+m
+  }
+
+  const hasConflict = (staffId:string,start:string,duration:number,idx:number) => {
+    if(!staffId) return false
+    const st = toMin(start)
+    const en = st + duration
+    for(const b of bookings) {
+      if(b.staffId!==staffId || b.date!==date) continue
+      const bst = toMin(b.start)
+      const ben = bst + b.items.reduce((a,i)=>a+i.duration,0)
+      if(st < ben && en > bst) return true
+    }
+    for(let i=0;i<items.length;i++) {
+      if(i===idx) continue
+      const it = items[i]
+      if(it.staffId!==staffId || !it.start) continue
+      const ist = toMin(it.start)
+      const ien = ist + it.duration
+      if(st < ien && en > ist) return true
+    }
+    return false
   }
 
   const saveBooking = async() => {
-    if(!customer||!phone||!items.length||!staffId||!start) return
+    if(!customer||!phone||!items.length) return
+    if(items.some(i=>!i.staffId || !i.start)) return
     if(!window.confirm(`Total amount ₹${totalAmount}. Confirm booking?`)) return
     const color = COLORS[bookings.length % COLORS.length]
     try {
       const res = await fetch('/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customer, phone, staffId, date, start, color, items })
+        body: JSON.stringify({ customer, phone, date, color, items })
       })
       if(res.ok) {
         const booking: Booking = await res.json()
@@ -152,7 +202,7 @@ export default function WalkIn() {
       setResult({success:false, message:'Failed to save booking'})
 
     } finally {
-      setCustomer(''); setPhone(''); setItems([]); setStaffId(''); setStart('')
+      setCustomer(''); setPhone(''); setItems([])
     }
   }
 
@@ -187,9 +237,30 @@ export default function WalkIn() {
             </div>
           )}
           {items.length>0 && (
-            <ul className="space-y-1 text-sm">
-              {items.map(i=> (
-                <li key={i.tierId} className="flex justify-between"><span>{i.name}</span><span>{i.duration}m ₹{i.price}</span></li>
+            <ul className="space-y-2 text-sm">
+              {items.map((i,idx)=> (
+                <li key={i.tierId} className="grid grid-cols-5 gap-2 items-center">
+                  <span className="col-span-2 truncate" title={i.name}>{i.name}</span>
+                  <select
+                    value={i.staffId}
+                    onChange={e=>setItems(itms=>itms.map((it,j)=> j===idx?{...it,staffId:e.target.value,start:''}:it))}
+                    className="border rounded p-1"
+                  >
+                    <option value=''>Staff</option>
+                    {staff.map(s=>(<option key={s.id} value={s.id}>{s.name}</option>))}
+                  </select>
+                  <select
+                    value={i.start}
+                    onChange={e=>setItems(itms=>itms.map((it,j)=> j===idx?{...it,start:e.target.value}:it))}
+                    className="border rounded p-1"
+                  >
+                    <option value=''>Time</option>
+                    {timeOptionsFor(i.duration).map(t=> (
+                      <option key={t} value={t} style={{backgroundColor: i.staffId && hasConflict(i.staffId,t,i.duration,idx)?'#fef08a':undefined}}>{t}</option>
+                    ))}
+                  </select>
+                  <span>{i.duration}m ₹{i.price}</span>
+                </li>
               ))}
             </ul>
           )}
@@ -198,17 +269,7 @@ export default function WalkIn() {
           )}
         </div>
         <div className="space-y-2">
-          <select value={staffId} onChange={e=>setStaffId(e.target.value)} className="w-full p-2 border rounded">
-            <option value=''>Select staff</option>
-            {staff.map(s=>(<option key={s.id} value={s.id}>{s.name}</option>))}
-          </select>
-          <input type="date" value={date} onChange={e=>setDate(e.target.value)} className="w-full p-2 border rounded" />
-          <select value={start} onChange={e=>setStart(e.target.value)} className="w-full p-2 border rounded">
-            <option value=''>Select time</option>
-            {times.map(t=> (
-              <option key={t} value={t}>{t}</option>
-            ))}
-          </select>
+          <input type="date" min={format(new Date(),'yyyy-MM-dd')} value={date} onChange={e=>setDate(e.target.value)} className="w-full p-2 border rounded" />
           <button onClick={saveBooking} className="bg-green-700 text-white px-4 py-2 rounded">Confirm Booking</button>
         </div>
       </div>
@@ -222,7 +283,7 @@ export default function WalkIn() {
             </tr>
           </thead>
           <tbody>
-            {times.map(time=> (
+            {allTimes.map(time=> (
               <tr key={time}>
                 <td className="border px-1 whitespace-nowrap">{time}</td>
                 {staff.map(st=> (
