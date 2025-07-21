@@ -41,6 +41,7 @@ interface Booking {
   phone: string
   services: Selected[]
   staffId: string
+  date: string
   start: string
   color: string
 }
@@ -60,6 +61,7 @@ export default function WalkIn() {
   const [staffId,setStaffId] = useState('')
   const [customer,setCustomer] = useState('')
   const [phone,setPhone] = useState('')
+  const [date,setDate] = useState(() => format(new Date(),'yyyy-MM-dd'))
   const [start,setStart] = useState('')
 
   const [bookings,setBookings] = useState<Booking[]>([])
@@ -85,7 +87,12 @@ export default function WalkIn() {
 
   useEffect(()=>{ loadCategories(); loadStaff();
     const stored = localStorage.getItem('walkin-bookings')
-    if(stored) setBookings(JSON.parse(stored))
+    if(stored) {
+      try {
+        const parsed: Booking[] = JSON.parse(stored)
+        setBookings(parsed.map(b => ({ date: b.date ?? format(new Date(),'yyyy-MM-dd'), ...b })))
+      } catch {}
+    }
   },[])
   useEffect(()=>{ loadServices(); setSelectedSvc(''); setTiers([]); },[category])
   useEffect(()=>{
@@ -108,17 +115,23 @@ export default function WalkIn() {
   const totalAmount = items.reduce((acc,i)=>acc+i.price,0)
 
   const times = [] as string[]
-  const base = new Date(); base.setHours(9,0,0,0)
-  for(let i=0;i<48;i++){ times.push(format(new Date(base.getTime()+i*15*60000),'HH:mm')) }
+  const base = new Date(date)
+  base.setHours(9,0,0,0)
+  for(let i=0;i<48;i++) {
+    times.push(format(new Date(base.getTime()+i*15*60000),'HH:mm'))
+  }
 
   const saveBooking = () => {
     if(!customer||!phone||!items.length||!staffId||!start) return
     const color = COLORS[bookings.length % COLORS.length]
-    setBookings([...bookings,{ id:crypto.randomUUID(), customer, phone, services:items, staffId, start, color }])
+    const id = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random()}`
+    setBookings(b => [...b,{ id, customer, phone, services:items, staffId, date, start, color }])
     setCustomer(''); setPhone(''); setItems([]); setStaffId(''); setStart('')
   }
 
-  const bookingsFor = (id:string, time:string) => bookings.filter(b=>b.staffId===id && b.start===time)
+  const bookingsFor = (id:string, time:string) => bookings.filter(b=>b.staffId===id && b.date===date && b.start===time)
 
   return (
     <div className="space-y-6">
@@ -164,6 +177,7 @@ export default function WalkIn() {
             <option value=''>Select staff</option>
             {staff.map(s=>(<option key={s.id} value={s.id}>{s.name}</option>))}
           </select>
+          <input type="date" value={date} onChange={e=>setDate(e.target.value)} className="w-full p-2 border rounded" />
           <select value={start} onChange={e=>setStart(e.target.value)} className="w-full p-2 border rounded">
             <option value=''>Select time</option>
             {times.map(t=> (
@@ -188,8 +202,17 @@ export default function WalkIn() {
                 <td className="border px-1 whitespace-nowrap">{time}</td>
                 {staff.map(st=> (
                   <td key={st.id+time} className="border h-8 relative">
-                    {bookingsFor(st.id,time).map(b=>(
-                      <div key={b.id} className="absolute inset-0 text-white flex items-center justify-center text-xs" style={{background:b.color}} title={`${b.customer} - ₹${b.services.reduce((a,i)=>a+i.price,0)}`}></div>
+                    {bookingsFor(st.id,time).map((b,i,arr)=>(
+                      <div
+                        key={b.id}
+                        className="absolute inset-y-0 text-white flex items-center justify-center text-xs"
+                        style={{
+                          background: b.color,
+                          width: `${100/arr.length}%`,
+                          left: `${(i*100)/arr.length}%`,
+                        }}
+                        title={`${b.customer} - ₹${b.services.reduce((a,i)=>a+i.price,0)}`}
+                      ></div>
                     ))}
                   </td>
                 ))}
