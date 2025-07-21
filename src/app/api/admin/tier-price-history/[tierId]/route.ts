@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(req: Request, { params }: { params: { tierId: string } }) {
-  const { tierId } = params
+  const { tierId } = await params
   const entries = await prisma.serviceTierPriceHistory.findMany({
     where: { tierId },
     orderBy: { startDate: 'desc' },
@@ -11,7 +11,7 @@ export async function GET(req: Request, { params }: { params: { tierId: string }
 }
 
 export async function POST(req: Request, { params }: { params: { tierId: string } }) {
-  const { tierId } = params
+  const { tierId } = await params
   const data = await req.json()
   const entry = await prisma.serviceTierPriceHistory.create({
     data: {

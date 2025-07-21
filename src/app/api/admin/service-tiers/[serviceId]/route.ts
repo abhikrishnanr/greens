@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server'
 const prisma = new PrismaClient()
 
 export async function GET(req: Request, { params }: { params: { serviceId: string } }) {
-  const { serviceId } = params
+  const { serviceId } = await params
   const tiers = await prisma.serviceTier.findMany({
     where: { serviceId },
     include: { priceHistory: true },
