@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server'
 const prisma = new PrismaClient()
 
 export async function GET(req, { params }: { params: { id: string } }) {
-  const { id } = params
+  const { id } = await params
   try {
     let service = await prisma.serviceNew.findUnique({
       where: { id },

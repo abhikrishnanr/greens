@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(req: Request, { params }: { params: { categoryId: string } }) {
-  const { categoryId } = params
+  const { categoryId } = await params
   const services = await prisma.serviceNew.findMany({
     where: { categoryId },
     include: { tiers: true },
@@ -12,7 +12,7 @@ export async function GET(req: Request, { params }: { params: { categoryId: stri
 }
 
 export async function POST(req: Request, { params }: { params: { categoryId: string } }) {
-  const { categoryId } = params
+  const { categoryId } = await params
   const data = await req.json()
   const service = await prisma.serviceNew.create({
     data: {

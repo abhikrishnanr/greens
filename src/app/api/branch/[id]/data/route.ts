@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
-  const branchId = params.id;
+  const branchId = (await params).id;
   try {
     const staff = await prisma.user.findMany({
       where: { role: 'staff', branchId },
