@@ -29,6 +29,7 @@ model User {
   imageUrl    String?   @db.VarChar(191)
   createdAt   DateTime  @default(now()) @db.Timestamp(3)
   updatedAt   DateTime  @default(now()) @updatedAt @db.Timestamp(3)
+  bookings    Booking[] @relation("StaffBookings")
 
   
 }
@@ -45,6 +46,7 @@ model Branch {
 
   users         User[]
   branchService BranchService[]
+  bookings      Booking[]
 }
 
 model Coupon {
@@ -139,6 +141,7 @@ model ServiceTier {
   offerPrice   Float?
   duration     Int?
   priceHistory ServiceTierPriceHistory[]
+  bookingItems BookingItem[]
 }
 
 model ServiceTierPriceHistory {
@@ -152,4 +155,30 @@ model ServiceTierPriceHistory {
   changedAt   DateTime    @default(now()) @map("changed_at") @db.Timestamp(3)
 
   @@map("servicetierpricehistory")
+}
+
+model Booking {
+  id             String      @id @default(uuid())
+  customerName   String
+  phone          String?
+  scheduledAt    DateTime
+  duration       Int
+  estimatedAmount Float
+  status         String      @default("pending")
+  staffId        String?     @db.VarChar(191)
+  staff          User? @relation("StaffBookings", fields: [staffId], references: [id])
+  branchId       String?     @db.VarChar(191)
+  branch         Branch?     @relation(fields: [branchId], references: [id])
+  items          BookingItem[]
+  createdAt      DateTime    @default(now()) @db.Timestamp(3)
+  updatedAt      DateTime    @default(now()) @updatedAt @db.Timestamp(3)
+}
+
+model BookingItem {
+  id            String      @id @default(uuid())
+  booking       Booking     @relation(fields: [bookingId], references: [id])
+  bookingId     String      @db.VarChar(191)
+  serviceTier   ServiceTier @relation(fields: [serviceTierId], references: [id])
+  serviceTierId String      @db.VarChar(191)
+  quantity      Int         @default(1)
 }
