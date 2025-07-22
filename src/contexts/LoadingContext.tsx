@@ -1,5 +1,5 @@
 'use client'
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import React, { createContext, useContext, useEffect, useState, useRef, ReactNode } from 'react'
 
 interface LoadingValue {
   loading: boolean
@@ -15,8 +15,13 @@ export function LoadingProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState(0)
   const [active, setActive] = useState(0)
+  const hideRef = useRef<NodeJS.Timeout | null>(null)
 
   const start = () => {
+    if (hideRef.current) {
+      clearTimeout(hideRef.current)
+      hideRef.current = null
+    }
     setActive(n => n + 1)
     if (!loading) {
       setProgress(0)
@@ -29,9 +34,10 @@ export function LoadingProvider({ children }: { children: React.ReactNode }) {
       const next = n - 1
       if (next <= 0) {
         setProgress(100)
-        setTimeout(() => {
+        hideRef.current = setTimeout(() => {
           setLoading(false)
           setProgress(0)
+          hideRef.current = null
         }, 300)
         return 0
       }
