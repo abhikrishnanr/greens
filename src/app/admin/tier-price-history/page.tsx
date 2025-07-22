@@ -37,6 +37,7 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command"
+
 import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
@@ -86,6 +87,7 @@ export default function TierPriceHistoryPage() {
   const [openCategoryPopover, setOpenCategoryPopover] = useState(false)
   const [openServicePopover, setOpenServicePopover] = useState(false)
   const [openTierPopover, setOpenTierPopover] = useState(false)
+
 
 
   // Get today's date in YYYY-MM-DD format for min attribute
@@ -475,6 +477,7 @@ export default function TierPriceHistoryPage() {
                   </Command>
                 </PopoverContent>
               </Popover>
+
               </div>
               {(searchTerm || categoryFilter.length > 0 || serviceFilter.length > 0 || tierFilter.length > 0) && (
                 <Button
@@ -485,7 +488,7 @@ export default function TierPriceHistoryPage() {
                     setServiceFilter([])
                     setTierFilter([])
                   }}
-                  className="h-9 px-3 text-red-600 hover:bg-red-50 hover:text-red-700"
+                  className="col-span-full justify-self-start h-9 px-3 text-red-600 hover:bg-red-50 hover:text-red-700"
                 >
                   Reset All Filters
                   <XCircle className="ml-2 h-4 w-4" />
@@ -609,6 +612,7 @@ export default function TierPriceHistoryPage() {
         {/* Price Entry Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="sm:max-w-[500px] p-6 max-h-[80vh] overflow-y-auto text-gray-900">
+
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold">Edit Price History</DialogTitle>
               <DialogDescription>Manage individual price entries for this service tier.</DialogDescription>
