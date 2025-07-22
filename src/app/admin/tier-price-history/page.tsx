@@ -306,6 +306,7 @@ export default function TierPriceHistoryPage() {
                   value={tierFilter}
                   onValueChange={setTierFilter}
                 />
+
               </div>
               {(searchTerm || categoryFilter.length > 0 || serviceFilter.length > 0 || tierFilter.length > 0) && (
                 <Button
@@ -440,6 +441,7 @@ export default function TierPriceHistoryPage() {
         {/* Price Entry Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="sm:max-w-[500px] p-6 max-h-[80vh] overflow-y-auto text-gray-900">
+
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold">Edit Price History</DialogTitle>
               <DialogDescription>Manage individual price entries for this service tier.</DialogDescription>
