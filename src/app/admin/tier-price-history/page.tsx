@@ -45,12 +45,15 @@ export default function TierPriceHistoryPage() {
 
   const loadRows = async () => {
     const tiers = await fetch('/api/admin/service-tiers/all').then(r => r.json())
-    const enriched: TierRow[] = []
-    for (const t of tiers) {
-      const hist: Entry[] = await fetch(`/api/admin/tier-price-history/${t.id}`).then(r => r.json())
-      const { current, upcoming } = getCurrentAndNext(hist)
-      enriched.push({ ...t, current, upcoming })
-    }
+    const histories = await Promise.all(
+      tiers.map((t: TierRow) =>
+        fetch(`/api/admin/tier-price-history/${t.id}`).then(r => r.json())
+      )
+    )
+    const enriched: TierRow[] = tiers.map((t: TierRow, i: number) => {
+      const { current, upcoming } = getCurrentAndNext(histories[i] as Entry[])
+      return { ...t, current, upcoming }
+    })
     setRows(enriched)
   }
 
