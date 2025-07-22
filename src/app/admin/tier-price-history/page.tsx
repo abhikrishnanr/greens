@@ -19,20 +19,6 @@ interface Entry {
   endDate?: string | null
 }
 
-function getCurrentAndNext(entries: Entry[]) {
-  const now = new Date()
-  const sorted = [...entries].sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-  let current: Entry | undefined
-  let upcoming: Entry | undefined
-  for (const e of sorted) {
-    const start = new Date(e.startDate)
-    const end = e.endDate ? new Date(e.endDate) : null
-    if (!current && start <= now && (!end || now < end)) current = e
-    if (!upcoming && start > now) upcoming = e
-  }
-  return { current, upcoming }
-}
-
 export default function TierPriceHistoryPage() {
   const empty: Partial<Entry> = { id: '', actualPrice: 0, startDate: '' }
   const [rows, setRows] = useState<TierRow[]>([])
@@ -45,16 +31,7 @@ export default function TierPriceHistoryPage() {
 
   const loadRows = async () => {
     const tiers = await fetch('/api/admin/service-tiers/all').then(r => r.json())
-    const histories = await Promise.all(
-      tiers.map((t: TierRow) =>
-        fetch(`/api/admin/tier-price-history/${t.id}`).then(r => r.json())
-      )
-    )
-    const enriched: TierRow[] = tiers.map((t: TierRow, i: number) => {
-      const { current, upcoming } = getCurrentAndNext(histories[i] as Entry[])
-      return { ...t, current, upcoming }
-    })
-    setRows(enriched)
+    setRows(tiers)
   }
 
   const open = async (tierId: string) => {
