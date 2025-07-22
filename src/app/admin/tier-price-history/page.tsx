@@ -5,8 +5,6 @@ import {
   Pencil,
   Trash2,
   Search,
-  ChevronDown,
-  CheckIcon,
   XCircle,
   IndianRupee,
   Calendar,
@@ -28,17 +26,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from "@/components/ui/command"
-import { cn } from "@/lib/utils"
+import { MultiSelect } from "@/components/ui/multi-select"
 import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
@@ -86,10 +74,6 @@ export default function TierPriceHistoryPage() {
   const [serviceFilter, setServiceFilter] = useState<string[]>([])
   const [tierFilter, setTierFilter] = useState<string[]>([])
 
-  // State for controlling popover open/close
-  const [openCategoryPopover, setOpenCategoryPopover] = useState(false)
-  const [openServicePopover, setOpenServicePopover] = useState(false)
-  const [openTierPopover, setOpenTierPopover] = useState(false)
 
   // Get today's date in YYYY-MM-DD format for min attribute
   const today = useMemo(() => new Date().toISOString().split("T")[0], [])
@@ -277,8 +261,8 @@ export default function TierPriceHistoryPage() {
           </CardHeader>
           <CardContent>
             {/* Search and Filters */}
-            <div className="flex flex-col md:flex-row md:flex-wrap items-center gap-4 mb-6">
-              <div className="relative w-full md:max-w-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 items-end gap-4 mb-6">
+              <div className="relative col-span-full xl:col-span-2">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search by category, service, or tier..."
@@ -288,195 +272,41 @@ export default function TierPriceHistoryPage() {
                 />
               </div>
               {/* Category Filter */}
-              <Popover open={openCategoryPopover} onOpenChange={setOpenCategoryPopover}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full md:w-auto justify-between bg-white hover:bg-gray-50">
-                    Category
-                    {categoryFilter.length > 0 && (
-                      <Badge variant="secondary" className="ml-2 px-2 py-0.5 rounded-full">
-                        {categoryFilter.length}
-                      </Badge>
-                    )}
-                    <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start" sideOffset={8}>
-                  <Command>
-                    <CommandInput placeholder="Search category..." />
-                    <CommandList>
-                      <CommandEmpty>No results found.</CommandEmpty>
-                      <CommandGroup>
-                        {uniqueCategories.map((category) => (
-                          <CommandItem
-                            key={category}
-                            onSelect={() => {
-                              setCategoryFilter((prev) =>
-                                prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category],
-                              )
-                              // Keep popover open for multi-select, close if single select desired
-                              // setOpenCategoryPopover(false);
-                            }}
-                          >
-                            <div
-                              className={cn(
-                                "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                                categoryFilter.includes(category)
-                                  ? "bg-primary text-primary-foreground"
-                                  : "opacity-50 [&_svg]:invisible",
-                              )}
-                            >
-                              <CheckIcon className={cn("h-4 w-4")} />
-                            </div>
-                            <span>{category}</span>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                      {categoryFilter.length > 0 && (
-                        <>
-                          <CommandSeparator />
-                          <CommandGroup>
-                            <CommandItem
-                              onSelect={() => {
-                                setCategoryFilter([])
-                                setOpenCategoryPopover(false) // Close after clearing
-                              }}
-                              className="justify-center text-center text-red-500"
-                            >
-                              Clear filters
-                            </CommandItem>
-                          </CommandGroup>
-                        </>
-                      )}
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+              <div className="col-span-1">
+                <Label htmlFor="categoryFilter" className="mb-1 block text-sm font-medium text-gray-700">
+                  Category
+                </Label>
+                <MultiSelect
+                  id="categoryFilter"
+                  options={uniqueCategories}
+                  value={categoryFilter}
+                  onValueChange={setCategoryFilter}
+                />
+              </div>
               {/* Service Filter */}
-              <Popover open={openServicePopover} onOpenChange={setOpenServicePopover}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full md:w-auto justify-between bg-white hover:bg-gray-50">
-                    Service
-                    {serviceFilter.length > 0 && (
-                      <Badge variant="secondary" className="ml-2 px-2 py-0.5 rounded-full">
-                        {serviceFilter.length}
-                      </Badge>
-                    )}
-                    <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start" sideOffset={8}>
-                  <Command>
-                    <CommandInput placeholder="Search service..." />
-                    <CommandList>
-                      <CommandEmpty>No results found.</CommandEmpty>
-                      <CommandGroup>
-                        {uniqueServices.map((service) => (
-                          <CommandItem
-                            key={service}
-                            onSelect={() => {
-                              setServiceFilter((prev) =>
-                                prev.includes(service) ? prev.filter((s) => s !== service) : [...prev, service],
-                              )
-                              // setOpenServicePopover(false);
-                            }}
-                          >
-                            <div
-                              className={cn(
-                                "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                                serviceFilter.includes(service)
-                                  ? "bg-primary text-primary-foreground"
-                                  : "opacity-50 [&_svg]:invisible",
-                              )}
-                            >
-                              <CheckIcon className={cn("h-4 w-4")} />
-                            </div>
-                            <span>{service}</span>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                      {serviceFilter.length > 0 && (
-                        <>
-                          <CommandSeparator />
-                          <CommandGroup>
-                            <CommandItem
-                              onSelect={() => {
-                                setServiceFilter([])
-                                setOpenServicePopover(false) // Close after clearing
-                              }}
-                              className="justify-center text-center text-red-500"
-                            >
-                              Clear filters
-                            </CommandItem>
-                          </CommandGroup>
-                        </>
-                      )}
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+              <div className="col-span-1">
+                <Label htmlFor="serviceFilter" className="mb-1 block text-sm font-medium text-gray-700">
+                  Service
+                </Label>
+                <MultiSelect
+                  id="serviceFilter"
+                  options={uniqueServices}
+                  value={serviceFilter}
+                  onValueChange={setServiceFilter}
+                />
+              </div>
               {/* Tier Filter */}
-              <Popover open={openTierPopover} onOpenChange={setOpenTierPopover}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full md:w-auto justify-between bg-white hover:bg-gray-50">
-                    Tier
-                    {tierFilter.length > 0 && (
-                      <Badge variant="secondary" className="ml-2 px-2 py-0.5 rounded-full">
-                        {tierFilter.length}
-                      </Badge>
-                    )}
-                    <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start" sideOffset={8}>
-                  <Command>
-                    <CommandInput placeholder="Search tier..." />
-                    <CommandList>
-                      <CommandEmpty>No results found.</CommandEmpty>
-                      <CommandGroup>
-                        {uniqueTiers.map((tier) => (
-                          <CommandItem
-                            key={tier}
-                            onSelect={() => {
-                              setTierFilter((prev) =>
-                                prev.includes(tier) ? prev.filter((t) => t !== tier) : [...prev, tier],
-                              )
-                              // setOpenTierPopover(false);
-                            }}
-                          >
-                            <div
-                              className={cn(
-                                "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                                tierFilter.includes(tier)
-                                  ? "bg-primary text-primary-foreground"
-                                  : "opacity-50 [&_svg]:invisible",
-                              )}
-                            >
-                              <CheckIcon className={cn("h-4 w-4")} />
-                            </div>
-                            <span>{tier}</span>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                      {tierFilter.length > 0 && (
-                        <>
-                          <CommandSeparator />
-                          <CommandGroup>
-                            <CommandItem
-                              onSelect={() => {
-                                setTierFilter([])
-                                setOpenTierPopover(false) // Close after clearing
-                              }}
-                              className="justify-center text-center text-red-500"
-                            >
-                              Clear filters
-                            </CommandItem>
-                          </CommandGroup>
-                        </>
-                      )}
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+              <div className="col-span-1">
+                <Label htmlFor="tierFilter" className="mb-1 block text-sm font-medium text-gray-700">
+                  Tier
+                </Label>
+                <MultiSelect
+                  id="tierFilter"
+                  options={uniqueTiers}
+                  value={tierFilter}
+                  onValueChange={setTierFilter}
+                />
+              </div>
               {(searchTerm || categoryFilter.length > 0 || serviceFilter.length > 0 || tierFilter.length > 0) && (
                 <Button
                   variant="ghost"
@@ -486,7 +316,7 @@ export default function TierPriceHistoryPage() {
                     setServiceFilter([])
                     setTierFilter([])
                   }}
-                  className="h-9 px-3 text-red-600 hover:bg-red-50 hover:text-red-700"
+                  className="col-span-full justify-self-start h-9 px-3 text-red-600 hover:bg-red-50 hover:text-red-700"
                 >
                   Reset All Filters
                   <XCircle className="ml-2 h-4 w-4" />
@@ -609,7 +439,7 @@ export default function TierPriceHistoryPage() {
         </Card>
         {/* Price Entry Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="sm:max-w-[500px] p-6 top-[10%] translate-y-0 max-h-[80vh] overflow-y-auto">
+          <DialogContent className="sm:max-w-[500px] p-6 max-h-[80vh] overflow-y-auto text-gray-900">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold">Edit Price History</DialogTitle>
               <DialogDescription>Manage individual price entries for this service tier.</DialogDescription>
