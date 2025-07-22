@@ -277,8 +277,8 @@ export default function TierPriceHistoryPage() {
           </CardHeader>
           <CardContent>
             {/* Search and Filters */}
-            <div className="flex flex-col md:flex-row md:flex-wrap items-center gap-4 mb-6">
-              <div className="relative w-full md:max-w-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 items-end gap-4 mb-6">
+              <div className="relative col-span-full xl:col-span-2">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search by category, service, or tier..."
@@ -288,9 +288,10 @@ export default function TierPriceHistoryPage() {
                 />
               </div>
               {/* Category Filter */}
+              <div className="col-span-1">
               <Popover open={openCategoryPopover} onOpenChange={setOpenCategoryPopover}>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full md:w-auto justify-between bg-white hover:bg-gray-50">
+                  <Button variant="outline" className="w-full justify-between bg-white hover:bg-gray-50">
                     Category
                     {categoryFilter.length > 0 && (
                       <Badge variant="secondary" className="ml-2 px-2 py-0.5 rounded-full">
@@ -347,14 +348,16 @@ export default function TierPriceHistoryPage() {
                           </CommandGroup>
                         </>
                       )}
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
               </Popover>
+              </div>
               {/* Service Filter */}
+              <div className="col-span-1">
               <Popover open={openServicePopover} onOpenChange={setOpenServicePopover}>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full md:w-auto justify-between bg-white hover:bg-gray-50">
+                  <Button variant="outline" className="w-full justify-between bg-white hover:bg-gray-50">
                     Service
                     {serviceFilter.length > 0 && (
                       <Badge variant="secondary" className="ml-2 px-2 py-0.5 rounded-full">
@@ -414,10 +417,12 @@ export default function TierPriceHistoryPage() {
                   </Command>
                 </PopoverContent>
               </Popover>
+              </div>
               {/* Tier Filter */}
+              <div className="col-span-1">
               <Popover open={openTierPopover} onOpenChange={setOpenTierPopover}>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full md:w-auto justify-between bg-white hover:bg-gray-50">
+                  <Button variant="outline" className="w-full justify-between bg-white hover:bg-gray-50">
                     Tier
                     {tierFilter.length > 0 && (
                       <Badge variant="secondary" className="ml-2 px-2 py-0.5 rounded-full">
@@ -477,6 +482,7 @@ export default function TierPriceHistoryPage() {
                   </Command>
                 </PopoverContent>
               </Popover>
+              </div>
               {(searchTerm || categoryFilter.length > 0 || serviceFilter.length > 0 || tierFilter.length > 0) && (
                 <Button
                   variant="ghost"
@@ -486,7 +492,7 @@ export default function TierPriceHistoryPage() {
                     setServiceFilter([])
                     setTierFilter([])
                   }}
-                  className="h-9 px-3 text-red-600 hover:bg-red-50 hover:text-red-700"
+                  className="col-span-full justify-self-start h-9 px-3 text-red-600 hover:bg-red-50 hover:text-red-700"
                 >
                   Reset All Filters
                   <XCircle className="ml-2 h-4 w-4" />
@@ -609,7 +615,7 @@ export default function TierPriceHistoryPage() {
         </Card>
         {/* Price Entry Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="sm:max-w-[500px] p-6 top-[10%] translate-y-0 max-h-[80vh] overflow-y-auto">
+          <DialogContent className="sm:max-w-[500px] p-6 max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold">Edit Price History</DialogTitle>
               <DialogDescription>Manage individual price entries for this service tier.</DialogDescription>
