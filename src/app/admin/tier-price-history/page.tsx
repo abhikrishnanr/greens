@@ -289,7 +289,7 @@ export default function TierPriceHistoryPage() {
               </div>
               {/* Category Filter */}
               <div className="col-span-1">
-              <Popover open={openCategoryPopover} onOpenChange={setOpenCategoryPopover}>
+              <Popover open={openCategoryPopover} onOpenChange={setOpenCategoryPopover} className="w-full">
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-between bg-white hover:bg-gray-50">
                     Category
@@ -301,7 +301,7 @@ export default function TierPriceHistoryPage() {
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start" sideOffset={8}>
+                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
                   <Command>
                     <CommandInput placeholder="Search category..." />
                     <CommandList>
@@ -355,7 +355,7 @@ export default function TierPriceHistoryPage() {
               </div>
               {/* Service Filter */}
               <div className="col-span-1">
-              <Popover open={openServicePopover} onOpenChange={setOpenServicePopover}>
+              <Popover open={openServicePopover} onOpenChange={setOpenServicePopover} className="w-full">
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-between bg-white hover:bg-gray-50">
                     Service
@@ -367,7 +367,7 @@ export default function TierPriceHistoryPage() {
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start" sideOffset={8}>
+                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
                   <Command>
                     <CommandInput placeholder="Search service..." />
                     <CommandList>
@@ -420,7 +420,7 @@ export default function TierPriceHistoryPage() {
               </div>
               {/* Tier Filter */}
               <div className="col-span-1">
-              <Popover open={openTierPopover} onOpenChange={setOpenTierPopover}>
+              <Popover open={openTierPopover} onOpenChange={setOpenTierPopover} className="w-full">
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-between bg-white hover:bg-gray-50">
                     Tier
@@ -432,7 +432,7 @@ export default function TierPriceHistoryPage() {
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start" sideOffset={8}>
+                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
                   <Command>
                     <CommandInput placeholder="Search tier..." />
                     <CommandList>
