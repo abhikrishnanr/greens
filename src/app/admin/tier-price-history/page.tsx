@@ -1,7 +1,5 @@
 "use client"
-
 import type React from "react"
-
 import { useEffect, useState, useMemo } from "react"
 import {
   Pencil,
@@ -10,7 +8,7 @@ import {
   ChevronDown,
   CheckIcon,
   XCircle,
-  DollarSign,
+  IndianRupee,
   Calendar,
   Tag,
   Sparkles,
@@ -61,19 +59,40 @@ interface Entry {
   endDate?: string | null
 }
 
+// Helper function to format date for input type="date" (YYYY-MM-DD)
+const formatDateForInput = (dateString: string | null | undefined): string => {
+  if (!dateString) return ""
+  try {
+    const date = new Date(dateString)
+    // Ensure it's a valid date before formatting
+    if (isNaN(date.getTime())) return ""
+    return date.toISOString().split("T")[0]
+  } catch (error) {
+    console.error("Error formatting date:", error)
+    return ""
+  }
+}
+
 export default function TierPriceHistoryPage() {
   const empty: Partial<Entry> = { id: "", actualPrice: 0, startDate: "" }
   const [rows, setRows] = useState<TierRow[]>([])
-  const [selected, setSelected] = useState("") // Renamed from selectedTierId
+  const [selected, setSelected] = useState("")
   const [entries, setEntries] = useState<Entry[]>([])
   const [form, setForm] = useState<Partial<Entry>>(empty)
-  const [editing, setEditing] = useState(false) // Renamed from isEditing
-  const [isDialogOpen, setIsDialogOpen] = useState(false) // Kept for dialog state
-
+  const [editing, setEditing] = useState(false)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [categoryFilter, setCategoryFilter] = useState<string[]>([])
   const [serviceFilter, setServiceFilter] = useState<string[]>([])
   const [tierFilter, setTierFilter] = useState<string[]>([])
+
+  // State for controlling popover open/close
+  const [openCategoryPopover, setOpenCategoryPopover] = useState(false)
+  const [openServicePopover, setOpenServicePopover] = useState(false)
+  const [openTierPopover, setOpenTierPopover] = useState(false)
+
+  // Get today's date in YYYY-MM-DD format for min attribute
+  const today = useMemo(() => new Date().toISOString().split("T")[0], [])
 
   useEffect(() => {
     loadRows()
@@ -85,24 +104,21 @@ export default function TierPriceHistoryPage() {
   }
 
   const open = async (tierId: string) => {
-    // Original function name
     setSelected(tierId)
     const hist = await fetch(`/api/admin/tier-price-history/${tierId}`).then((r) => r.json())
     setEntries(hist)
     setForm({ ...empty, id: crypto.randomUUID() })
     setEditing(false)
-    setIsDialogOpen(true) // Open the dialog
+    setIsDialogOpen(true)
   }
 
   const closeTierDetails = () => {
-    // Helper to close dialog
     setSelected("")
     setEntries([])
     setIsDialogOpen(false)
   }
 
   const save = async (e: React.FormEvent) => {
-    // Original function name
     e.preventDefault()
     const body = {
       actualPrice: Number(form.actualPrice),
@@ -110,7 +126,6 @@ export default function TierPriceHistoryPage() {
       startDate: form.startDate,
       endDate: form.endDate || null,
     }
-
     if (editing) {
       await fetch(`/api/admin/tier-price-history/${selected}`, {
         method: "PUT",
@@ -126,27 +141,23 @@ export default function TierPriceHistoryPage() {
     }
     setForm({ ...empty, id: crypto.randomUUID() })
     setEditing(false)
-    // Reload entries for the current tier and the main table
     const hist = await fetch(`/api/admin/tier-price-history/${selected}`).then((r) => r.json())
     setEntries(hist)
     loadRows()
   }
 
   const edit = (e: Entry) => {
-    // Original function name
     setForm({ ...e })
     setEditing(true)
   }
 
   const del = async (id: string) => {
-    // Original function name
     if (!confirm("Are you sure you want to delete this price entry?")) return
     await fetch(`/api/admin/tier-price-history/${selected}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     })
-    // Reload entries for the current tier and the main table
     const hist = await fetch(`/api/admin/tier-price-history/${selected}`).then((r) => r.json())
     setEntries(hist)
     loadRows()
@@ -154,8 +165,6 @@ export default function TierPriceHistoryPage() {
 
   const filteredRows = useMemo(() => {
     let currentRows = rows
-
-    // Apply search term
     if (searchTerm) {
       currentRows = currentRows.filter(
         (row) =>
@@ -166,22 +175,15 @@ export default function TierPriceHistoryPage() {
           row.upcoming?.actualPrice?.toString().includes(searchTerm),
       )
     }
-
-    // Apply category filter
     if (categoryFilter.length > 0) {
       currentRows = currentRows.filter((row) => categoryFilter.includes(row.categoryName))
     }
-
-    // Apply service filter
     if (serviceFilter.length > 0) {
       currentRows = currentRows.filter((row) => serviceFilter.includes(row.serviceName))
     }
-
-    // Apply tier filter
     if (tierFilter.length > 0) {
       currentRows = currentRows.filter((row) => tierFilter.includes(row.tierName))
     }
-
     return [...currentRows].sort((a, b) => {
       const cat = a.categoryName.localeCompare(b.categoryName)
       if (cat !== 0) return cat
@@ -199,6 +201,25 @@ export default function TierPriceHistoryPage() {
   const tiersWithUpcomingPrice = rows.filter((row) => row.upcoming).length
   const tiersWithoutPrice = rows.filter((row) => !row.current && !row.upcoming).length
 
+  // Determine if the current form's start date is in the past (for disabling)
+  const isStartDateInPast = useMemo(() => {
+    if (!form.startDate) return false
+    const entryDate = new Date(form.startDate)
+    const now = new Date()
+    // Compare only dates, ignoring time
+    return entryDate.setHours(0, 0, 0, 0) < now.setHours(0, 0, 0, 0)
+  }, [form.startDate])
+
+  // Determine the minimum allowed date for the end date input
+  const endDateMinDate = useMemo(() => {
+    if (form.startDate) {
+      // End date cannot be before start date
+      return formatDateForInput(form.startDate)
+    }
+    // If no start date, end date cannot be before today
+    return today
+  }, [form.startDate, today])
+
   return (
     <TooltipProvider>
       <div className="container mx-auto py-8 px-4 md:px-6 bg-gray-50 min-h-screen">
@@ -206,7 +227,6 @@ export default function TierPriceHistoryPage() {
         <p className="text-lg text-muted-foreground mb-8">
           Effortlessly manage and update all service tier prices and special offers.
         </p>
-
         {/* Info Graphics / Summary Cards */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-10">
           <Card className="shadow-lg border-l-4 border-blue-500">
@@ -222,7 +242,7 @@ export default function TierPriceHistoryPage() {
           <Card className="shadow-lg border-l-4 border-green-500">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-green-700">Tiers with Active Pricing</CardTitle>
-              <DollarSign className="h-5 w-5 text-green-500" />
+              <IndianRupee className="h-5 w-5 text-green-500" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-gray-900">{tiersWithCurrentPrice}</div>
@@ -250,7 +270,6 @@ export default function TierPriceHistoryPage() {
             </CardContent>
           </Card>
         </div>
-
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="text-2xl font-semibold">Service Tier Price List</CardTitle>
@@ -268,16 +287,20 @@ export default function TierPriceHistoryPage() {
                   className="pl-9 pr-4 py-2 rounded-md border focus-visible:ring-blue-500"
                 />
               </div>
-
               {/* Category Filter */}
-              <Popover>
+              <Popover open={openCategoryPopover} onOpenChange={setOpenCategoryPopover}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full md:w-auto justify-between bg-white hover:bg-gray-50">
                     Category
+                    {categoryFilter.length > 0 && (
+                      <Badge variant="secondary" className="ml-2 px-2 py-0.5 rounded-full">
+                        {categoryFilter.length}
+                      </Badge>
+                    )}
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0" align="start">
+                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start" sideOffset={8}>
                   <Command>
                     <CommandInput placeholder="Search category..." />
                     <CommandList>
@@ -286,10 +309,12 @@ export default function TierPriceHistoryPage() {
                         {uniqueCategories.map((category) => (
                           <CommandItem
                             key={category}
-                            onClick={() => {
+                            onSelect={() => {
                               setCategoryFilter((prev) =>
                                 prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category],
                               )
+                              // Keep popover open for multi-select, close if single select desired
+                              // setOpenCategoryPopover(false);
                             }}
                           >
                             <div
@@ -311,7 +336,10 @@ export default function TierPriceHistoryPage() {
                           <CommandSeparator />
                           <CommandGroup>
                             <CommandItem
-                              onClick={() => setCategoryFilter([])}
+                              onSelect={() => {
+                                setCategoryFilter([])
+                                setOpenCategoryPopover(false) // Close after clearing
+                              }}
                               className="justify-center text-center text-red-500"
                             >
                               Clear filters
@@ -323,16 +351,20 @@ export default function TierPriceHistoryPage() {
                   </Command>
                 </PopoverContent>
               </Popover>
-
               {/* Service Filter */}
-              <Popover>
+              <Popover open={openServicePopover} onOpenChange={setOpenServicePopover}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full md:w-auto justify-between bg-white hover:bg-gray-50">
                     Service
+                    {serviceFilter.length > 0 && (
+                      <Badge variant="secondary" className="ml-2 px-2 py-0.5 rounded-full">
+                        {serviceFilter.length}
+                      </Badge>
+                    )}
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0" align="start">
+                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start" sideOffset={8}>
                   <Command>
                     <CommandInput placeholder="Search service..." />
                     <CommandList>
@@ -341,10 +373,11 @@ export default function TierPriceHistoryPage() {
                         {uniqueServices.map((service) => (
                           <CommandItem
                             key={service}
-                            onClick={() => {
+                            onSelect={() => {
                               setServiceFilter((prev) =>
                                 prev.includes(service) ? prev.filter((s) => s !== service) : [...prev, service],
                               )
+                              // setOpenServicePopover(false);
                             }}
                           >
                             <div
@@ -366,7 +399,10 @@ export default function TierPriceHistoryPage() {
                           <CommandSeparator />
                           <CommandGroup>
                             <CommandItem
-                              onClick={() => setServiceFilter([])}
+                              onSelect={() => {
+                                setServiceFilter([])
+                                setOpenServicePopover(false) // Close after clearing
+                              }}
                               className="justify-center text-center text-red-500"
                             >
                               Clear filters
@@ -378,16 +414,20 @@ export default function TierPriceHistoryPage() {
                   </Command>
                 </PopoverContent>
               </Popover>
-
               {/* Tier Filter */}
-              <Popover>
+              <Popover open={openTierPopover} onOpenChange={setOpenTierPopover}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full md:w-auto justify-between bg-white hover:bg-gray-50">
                     Tier
+                    {tierFilter.length > 0 && (
+                      <Badge variant="secondary" className="ml-2 px-2 py-0.5 rounded-full">
+                        {tierFilter.length}
+                      </Badge>
+                    )}
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0" align="start">
+                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start" sideOffset={8}>
                   <Command>
                     <CommandInput placeholder="Search tier..." />
                     <CommandList>
@@ -396,10 +436,11 @@ export default function TierPriceHistoryPage() {
                         {uniqueTiers.map((tier) => (
                           <CommandItem
                             key={tier}
-                            onClick={() => {
+                            onSelect={() => {
                               setTierFilter((prev) =>
                                 prev.includes(tier) ? prev.filter((t) => t !== tier) : [...prev, tier],
                               )
+                              // setOpenTierPopover(false);
                             }}
                           >
                             <div
@@ -421,7 +462,10 @@ export default function TierPriceHistoryPage() {
                           <CommandSeparator />
                           <CommandGroup>
                             <CommandItem
-                              onClick={() => setTierFilter([])}
+                              onSelect={() => {
+                                setTierFilter([])
+                                setOpenTierPopover(false) // Close after clearing
+                              }}
                               className="justify-center text-center text-red-500"
                             >
                               Clear filters
@@ -433,7 +477,6 @@ export default function TierPriceHistoryPage() {
                   </Command>
                 </PopoverContent>
               </Popover>
-
               {(searchTerm || categoryFilter.length > 0 || serviceFilter.length > 0 || tierFilter.length > 0) && (
                 <Button
                   variant="ghost"
@@ -445,12 +488,11 @@ export default function TierPriceHistoryPage() {
                   }}
                   className="h-9 px-3 text-red-600 hover:bg-red-50 hover:text-red-700"
                 >
-                  Reset Filters
+                  Reset All Filters
                   <XCircle className="ml-2 h-4 w-4" />
                 </Button>
               )}
             </div>
-
             {/* Main Table */}
             <div className="rounded-lg border overflow-hidden shadow-sm">
               <Table>
@@ -479,14 +521,14 @@ export default function TierPriceHistoryPage() {
                           {row.current ? (
                             <div className="flex flex-col items-start gap-1">
                               <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
-                                ${row.current.actualPrice}
+                                ₹{row.current.actualPrice}
                               </Badge>
                               {row.current.offerPrice && (
                                 <Badge
                                   variant="outline"
                                   className="bg-purple-100 text-purple-800 border-purple-300 hover:bg-purple-200"
                                 >
-                                  Offer: ${row.current.offerPrice}
+                                  Offer: ₹{row.current.offerPrice}
                                 </Badge>
                               )}
                             </div>
@@ -503,14 +545,14 @@ export default function TierPriceHistoryPage() {
                           {row.upcoming ? (
                             <div className="flex flex-col items-start gap-1">
                               <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200">
-                                ${row.upcoming.actualPrice}
+                                ₹{row.upcoming.actualPrice}
                               </Badge>
                               {row.upcoming.offerPrice && (
                                 <Badge
                                   variant="outline"
                                   className="bg-purple-100 text-purple-800 border-purple-300 hover:bg-purple-200"
                                 >
-                                  Offer: ${row.upcoming.offerPrice}
+                                  Offer: ₹{row.upcoming.offerPrice}
                                 </Badge>
                               )}
                             </div>
@@ -527,7 +569,7 @@ export default function TierPriceHistoryPage() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => open(row.id)} // Original function call
+                                onClick={() => open(row.id)}
                                 className="text-blue-600 hover:bg-blue-50 hover:text-blue-700"
                               >
                                 <Pencil className="h-4 w-4" />
@@ -565,10 +607,9 @@ export default function TierPriceHistoryPage() {
             </div>
           </CardContent>
         </Card>
-
         {/* Price Entry Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="sm:max-w-[500px] p-6">
+          <DialogContent className="sm:max-w-[500px] p-6 top-[10%] translate-y-0 max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold">Edit Price History</DialogTitle>
               <DialogDescription>Manage individual price entries for this service tier.</DialogDescription>
@@ -582,7 +623,7 @@ export default function TierPriceHistoryPage() {
                 <Input
                   id="actualPrice"
                   type="number"
-                  placeholder="e.g., 50.00"
+                  placeholder="e.g., 500.00"
                   value={form.actualPrice ?? ""}
                   onChange={(e) => setForm({ ...form, actualPrice: Number.parseFloat(e.target.value) })}
                   required
@@ -596,7 +637,7 @@ export default function TierPriceHistoryPage() {
                 <Input
                   id="offerPrice"
                   type="number"
-                  placeholder="e.g., 45.00 (optional)"
+                  placeholder="e.g., 450.00 (optional)"
                   value={form.offerPrice ?? ""}
                   onChange={(e) =>
                     setForm({ ...form, offerPrice: e.target.value ? Number.parseFloat(e.target.value) : null })
@@ -611,9 +652,11 @@ export default function TierPriceHistoryPage() {
                 <Input
                   id="startDate"
                   type="date"
-                  value={form.startDate || ""}
+                  value={formatDateForInput(form.startDate)}
                   onChange={(e) => setForm({ ...form, startDate: e.target.value })}
                   required
+                  disabled={editing && isStartDateInPast}
+                  min={today}
                   className="mt-1 w-full focus-visible:ring-blue-500"
                 />
                 <p className="mt-2 text-xs text-muted-foreground">Date when this price becomes effective.</p>
@@ -625,8 +668,9 @@ export default function TierPriceHistoryPage() {
                 <Input
                   id="endDate"
                   type="date"
-                  value={form.endDate || ""}
+                  value={formatDateForInput(form.endDate)}
                   onChange={(e) => setForm({ ...form, endDate: e.target.value || null })}
+                  min={endDateMinDate}
                   className="mt-1 w-full focus-visible:ring-blue-500"
                 />
                 <p className="mt-2 text-xs text-muted-foreground">Leave blank if this price has no planned end date.</p>
@@ -641,11 +685,10 @@ export default function TierPriceHistoryPage() {
                   Cancel
                 </Button>
                 <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
-                  {editing ? "Update Entry" : "Add New Entry"} {/* Original state variable */}
+                  {editing ? "Update Entry" : "Add New Entry"}
                 </Button>
               </DialogFooter>
             </form>
-
             {entries.length > 0 && (
               <div className="mt-6 border-t pt-4">
                 <h3 className="text-lg font-semibold mb-3">Historical Price Entries</h3>
@@ -663,8 +706,8 @@ export default function TierPriceHistoryPage() {
                     <TableBody>
                       {entries.map((e) => (
                         <TableRow key={e.id} className="hover:bg-gray-50 transition-colors">
-                          <TableCell className="font-medium">${e.actualPrice}</TableCell>
-                          <TableCell>{e.offerPrice ? `$${e.offerPrice}` : "—"}</TableCell>
+                          <TableCell className="font-medium">₹{e.actualPrice}</TableCell>
+                          <TableCell>{e.offerPrice ? `₹${e.offerPrice}` : "—"}</TableCell>
                           <TableCell>{new Date(e.startDate).toLocaleDateString()}</TableCell>
                           <TableCell>{e.endDate ? new Date(e.endDate).toLocaleDateString() : "—"}</TableCell>
                           <TableCell className="text-right">
@@ -673,7 +716,7 @@ export default function TierPriceHistoryPage() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  onClick={() => edit(e)} // Original function call
+                                  onClick={() => edit(e)}
                                   className="text-blue-500 hover:bg-blue-50 hover:text-blue-600"
                                 >
                                   <Pencil className="h-4 w-4" />
@@ -687,7 +730,7 @@ export default function TierPriceHistoryPage() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  onClick={() => del(e.id)} // Original function call
+                                  onClick={() => del(e.id)}
                                   className="text-red-500 hover:bg-red-50 hover:text-red-600"
                                 >
                                   <Trash2 className="h-4 w-4" />
