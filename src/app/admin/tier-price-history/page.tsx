@@ -182,7 +182,13 @@ export default function TierPriceHistoryPage() {
       currentRows = currentRows.filter((row) => tierFilter.includes(row.tierName))
     }
 
-    return currentRows
+    return [...currentRows].sort((a, b) => {
+      const cat = a.categoryName.localeCompare(b.categoryName)
+      if (cat !== 0) return cat
+      const serv = a.serviceName.localeCompare(b.serviceName)
+      if (serv !== 0) return serv
+      return a.tierName.localeCompare(b.tierName)
+    })
   }, [rows, searchTerm, categoryFilter, serviceFilter, tierFilter])
 
   const uniqueCategories = useMemo(() => Array.from(new Set(rows.map((row) => row.categoryName))), [rows])
@@ -252,7 +258,7 @@ export default function TierPriceHistoryPage() {
           </CardHeader>
           <CardContent>
             {/* Search and Filters */}
-            <div className="flex flex-col md:flex-row items-center gap-4 mb-6">
+            <div className="flex flex-col md:flex-row md:flex-wrap items-center gap-4 mb-6">
               <div className="relative w-full md:max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -280,7 +286,7 @@ export default function TierPriceHistoryPage() {
                         {uniqueCategories.map((category) => (
                           <CommandItem
                             key={category}
-                            onSelect={() => {
+                            onClick={() => {
                               setCategoryFilter((prev) =>
                                 prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category],
                               )
@@ -305,7 +311,7 @@ export default function TierPriceHistoryPage() {
                           <CommandSeparator />
                           <CommandGroup>
                             <CommandItem
-                              onSelect={() => setCategoryFilter([])}
+                              onClick={() => setCategoryFilter([])}
                               className="justify-center text-center text-red-500"
                             >
                               Clear filters
@@ -335,7 +341,7 @@ export default function TierPriceHistoryPage() {
                         {uniqueServices.map((service) => (
                           <CommandItem
                             key={service}
-                            onSelect={() => {
+                            onClick={() => {
                               setServiceFilter((prev) =>
                                 prev.includes(service) ? prev.filter((s) => s !== service) : [...prev, service],
                               )
@@ -360,7 +366,7 @@ export default function TierPriceHistoryPage() {
                           <CommandSeparator />
                           <CommandGroup>
                             <CommandItem
-                              onSelect={() => setServiceFilter([])}
+                              onClick={() => setServiceFilter([])}
                               className="justify-center text-center text-red-500"
                             >
                               Clear filters
@@ -390,7 +396,7 @@ export default function TierPriceHistoryPage() {
                         {uniqueTiers.map((tier) => (
                           <CommandItem
                             key={tier}
-                            onSelect={() => {
+                            onClick={() => {
                               setTierFilter((prev) =>
                                 prev.includes(tier) ? prev.filter((t) => t !== tier) : [...prev, tier],
                               )
@@ -415,7 +421,7 @@ export default function TierPriceHistoryPage() {
                           <CommandSeparator />
                           <CommandGroup>
                             <CommandItem
-                              onSelect={() => setTierFilter([])}
+                              onClick={() => setTierFilter([])}
                               className="justify-center text-center text-red-500"
                             >
                               Clear filters
@@ -568,11 +574,9 @@ export default function TierPriceHistoryPage() {
               <DialogDescription>Manage individual price entries for this service tier.</DialogDescription>
             </DialogHeader>
             <Separator className="my-4" />
-            <form onSubmit={save} className="grid gap-5">
-              {" "}
-              {/* Original function call */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="actualPrice" className="text-right font-medium">
+            <form onSubmit={save} className="space-y-4">
+              <div>
+                <Label htmlFor="actualPrice" className="font-medium">
                   Actual Price
                 </Label>
                 <Input
@@ -582,11 +586,11 @@ export default function TierPriceHistoryPage() {
                   value={form.actualPrice ?? ""}
                   onChange={(e) => setForm({ ...form, actualPrice: Number.parseFloat(e.target.value) })}
                   required
-                  className="col-span-3 focus-visible:ring-blue-500"
+                  className="mt-1 w-full focus-visible:ring-blue-500"
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="offerPrice" className="text-right font-medium">
+              <div>
+                <Label htmlFor="offerPrice" className="font-medium">
                   Offer Price
                 </Label>
                 <Input
@@ -597,11 +601,11 @@ export default function TierPriceHistoryPage() {
                   onChange={(e) =>
                     setForm({ ...form, offerPrice: e.target.value ? Number.parseFloat(e.target.value) : null })
                   }
-                  className="col-span-3 focus-visible:ring-blue-500"
+                  className="mt-1 w-full focus-visible:ring-blue-500"
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="startDate" className="text-right font-medium">
+              <div>
+                <Label htmlFor="startDate" className="font-medium">
                   Start Date
                 </Label>
                 <Input
@@ -610,14 +614,12 @@ export default function TierPriceHistoryPage() {
                   value={form.startDate || ""}
                   onChange={(e) => setForm({ ...form, startDate: e.target.value })}
                   required
-                  className="col-span-3 focus-visible:ring-blue-500"
+                  className="mt-1 w-full focus-visible:ring-blue-500"
                 />
+                <p className="mt-2 text-xs text-muted-foreground">Date when this price becomes effective.</p>
               </div>
-              <p className="text-xs text-muted-foreground col-start-2 col-span-3 -mt-2">
-                Date when this price becomes effective.
-              </p>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="endDate" className="text-right font-medium">
+              <div>
+                <Label htmlFor="endDate" className="font-medium">
                   End Date
                 </Label>
                 <Input
@@ -625,12 +627,10 @@ export default function TierPriceHistoryPage() {
                   type="date"
                   value={form.endDate || ""}
                   onChange={(e) => setForm({ ...form, endDate: e.target.value || null })}
-                  className="col-span-3 focus-visible:ring-blue-500"
+                  className="mt-1 w-full focus-visible:ring-blue-500"
                 />
+                <p className="mt-2 text-xs text-muted-foreground">Leave blank if this price has no planned end date.</p>
               </div>
-              <p className="text-xs text-muted-foreground col-start-2 col-span-3 -mt-2">
-                Leave blank if this price has no planned end date.
-              </p>
               <DialogFooter className="pt-4">
                 <Button
                   type="button"
