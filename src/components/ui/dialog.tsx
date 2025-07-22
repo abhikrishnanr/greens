@@ -9,7 +9,10 @@ interface DialogProps extends React.HTMLAttributes<HTMLDivElement> {
 export function Dialog({ open, onOpenChange, children }: DialogProps) {
   if (!open) return null
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => onOpenChange?.(false)}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4 bg-black/50"
+      onClick={() => onOpenChange?.(false)}
+    >
       {children}
     </div>
   )
