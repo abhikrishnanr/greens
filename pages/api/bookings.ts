@@ -20,6 +20,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       data: {
         customer: data.customer,
         phone: data.phone,
+        gender: data.gender,
+        age: data.age !== null && data.age !== undefined ? Number(data.age) : null,
         staffId: firstItem?.staffId || data.staffId,
         date: data.date,
         start: firstItem?.start || data.start,
