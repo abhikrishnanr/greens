@@ -191,9 +191,11 @@ export default function AdminBooking() {
   }, [edit])
 
   const addItem = () => {
-
     const variant = variants.find((t) => t.id === selectedTier)
-    if (!variant) return
+    if (!variant) {
+      setResult({ success: false, message: "Please select a variant first." })
+      return
+    }
 
     const price = variant.currentPrice?.offerPrice ?? variant.currentPrice?.actualPrice ?? 0
     const duration = variant.duration || 0
@@ -297,6 +299,11 @@ export default function AdminBooking() {
     try {
       const color = COLORS[bookings.length % COLORS.length]
 
+      const formattedItems = items.map(({ variantId, ...rest }) => ({
+        ...rest,
+        tierId: variantId,
+      }))
+
       const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -307,7 +314,7 @@ export default function AdminBooking() {
           age: age ? Number(age) : null,
           date,
           color,
-          items,
+          items: formattedItems,
         }),
       })
       if (res.ok) {
