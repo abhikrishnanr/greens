@@ -31,7 +31,7 @@ interface Category {
   name: string
 }
 
-interface Tier {
+interface Variant {
   id: string
   name: string
   duration?: number | null
@@ -50,7 +50,7 @@ interface Service {
   caption?: string | null
   description?: string | null
   imageUrl?: string | null
-  tiers: Tier[]
+  variants: Variant[]
 }
 
 export default function ServicesAdmin() {
@@ -73,12 +73,12 @@ export default function ServicesAdmin() {
     setServiceForm({ ...serviceForm, imageUrl: data.url })
   }
 
-  const emptyTier: Partial<Tier> = { id: "", name: "", duration: null }
-  const [tiers, setTiers] = useState<Tier[]>([])
-  const [tierForm, setTierForm] = useState<Partial<Tier>>({})
-  const [showTierModal, setShowTierModal] = useState(false)
-  const [editingTier, setEditingTier] = useState(false)
-  const [tierServiceId, setTierServiceId] = useState("")
+  const emptyVariant: Partial<Variant> = { id: "", name: "", duration: null }
+  const [variants, setVariants] = useState<Variant[]>([])
+  const [variantForm, setVariantForm] = useState<Partial<Variant>>({})
+  const [showVariantModal, setShowVariantModal] = useState(false)
+  const [editingVariant, setEditingVariant] = useState(false)
+  const [variantServiceId, setVariantServiceId] = useState("")
 
   const emptyImage: Partial<Image> = { id: "", imageUrl: "", caption: "" }
   const [images, setImages] = useState<Image[]>([])
@@ -161,62 +161,62 @@ export default function ServicesAdmin() {
     loadServices()
   }
 
-  const openTierManager = async (svc: Service) => {
-    setTierServiceId(svc.id)
-    const res = await fetch(`/api/admin/service-tiers/${svc.id}`)
+  const openVariantManager = async (svc: Service) => {
+    setVariantServiceId(svc.id)
+    const res = await fetch(`/api/admin/service-variants/${svc.id}`)
     const data = await res.json()
-    setTiers(data)
-    setTierForm({} as Partial<Tier>)
-    setShowTierModal(true)
+    setVariants(data)
+    setVariantForm({} as Partial<Variant>)
+    setShowVariantModal(true)
   }
 
-  const openAddTier = () => {
-    setTierForm({ ...emptyTier, id: crypto.randomUUID() })
-    setEditingTier(false)
+  const openAddVariant = () => {
+    setVariantForm({ ...emptyVariant, id: crypto.randomUUID() })
+    setEditingVariant(false)
   }
 
-  const openEditTier = (t: Tier) => {
-    setTierForm({ ...t })
-    setEditingTier(true)
+  const openEditVariant = (v: Variant) => {
+    setVariantForm({ ...v })
+    setEditingVariant(true)
   }
 
-  const saveTier = async (e: React.FormEvent) => {
+  const saveVariant = async (e: React.FormEvent) => {
     e.preventDefault()
     const body = {
-      id: tierForm.id,
-      name: tierForm.name,
-      duration: tierForm.duration ? Number(tierForm.duration) : null,
+      id: variantForm.id,
+      name: variantForm.name,
+      duration: variantForm.duration ? Number(variantForm.duration) : null,
     }
-    if (editingTier) {
-      await fetch(`/api/admin/service-tiers/${tierServiceId}`, {
+    if (editingVariant) {
+      await fetch(`/api/admin/service-variants/${variantServiceId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       })
     } else {
-      await fetch(`/api/admin/service-tiers/${tierServiceId}`, {
+      await fetch(`/api/admin/service-variants/${variantServiceId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       })
     }
-    const res = await fetch(`/api/admin/service-tiers/${tierServiceId}`)
+    const res = await fetch(`/api/admin/service-variants/${variantServiceId}`)
     const data = await res.json()
-    setTiers(data)
-    setTierForm({} as Partial<Tier>)
-    setEditingTier(false)
+    setVariants(data)
+    setVariantForm({} as Partial<Variant>)
+    setEditingVariant(false)
   }
 
-  const deleteTier = async (id: string) => {
-    if (!confirm("Delete this tier?")) return
-    await fetch(`/api/admin/service-tiers/${tierServiceId}`, {
+  const deleteVariant = async (id: string) => {
+    if (!confirm("Delete this variant?")) return
+    await fetch(`/api/admin/service-variants/${variantServiceId}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     })
-    const res = await fetch(`/api/admin/service-tiers/${tierServiceId}`)
+    const res = await fetch(`/api/admin/service-variants/${variantServiceId}`)
     const data = await res.json()
-    setTiers(data)
+    setVariants(data)
   }
 
   const openImageManager = async (svc: Service) => {
@@ -281,7 +281,7 @@ export default function ServicesAdmin() {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
             Services Management
           </h1>
-          <p className="text-slate-600">Manage your services, tiers, and media content</p>
+          <p className="text-slate-600">Manage your services, variants, and media content</p>
         </div>
 
         {/* Category Selection */}
@@ -343,7 +343,7 @@ export default function ServicesAdmin() {
                   )}
                   <div className="absolute top-4 right-4">
                     <Badge variant="secondary" className="bg-white/90 text-slate-700">
-                      {service.tiers.length} tiers
+                      {service.variants.length} variants
                     </Badge>
                   </div>
                 </div>
@@ -365,11 +365,11 @@ export default function ServicesAdmin() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => openTierManager(service)}
+                      onClick={() => openVariantManager(service)}
                       className="flex-1 hover:bg-green-50 hover:border-green-200"
                     >
                       <DollarSign className="h-4 w-4 mr-1" />
-                      Tiers
+                      Variants
                     </Button>
                     <Button
                       variant="outline"
@@ -488,20 +488,20 @@ export default function ServicesAdmin() {
           </div>
         )}
 
-        {/* Tier Management Modal */}
-        {showTierModal && (
+        {/* Variant Management Modal */}
+        {showVariantModal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border-0">
               <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-600 text-slate-800">
                 <CardTitle className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <DollarSign className="h-5 w-5" />
-                    Manage Service Tiers
+                    Manage Service Variants
                   </span>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setShowTierModal(false)}
+                    onClick={() => setShowVariantModal(false)}
                     className="text-slate-800 hover:bg-white/20"
                   >
                     <X className="h-4 w-4" />
@@ -509,31 +509,31 @@ export default function ServicesAdmin() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                {/* Existing Tiers */}
+                {/* Existing Variants */}
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-slate-800">Current Tiers</h3>
+                    <h3 className="text-lg font-semibold text-slate-800">Current Variants</h3>
                     <Button
-                      onClick={openAddTier}
+                      onClick={openAddVariant}
                       size="sm"
                       className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      Add Tier
+                      Add Variant
                     </Button>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {tiers.map((tier) => (
-                      <Card key={tier.id} className="border border-slate-200 hover:shadow-md transition-shadow">
+                    {variants.map((variant) => (
+                      <Card key={variant.id} className="border border-slate-200 hover:shadow-md transition-shadow">
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between mb-3">
-                            <h4 className="font-medium text-slate-800">{tier.name}</h4>
+                            <h4 className="font-medium text-slate-800">{variant.name}</h4>
                             <div className="flex gap-1">
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => openEditTier(tier)}
+                                onClick={() => openEditVariant(variant)}
                                 className="h-8 w-8 p-0 hover:bg-blue-100"
                               >
                                 <Edit3 className="h-3 w-3" />
@@ -541,7 +541,7 @@ export default function ServicesAdmin() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => deleteTier(tier.id)}
+                                onClick={() => deleteVariant(variant.id)}
                                 className="h-8 w-8 p-0 hover:bg-red-100 text-red-600"
                               >
                                 <Trash2 className="h-3 w-3" />
@@ -552,26 +552,26 @@ export default function ServicesAdmin() {
                             <div className="flex items-center gap-2">
                               <DollarSign className="h-3 w-3 text-slate-500" />
                               <span className="text-slate-600">Current Price:</span>
-                              {tier.currentPrice ? (
+                              {variant.currentPrice ? (
                                 <span className="font-medium">
-                                  ₹{tier.currentPrice.offerPrice ?? tier.currentPrice.actualPrice}
+                                  ₹{variant.currentPrice.offerPrice ?? variant.currentPrice.actualPrice}
                                 </span>
                               ) : (
                                 <span className="text-red-600 font-medium">
                                   Not set
                                 </span>
                               )}
-                              {!tier.currentPrice && (
-                                <a href="/admin/tier-price-history" className="text-blue-600 underline ml-2 text-xs">
+                              {!variant.currentPrice && (
+                                <a href="/admin/variant-price-history" className="text-blue-600 underline ml-2 text-xs">
                                   Update price
                                 </a>
                               )}
                             </div>
-                            {tier.duration && (
+                            {variant.duration && (
                               <div className="flex items-center gap-2">
                                 <Clock className="h-3 w-3 text-slate-500" />
                                 <span className="text-slate-600">Duration: </span>
-                                <span className="font-medium">{tier.duration} min</span>
+                                <span className="font-medium">{variant.duration} min</span>
                               </div>
                             )}
                           </div>
@@ -581,22 +581,22 @@ export default function ServicesAdmin() {
                   </div>
                 </div>
 
-                {/* Tier Form */}
-                {tierForm.name !== undefined && (
+                {/* Variant Form */}
+                {variantForm.name !== undefined && (
                   <Card className="border-2 border-green-200 bg-green-50/50">
                     <CardHeader className="pb-4">
                       <CardTitle className="text-lg text-green-800">
-                        {editingTier ? "Edit Tier" : "Add New Tier"}
+                        {editingVariant ? "Edit Variant" : "Add New Variant"}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <form onSubmit={saveTier} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <form onSubmit={saveVariant} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="tierName">Tier Name</Label>
+                          <Label htmlFor="variantName">Variant Name</Label>
                           <Input
-                            id="tierName"
-                            value={tierForm.name || ""}
-                            onChange={(e) => setTierForm({ ...tierForm, name: e.target.value })}
+                            id="variantName"
+                            value={variantForm.name || ""}
+                            onChange={(e) => setVariantForm({ ...variantForm, name: e.target.value })}
                             placeholder="e.g., Basic, Premium"
                             required
                           />
@@ -608,10 +608,10 @@ export default function ServicesAdmin() {
                           <Input
                             id="duration"
                             type="number"
-                            value={tierForm.duration ?? ""}
+                            value={variantForm.duration ?? ""}
                             onChange={(e) =>
-                              setTierForm({
-                                ...tierForm,
+                              setVariantForm({
+                                ...variantForm,
                                 duration: e.target.value ? Number.parseInt(e.target.value) : null,
                               })
                             }
@@ -624,8 +624,8 @@ export default function ServicesAdmin() {
                             type="button"
                             variant="outline"
                             onClick={() => {
-                              setTierForm({} as Partial<Tier>)
-                              setEditingTier(false)
+                              setVariantForm({} as Partial<Variant>)
+                              setEditingVariant(false)
                             }}
                           >
                             Cancel
@@ -635,7 +635,7 @@ export default function ServicesAdmin() {
                             className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
                           >
                             <Save className="h-4 w-4 mr-2" />
-                            {editingTier ? "Update" : "Add"} Tier
+                            {editingVariant ? "Update" : "Add"} Variant
                           </Button>
                         </div>
                       </form>

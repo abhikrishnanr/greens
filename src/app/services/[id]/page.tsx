@@ -30,7 +30,7 @@ export default async function ServiceDetailsPage({ params }: { params: { id: str
       <h1 className="text-3xl font-bold mb-2" style={{ color: '#41eb70' }}>{service.name}</h1>
       {service.caption && <p className="text-lg text-gray-300 mb-4">{service.caption}</p>}
       <div className="prose prose-invert mb-6" dangerouslySetInnerHTML={{ __html: service.description || '' }} />
-      <h2 className="text-2xl font-semibold mb-4" style={{ color: '#41eb70' }}>Tiers</h2>
+      <h2 className="text-2xl font-semibold mb-4" style={{ color: '#41eb70' }}>Variants</h2>
       <ul className="space-y-3">
         {service.tiers.map(t => (
           <li key={t.id} className="flex items-center justify-between bg-gray-800 rounded-xl p-4">

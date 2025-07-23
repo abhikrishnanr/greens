@@ -37,7 +37,7 @@ const sections: {
         icon: MdCategory,
       },
       { href: '/admin/services', label: 'Services', icon: MdDesignServices },
-      { href: '/admin/tier-price-history', label: 'Tier Price History', icon: MdHistory },
+      { href: '/admin/variant-price-history', label: 'Variant Price History', icon: MdHistory },
       { href: '/admin/walk-in', label: 'Walk-in', icon: MdEvent },
     ],
   },

@@ -2,19 +2,42 @@
 
 import { useEffect, useState } from "react"
 import { format } from "date-fns"
+<<<<<<< HEAD
 import { Calendar, Plus, X, CheckCircle, AlertCircle, Edit, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+=======
+import {
+  Calendar,
+  Plus,
+  X,
+  CheckCircle,
+  AlertCircle,
+  Edit,
+  Trash2,
+  User,
+  Scissors,
+  Clock,
+  DollarSign,
+  ListChecks,
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
 
 interface Category {
   id: string
   name: string
 }
 
-interface Tier {
+interface Variant {
   id: string
   name: string
   duration?: number | null
@@ -24,7 +47,7 @@ interface Tier {
 interface Service {
   id: string
   name: string
-  tiers: Tier[]
+  variants: Variant[]
 }
 
 interface Staff {
@@ -38,7 +61,7 @@ interface StaffApi extends Staff {
 
 interface Selected {
   serviceId: string
-  tierId: string
+  variantId: string
   name: string
   duration: number
   price: number
@@ -64,7 +87,11 @@ export default function AdminBooking() {
   const [category, setCategory] = useState("")
   const [services, setServices] = useState<Service[]>([])
   const [selectedSvc, setSelectedSvc] = useState("")
+<<<<<<< HEAD
   const [tiers, setTiers] = useState<Tier[]>([])
+=======
+  const [variants, setVariants] = useState<Variant[]>([])
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
   const [selectedTier, setSelectedTier] = useState("")
   const [items, setItems] = useState<Selected[]>([])
   const [staff, setStaff] = useState<Staff[]>([])
@@ -77,6 +104,7 @@ export default function AdminBooking() {
   const [editStaffId, setEditStaffId] = useState("")
   const [editStart, setEditStart] = useState("")
 
+<<<<<<< HEAD
   // Load functions (keeping original logic)
   const loadCategories = async () => {
     const res = await fetch("/api/admin/service-categories")
@@ -115,6 +143,74 @@ export default function AdminBooking() {
     }
   }
 
+=======
+  // Original load functions - no dummy data here
+  const loadCategories = async () => {
+    try {
+      const res = await fetch("/api/admin/service-categories")
+      if (!res.ok) throw new Error("Failed to fetch categories")
+      const data = await res.json()
+      setCategories(data)
+    } catch (error) {
+      console.error("Error loading categories:", error)
+      setResult({ success: false, message: "Failed to load service categories." })
+    }
+  }
+
+  const loadServices = async () => {
+    if (!category) {
+      setServices([])
+      setVariants([])
+      setSelectedSvc("")
+      return
+    }
+    try {
+      const res = await fetch(`/api/admin/services-new/${category}`)
+      if (!res.ok) throw new Error("Failed to fetch services")
+      const data: Service[] = await res.json()
+      const enriched: Service[] = []
+      for (const svc of data) {
+        const tRes = await fetch(`/api/admin/service-variants/${svc.id}`)
+        const variants: Variant[] = await tRes.json()
+        if (variants.some((t) => t.currentPrice)) {
+          enriched.push({ ...svc, variants })
+        }
+      }
+      setServices(enriched)
+    } catch (error) {
+      console.error("Error loading services:", error)
+      setResult({ success: false, message: "Failed to load services for this category." })
+    }
+  }
+
+  const loadStaff = async () => {
+    try {
+      const res = await fetch("/api/staff")
+      if (!res.ok) throw new Error("Failed to fetch staff")
+      const { staff: staffData } = await res.json()
+      setStaff((staffData as StaffApi[]).filter((s) => !s.removed))
+    } catch (error) {
+      console.error("Error loading staff:", error)
+      setResult({ success: false, message: "Failed to load staff members." })
+    }
+  }
+
+  const loadBookings = async () => {
+    try {
+      const res = await fetch(`/api/bookings?date=${date}`)
+      if (res.ok) {
+        const data = await res.json()
+        setBookings(data)
+      } else {
+        throw new Error("Failed loading bookings")
+      }
+    } catch (err) {
+      console.error("Failed loading bookings", err)
+      setResult({ success: false, message: "Failed to load bookings for the selected date." })
+    }
+  }
+
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
   useEffect(() => {
     loadCategories()
     loadStaff()
@@ -125,12 +221,20 @@ export default function AdminBooking() {
   useEffect(() => {
     loadServices()
     setSelectedSvc("")
+<<<<<<< HEAD
     setTiers([])
+=======
+    setVariants([])
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
   }, [category])
   useEffect(() => {
     if (!selectedSvc) return
     const svc = services.find((s) => s.id === selectedSvc)
+<<<<<<< HEAD
     setTiers(svc?.tiers || [])
+=======
+    setVariants(svc?.variants || [])
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
   }, [selectedSvc])
   useEffect(() => {
     localStorage.setItem("walkin-bookings", JSON.stringify(bookings))
@@ -143,16 +247,31 @@ export default function AdminBooking() {
   }, [edit])
 
   const addItem = () => {
+<<<<<<< HEAD
     const tier = tiers.find((t) => t.id === selectedTier)
     if (!tier) return
     const price = tier.currentPrice?.offerPrice ?? tier.currentPrice?.actualPrice ?? 0
     const duration = tier.duration || 0
+=======
+    const variant = variants.find((t) => t.id === selectedTier)
+    if (!variant) return
+
+    const price = variant.currentPrice?.offerPrice ?? variant.currentPrice?.actualPrice ?? 0
+    const duration = variant.duration || 0
+    const serviceName = services.find((s) => s.id === selectedSvc)?.name || ""
+
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
     setItems([
       ...items,
       {
         serviceId: selectedSvc,
+<<<<<<< HEAD
         tierId: tier.id,
         name: `${services.find((s) => s.id === selectedSvc)?.name} - ${tier.name}`,
+=======
+        variantId: variant.id,
+        name: `${serviceName} - ${variant.name}`,
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
         duration,
         price,
         staffId: "",
@@ -167,8 +286,14 @@ export default function AdminBooking() {
 
   const allTimes = [] as string[]
   const base = new Date(date)
+<<<<<<< HEAD
   base.setHours(9, 0, 0, 0)
   for (let i = 0; i < 48; i++) {
+=======
+  base.setHours(9, 0, 0, 0) // Start from 9 AM
+  for (let i = 0; i < 48; i++) {
+    // 48 * 15 minutes = 12 hours (9 AM to 9 PM)
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
     allTimes.push(format(new Date(base.getTime() + i * 15 * 60000), "HH:mm"))
   }
 
@@ -204,11 +329,19 @@ export default function AdminBooking() {
     for (const b of bookings) {
       if (b.staffId !== staffId || b.date !== date) continue
       const bst = toMin(b.start)
+<<<<<<< HEAD
       const ben = bst + b.items.reduce((a, i) => a + i.duration, 0)
       if (st < ben && en > bst) return true
     }
     for (let i = 0; i < items.length; i++) {
       if (i === idx) continue
+=======
+      const ben = bst + b.items.reduce((a, i) => a + i.duration, 0) // Sum durations of all items in the booking
+      if (st < ben && en > bst) return true
+    }
+    for (let i = 0; i < items.length; i++) {
+      if (i === idx) continue // Don't check conflict with itself
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
       const it = items[i]
       if (it.staffId !== staffId || !it.start) continue
       const ist = toMin(it.start)
@@ -219,12 +352,31 @@ export default function AdminBooking() {
   }
 
   const saveBooking = async () => {
+<<<<<<< HEAD
     if (!customer || !phone || !items.length) return
     if (items.some((i) => !i.staffId || !i.start)) return
     if (!window.confirm(`Total amount ₹${totalAmount}. Confirm booking?`)) return
 
     const color = COLORS[bookings.length % COLORS.length]
     try {
+=======
+    if (!customer || !phone || items.length === 0) {
+      setResult({ success: false, message: "Please fill in customer details and add at least one service." })
+      return
+    }
+    if (phone.length !== 10 || !/^\d{10}$/.test(phone)) {
+      setResult({ success: false, message: "Phone number must be exactly 10 digits." })
+      return
+    }
+    if (items.some((i) => !i.staffId || !i.start)) {
+      setResult({ success: false, message: "Please assign staff and time for all services." })
+      return
+    }
+    if (!window.confirm(`Total amount ₹${totalAmount}. Confirm booking?`)) return
+
+    try {
+      const color = COLORS[bookings.length % COLORS.length]
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
       const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -249,6 +401,7 @@ export default function AdminBooking() {
 
   const updateBooking = async () => {
     if (!edit) return
+<<<<<<< HEAD
     const res = await fetch("/api/bookings", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -258,21 +411,56 @@ export default function AdminBooking() {
       const updated = await res.json()
       setBookings((bs) => bs.map((b) => (b.id === updated.id ? updated : b)))
       setEdit(null)
+=======
+    try {
+      const res = await fetch("/api/bookings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: edit.id, staffId: editStaffId, start: editStart }),
+      })
+      if (res.ok) {
+        const updated = await res.json()
+        setBookings((bs) => bs.map((b) => (b.id === updated.id ? updated : b)))
+        setEdit(null)
+        setResult({ success: true, message: "Booking updated successfully!" })
+      } else {
+        throw new Error("Request failed")
+      }
+    } catch (err) {
+      console.error("Failed updating booking", err)
+      setResult({ success: false, message: "Failed to update booking." })
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
     }
   }
 
   const cancelBooking = async () => {
     if (!edit) return
     if (!window.confirm("Cancel this booking?")) return
+<<<<<<< HEAD
     const res = await fetch(`/api/bookings?id=${edit.id}`, { method: "DELETE" })
     if (res.ok) {
       setBookings((bs) => bs.filter((b) => b.id !== edit.id))
       setEdit(null)
+=======
+    try {
+      const res = await fetch(`/api/bookings?id=${edit.id}`, { method: "DELETE" })
+      if (res.ok) {
+        setBookings((bs) => bs.filter((b) => b.id !== edit.id))
+        setEdit(null)
+        setResult({ success: true, message: "Booking cancelled successfully!" })
+      } else {
+        throw new Error("Request failed")
+      }
+    } catch (err) {
+      console.error("Failed cancelling booking", err)
+      setResult({ success: false, message: "Failed to cancel booking." })
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
     }
   }
 
   const bookingsFor = (id: string, time: string) =>
     bookings.filter((b) => b.staffId === id && b.date === date && b.start === time)
+<<<<<<< HEAD
 
   return (
     <div className="p-4 max-w-full">
@@ -283,16 +471,39 @@ export default function AdminBooking() {
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-gray-500" />
             <Input
+=======
+
+  const isPhoneInvalid = phone.length > 0 && phone.length !== 10
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+        <h1 className="text-2xl font-bold text-gray-800">Greens Salon Admin: Walk-in Booking</h1>
+        <div className="flex items-center gap-3">
+          <Label htmlFor="booking-date" className="sr-only">
+            Booking Date
+          </Label>
+          <div className="relative">
+            <Calendar className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Input
+              id="booking-date"
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
               type="date"
               min={format(new Date(), "yyyy-MM-dd")}
               value={date}
               onChange={(e) => setDate(e.target.value)}
+<<<<<<< HEAD
               className="w-40"
+=======
+              className="pl-8 w-40 text-sm"
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
             />
           </div>
         </div>
       </div>
 
+<<<<<<< HEAD
       <div className="grid grid-cols-12 gap-4">
         {/* Booking Form - Left Side */}
         <div className="col-span-5">
@@ -306,11 +517,32 @@ export default function AdminBooking() {
                 <div>
                   <Label htmlFor="customer" className="text-xs">
                     Customer Name
+=======
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Booking Form - Left Side */}
+        <div className="space-y-6">
+          {/* Customer Information */}
+          <Card className="border-l-4 border-blue-500 shadow-md">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2 text-gray-800">
+                <User className="h-5 w-5 text-blue-600" /> Customer Details
+              </CardTitle>
+              <CardDescription className="text-sm text-gray-500">
+                Enter the customer's name and contact information.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="customer" className="text-sm">
+                    Full Name
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
                   </Label>
                   <Input
                     id="customer"
                     value={customer}
                     onChange={(e) => setCustomer(e.target.value)}
+<<<<<<< HEAD
                     className="h-8"
                     placeholder="Enter name"
                   />
@@ -318,10 +550,20 @@ export default function AdminBooking() {
                 <div>
                   <Label htmlFor="phone" className="text-xs">
                     Phone
+=======
+                    placeholder="e.g., Jane Doe"
+                    className="h-9"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-sm">
+                    Phone Number
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
                   </Label>
                   <Input
                     id="phone"
                     value={phone}
+<<<<<<< HEAD
                     onChange={(e) => setPhone(e.target.value)}
                     className="h-8"
                     placeholder="Enter phone"
@@ -335,6 +577,35 @@ export default function AdminBooking() {
                   <Label className="text-xs">Category</Label>
                   <Select value={category} onValueChange={setCategory}>
                     <SelectTrigger className="h-8">
+=======
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))} // Allow only digits, max 10
+                    placeholder="e.g., 5551234567"
+                    className={`h-9 ${isPhoneInvalid ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                    maxLength={10}
+                  />
+                  {isPhoneInvalid && <p className="text-xs text-red-500">Phone number must be exactly 10 digits.</p>}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Service Selection */}
+          <Card className="border-l-4 border-green-500 shadow-md">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2 text-gray-800">
+                <Scissors className="h-5 w-5 text-green-600" /> Select Services
+              </CardTitle>
+              <CardDescription className="text-sm text-gray-500">
+                Choose the services and variants, then assign staff and time for each.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm">Category</Label>
+                  <Select value={category} onValueChange={setCategory}>
+                    <SelectTrigger className="h-9">
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
@@ -348,10 +619,17 @@ export default function AdminBooking() {
                 </div>
 
                 {services.length > 0 && (
+<<<<<<< HEAD
                   <div>
                     <Label className="text-xs">Service</Label>
                     <Select value={selectedSvc} onValueChange={setSelectedSvc}>
                       <SelectTrigger className="h-8">
+=======
+                  <div className="space-y-2">
+                    <Label className="text-sm">Service</Label>
+                    <Select value={selectedSvc} onValueChange={setSelectedSvc}>
+                      <SelectTrigger className="h-9">
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
                         <SelectValue placeholder="Select service" />
                       </SelectTrigger>
                       <SelectContent>
@@ -366,6 +644,7 @@ export default function AdminBooking() {
                 )}
               </div>
 
+<<<<<<< HEAD
               {tiers.length > 0 && (
                 <div>
                   <Label className="text-xs">Tier</Label>
@@ -378,12 +657,31 @@ export default function AdminBooking() {
                         {tiers.map((t) => (
                           <SelectItem key={t.id} value={t.id}>
                             {t.name} - {t.duration}m - ₹{t.currentPrice?.actualPrice}
+=======
+              {variants.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="text-sm">Variant</Label>
+                  <div className="flex gap-2">
+                    <Select value={selectedTier} onValueChange={setSelectedTier}>
+                      <SelectTrigger className="flex-1 h-9">
+                        <SelectValue placeholder="Select variant" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {variants.map((t) => (
+                          <SelectItem key={t.id} value={t.id}>
+                            {t.name} ({t.duration}m) - ₹{t.currentPrice?.actualPrice}
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+<<<<<<< HEAD
                     <Button onClick={addItem} size="sm" className="h-8 px-3">
                       <Plus className="w-3 h-3" />
+=======
+                    <Button onClick={addItem} size="sm" className="h-9 px-3 bg-green-600 hover:bg-green-700">
+                      <Plus className="w-4 h-4" /> Add
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
                     </Button>
                   </div>
                 </div>
@@ -391,6 +689,7 @@ export default function AdminBooking() {
 
               {/* Selected Items */}
               {items.length > 0 && (
+<<<<<<< HEAD
                 <div className="space-y-2">
                   <Label className="text-xs">Selected Services</Label>
                   <div className="space-y-2 max-h-40 overflow-y-auto">
@@ -398,12 +697,24 @@ export default function AdminBooking() {
                       <div key={item.tierId} className="border rounded p-2 text-xs">
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-medium truncate" title={item.name}>
+=======
+                <div className="space-y-3 pt-4 border-t border-gray-200">
+                  <Label className="text-sm flex items-center gap-1">
+                    <ListChecks className="h-4 w-4 text-gray-600" /> Assigned Services
+                  </Label>
+                  <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+                    {items.map((item, idx) => (
+                      <div key={item.variantId} className="border rounded-md p-3 bg-gray-50">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-medium text-sm truncate" title={item.name}>
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
                             {item.name}
                           </span>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => setItems(items.filter((_, i) => i !== idx))}
+<<<<<<< HEAD
                             className="h-6 w-6 p-0 text-red-500"
                           >
                             <X className="w-3 h-3" />
@@ -455,11 +766,72 @@ export default function AdminBooking() {
                           </Select>
                           <div className="text-xs text-gray-600 flex items-center">
                             {item.duration}m ₹{item.price}
+=======
+                            className="h-7 w-7 p-0 text-red-500 hover:bg-red-50"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 text-sm">
+                          <div className="space-y-1">
+                            <Label className="text-xs text-gray-600">Staff</Label>
+                            <Select
+                              value={item.staffId}
+                              onValueChange={(value) =>
+                                setItems(items.map((it, i) => (i === idx ? { ...it, staffId: value, start: "" } : it)))
+                              }
+                            >
+                              <SelectTrigger className="h-8 text-xs">
+                                <SelectValue placeholder="Select staff" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {staff.map((s) => (
+                                  <SelectItem key={s.id} value={s.id}>
+                                    {s.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs text-gray-600">Time</Label>
+                            <Select
+                              value={item.start}
+                              onValueChange={(value) =>
+                                setItems(items.map((it, i) => (i === idx ? { ...it, start: value } : it)))
+                              }
+                              disabled={!item.staffId}
+                            >
+                              <SelectTrigger className="h-8 text-xs">
+                                <SelectValue placeholder={item.staffId ? "Select time" : "Select staff first"} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {timeOptionsFor(item.duration).map((t) => (
+                                  <SelectItem
+                                    key={t}
+                                    value={t}
+                                    style={
+                                      item.staffId && hasConflict(item.staffId, t, item.duration, idx)
+                                        ? { backgroundColor: "#fef08a" } // Original light yellow for conflict
+                                        : undefined
+                                    }
+                                  >
+                                    {t}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="flex flex-col justify-end pb-1">
+                            <span className="text-xs text-gray-600">Duration: {item.duration}m</span>
+                            <span className="text-xs font-medium text-gray-800">Price: ₹{item.price}</span>
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
+<<<<<<< HEAD
                   <div className="flex justify-between items-center pt-2 border-t">
                     <span className="text-sm font-medium">
                       Total: {totalDuration}m ₹{totalAmount}
@@ -468,6 +840,17 @@ export default function AdminBooking() {
                       onClick={saveBooking}
                       disabled={!customer || !phone || items.some((i) => !i.staffId || !i.start)}
                       size="sm"
+=======
+                  <Separator />
+                  <div className="flex justify-between items-center pt-2">
+                    <span className="text-base font-semibold text-gray-800 flex items-center gap-1">
+                      <DollarSign className="h-4 w-4 text-gray-600" /> Total: {totalDuration}m • ₹{totalAmount}
+                    </span>
+                    <Button
+                      onClick={saveBooking}
+                      disabled={!customer || !phone || phone.length !== 10 || items.some((i) => !i.staffId || !i.start)}
+                      className="px-6 py-2 bg-blue-600 hover:bg-blue-700"
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
                     >
                       Confirm Booking
                     </Button>
@@ -479,6 +862,7 @@ export default function AdminBooking() {
         </div>
 
         {/* Schedule Grid - Right Side */}
+<<<<<<< HEAD
         <div className="col-span-7">
           <Card>
             <CardHeader className="pb-3">
@@ -492,6 +876,29 @@ export default function AdminBooking() {
                       <th className="w-16 p-2 text-left border">Time</th>
                       {staff.map((s) => (
                         <th key={s.id} className="w-32 p-2 text-left border">
+=======
+        <div className="space-y-6">
+          <Card className="border-l-4 border-purple-500 shadow-md">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2 text-gray-800">
+                <Clock className="h-5 w-5 text-purple-600" /> Daily Schedule
+              </CardTitle>
+              <CardDescription className="text-sm text-gray-500">
+                View and manage appointments for {format(new Date(date), "MMMM dd, yyyy")}. Click on a booking to edit.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-auto max-h-[700px]">
+                <table className="w-full text-xs border-collapse">
+                  <thead className="sticky top-0 bg-gray-100 z-10">
+                    <tr>
+                      <th className="w-20 p-2 text-left border border-gray-200 font-medium text-gray-700">Time</th>
+                      {staff.map((s) => (
+                        <th
+                          key={s.id}
+                          className="min-w-[120px] p-2 text-left border border-gray-200 font-medium text-gray-700"
+                        >
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
                           {s.name}
                         </th>
                       ))}
@@ -500,6 +907,7 @@ export default function AdminBooking() {
                   <tbody>
                     {allTimes.map((time) => (
                       <tr key={time}>
+<<<<<<< HEAD
                         <td className="border p-1 text-gray-600 font-mono">{time}</td>
                         {staff.map((st) => (
                           <td key={st.id + time} className="border h-8 relative p-0">
@@ -507,15 +915,31 @@ export default function AdminBooking() {
                               <div
                                 key={b.id}
                                 className="absolute inset-0 text-white flex items-center justify-center text-[10px] cursor-pointer px-1 truncate"
+=======
+                        <td className="border border-gray-200 p-1 text-gray-600 font-mono align-top">{time}</td>
+                        {staff.map((st) => (
+                          <td key={st.id + time} className="border border-gray-200 h-10 relative p-0 align-top">
+                            {bookingsFor(st.id, time).map((b, i, arr) => (
+                              <div
+                                key={b.id}
+                                className="absolute inset-0 text-white flex items-center justify-center text-[10px] cursor-pointer px-1 rounded-sm m-0.5 overflow-hidden whitespace-nowrap text-ellipsis"
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
                                 style={{
                                   background: b.color,
                                   width: `${100 / arr.length}%`,
                                   left: `${(i * 100) / arr.length}%`,
                                 }}
+<<<<<<< HEAD
                                 title={`${b.customer} - ₹${b.items.reduce((a, i) => a + i.price, 0)}`}
                                 onClick={() => setEdit(b)}
                               >
                                 {b.customer}
+=======
+                                title={`${b.customer} - ${b.items.map((it) => it.name).join(", ")} - ₹${b.items.reduce((a, i) => a + i.price, 0)}`}
+                                onClick={() => setEdit(b)}
+                              >
+                                {b.items.map((it) => it.name).join(", ")}
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
                               </div>
                             ))}
                           </td>
@@ -532,6 +956,7 @@ export default function AdminBooking() {
 
       {/* Result Modal */}
       {result && (
+<<<<<<< HEAD
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <Card className="w-80">
             <CardContent className="p-4 text-center space-y-3">
@@ -542,6 +967,19 @@ export default function AdminBooking() {
               )}
               <p className="text-sm">{result.message}</p>
               <Button onClick={() => setResult(null)} size="sm" className="w-full">
+=======
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
+          <Card className="w-full max-w-sm">
+            <CardContent className="p-6 text-center space-y-4">
+              {result.success ? (
+                <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
+              ) : (
+                <AlertCircle className="w-16 h-16 text-red-500 mx-auto" />
+              )}
+              <h3 className="text-lg font-semibold text-gray-900">{result.success ? "Success!" : "Error!"}</h3>
+              <p className="text-gray-600 text-sm">{result.message}</p>
+              <Button onClick={() => setResult(null)} className="w-full">
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
                 Close
               </Button>
             </CardContent>
@@ -551,6 +989,7 @@ export default function AdminBooking() {
 
       {/* Edit Booking Modal */}
       {edit && (
+<<<<<<< HEAD
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <Card className="w-80">
             <CardHeader className="pb-3">
@@ -572,6 +1011,29 @@ export default function AdminBooking() {
                 <Label className="text-xs">Staff</Label>
                 <Select value={editStaffId} onValueChange={setEditStaffId}>
                   <SelectTrigger className="h-8">
+=======
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
+          <Card className="w-full max-w-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Edit Booking</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-sm space-y-1">
+                <p>
+                  <span className="font-medium">Customer:</span> {edit.customer}
+                </p>
+                <p>
+                  <span className="font-medium">Phone:</span> {edit.phone}
+                </p>
+                <p>
+                  <span className="font-medium">Services:</span> {edit.items.map((i) => i.name).join(", ")}
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm">Staff</Label>
+                <Select value={editStaffId} onValueChange={setEditStaffId}>
+                  <SelectTrigger className="h-9">
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -583,10 +1045,17 @@ export default function AdminBooking() {
                   </SelectContent>
                 </Select>
               </div>
+<<<<<<< HEAD
               <div>
                 <Label className="text-xs">Time</Label>
                 <Select value={editStart} onValueChange={setEditStart}>
                   <SelectTrigger className="h-8">
+=======
+              <div className="space-y-2">
+                <Label className="text-sm">Time</Label>
+                <Select value={editStart} onValueChange={setEditStart}>
+                  <SelectTrigger className="h-9">
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -600,12 +1069,21 @@ export default function AdminBooking() {
               </div>
               <div className="flex gap-2 pt-2">
                 <Button onClick={cancelBooking} variant="destructive" size="sm" className="flex-1">
+<<<<<<< HEAD
                   <Trash2 className="w-3 h-3 mr-1" />
                   Cancel
                 </Button>
                 <Button onClick={updateBooking} size="sm" className="flex-1">
                   <Edit className="w-3 h-3 mr-1" />
                   Save
+=======
+                  <Trash2 className="w-4 h-4 mr-1" />
+                  Cancel Booking
+                </Button>
+                <Button onClick={updateBooking} size="sm" className="flex-1">
+                  <Edit className="w-4 h-4 mr-1" />
+                  Save Changes
+>>>>>>> 025b9fbcd3edd57a252435425f303631f34639aa
                 </Button>
                 <Button onClick={() => setEdit(null)} variant="outline" size="sm">
                   Close

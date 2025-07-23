@@ -28,7 +28,7 @@ export async function GET(req, { params }: { params: { id: string } }) {
     })
 
     const now = new Date()
-    const tiers = await Promise.all(
+    const variants = await Promise.all(
       service.tiers.map(async (t) => {
         const current = await prisma.serviceTierPriceHistory.findFirst({
           where: {
@@ -59,7 +59,7 @@ export async function GET(req, { params }: { params: { id: string } }) {
         imageUrl: img.imageUrl,
         caption: img.caption ?? null,
       })),
-      tiers,
+      variants,
     }
 
     return NextResponse.json(result)
