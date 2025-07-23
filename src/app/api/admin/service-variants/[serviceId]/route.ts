@@ -5,13 +5,13 @@ const prisma = new PrismaClient()
 
 export async function GET(req: Request, { params }: { params: { serviceId: string } }) {
   const { serviceId } = await params
-  const tiers = await prisma.serviceTier.findMany({
+  const variants = await prisma.serviceTier.findMany({
     where: { serviceId },
     include: { priceHistory: true },
     orderBy: { name: 'asc' },
   })
   const now = new Date()
-  const response = tiers.map(t => {
+  const response = variants.map(t => {
     const current = t.priceHistory.find(ph => {
       const start = ph.startDate
       const end = ph.endDate
@@ -32,7 +32,7 @@ export async function GET(req: Request, { params }: { params: { serviceId: strin
 export async function POST(req: Request, { params }: { params: { serviceId: string } }) {
   const { serviceId } = await params
   const data = await req.json()
-  const tier = await prisma.serviceTier.create({
+  const variant = await prisma.serviceTier.create({
     data: {
       serviceId,
       name: data.name,
@@ -47,13 +47,13 @@ export async function POST(req: Request, { params }: { params: { serviceId: stri
   if (data.actualPrice !== undefined || data.offerPrice !== undefined) {
     await prisma.serviceTierPriceHistory.create({
       data: {
-        tierId: tier.id,
-        actualPrice: tier.actualPrice,
-        offerPrice: tier.offerPrice,
+        tierId: variant.id,
+        actualPrice: variant.actualPrice,
+        offerPrice: variant.offerPrice,
       },
     })
   }
-  return NextResponse.json(tier)
+  return NextResponse.json(variant)
 }
 
 export async function PUT(req: Request, { params }: { params: { serviceId: string } }) {
@@ -65,22 +65,22 @@ export async function PUT(req: Request, { params }: { params: { serviceId: strin
   if (data.offerPrice !== undefined) updateData.offerPrice =
     data.offerPrice === null ? null : Number(data.offerPrice)
 
-  const tier = await prisma.serviceTier.update({ where: { id: data.id }, data: updateData })
+  const variant = await prisma.serviceTier.update({ where: { id: data.id }, data: updateData })
 
   if (
     existing &&
-    (('actualPrice' in updateData && existing.actualPrice !== tier.actualPrice) ||
-      ('offerPrice' in updateData && existing.offerPrice !== tier.offerPrice))
+    (('actualPrice' in updateData && existing.actualPrice !== variant.actualPrice) ||
+      ('offerPrice' in updateData && existing.offerPrice !== variant.offerPrice))
   ) {
     await prisma.serviceTierPriceHistory.create({
       data: {
-        tierId: tier.id,
-        actualPrice: tier.actualPrice,
-        offerPrice: tier.offerPrice,
+        tierId: variant.id,
+        actualPrice: variant.actualPrice,
+        offerPrice: variant.offerPrice,
       },
     })
   }
-  return NextResponse.json(tier)
+  return NextResponse.json(variant)
 }
 
 export async function DELETE(req: Request, { params }: { params: { serviceId: string } }) {

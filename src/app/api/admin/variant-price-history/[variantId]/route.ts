@@ -1,21 +1,21 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export async function GET(req: Request, { params }: { params: { tierId: string } }) {
-  const { tierId } = await params
+export async function GET(req: Request, { params }: { params: { variantId: string } }) {
+  const { variantId } = await params
   const entries = await prisma.serviceTierPriceHistory.findMany({
-    where: { tierId },
+    where: { tierId: variantId },
     orderBy: { startDate: 'desc' },
   })
   return NextResponse.json(entries)
 }
 
-export async function POST(req: Request, { params }: { params: { tierId: string } }) {
-  const { tierId } = await params
+export async function POST(req: Request, { params }: { params: { variantId: string } }) {
+  const { variantId } = await params
   const data = await req.json()
   const entry = await prisma.serviceTierPriceHistory.create({
     data: {
-      tierId,
+      tierId: variantId,
       actualPrice: Number(data.actualPrice),
       offerPrice: data.offerPrice === null || data.offerPrice === undefined ? null : Number(data.offerPrice),
       startDate: data.startDate ? new Date(data.startDate) : new Date(),
@@ -25,7 +25,7 @@ export async function POST(req: Request, { params }: { params: { tierId: string 
   return NextResponse.json(entry)
 }
 
-export async function PUT(req: Request, { params }: { params: { tierId: string } }) {
+export async function PUT(req: Request, { params }: { params: { variantId: string } }) {
   const data = await req.json()
   const entry = await prisma.serviceTierPriceHistory.update({
     where: { id: data.id },
@@ -39,7 +39,7 @@ export async function PUT(req: Request, { params }: { params: { tierId: string }
   return NextResponse.json(entry)
 }
 
-export async function DELETE(req: Request, { params }: { params: { tierId: string } }) {
+export async function DELETE(req: Request, { params }: { params: { variantId: string } }) {
   const { id } = await req.json()
   await prisma.serviceTierPriceHistory.delete({ where: { id } })
   return NextResponse.json({ success: true })

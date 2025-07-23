@@ -10,6 +10,7 @@ import {
   Tag,
   Sparkles,
   Info,
+  X,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -28,9 +29,9 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
-interface TierRow {
+interface VariantRow {
   id: string
-  tierName: string
+  variantName: string
   serviceName: string
   categoryName: string
   current?: Entry
@@ -59,9 +60,9 @@ const formatDateForInput = (dateString: string | null | undefined): string => {
   }
 }
 
-export default function TierPriceHistoryPage() {
+export default function VariantPriceHistoryPage() {
   const empty: Partial<Entry> = { id: "", actualPrice: 0, startDate: "" }
-  const [rows, setRows] = useState<TierRow[]>([])
+  const [rows, setRows] = useState<VariantRow[]>([])
   const [selected, setSelected] = useState("")
   const [entries, setEntries] = useState<Entry[]>([])
   const [form, setForm] = useState<Partial<Entry>>(empty)
@@ -79,20 +80,20 @@ export default function TierPriceHistoryPage() {
   }, [])
 
   const loadRows = async () => {
-    const tiers = await fetch("/api/admin/service-tiers/all").then((r) => r.json())
-    setRows(tiers)
+    const variants = await fetch("/api/admin/service-variants/all").then((r) => r.json())
+    setRows(variants)
   }
 
-  const open = async (tierId: string) => {
-    setSelected(tierId)
-    const hist = await fetch(`/api/admin/tier-price-history/${tierId}`).then((r) => r.json())
+  const open = async (variantId: string) => {
+    setSelected(variantId)
+    const hist = await fetch(`/api/admin/variant-price-history/${variantId}`).then((r) => r.json())
     setEntries(hist)
     setForm({ ...empty, id: crypto.randomUUID() })
     setEditing(false)
     setIsDialogOpen(true)
   }
 
-  const closeTierDetails = () => {
+  const closeVariantDetails = () => {
     setSelected("")
     setEntries([])
     setIsDialogOpen(false)
@@ -107,13 +108,13 @@ export default function TierPriceHistoryPage() {
       endDate: form.endDate || null,
     }
     if (editing) {
-      await fetch(`/api/admin/tier-price-history/${selected}`, {
+      await fetch(`/api/admin/variant-price-history/${selected}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: form.id, ...body }),
       })
     } else {
-      await fetch(`/api/admin/tier-price-history/${selected}`, {
+      await fetch(`/api/admin/variant-price-history/${selected}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -121,7 +122,7 @@ export default function TierPriceHistoryPage() {
     }
     setForm({ ...empty, id: crypto.randomUUID() })
     setEditing(false)
-    const hist = await fetch(`/api/admin/tier-price-history/${selected}`).then((r) => r.json())
+    const hist = await fetch(`/api/admin/variant-price-history/${selected}`).then((r) => r.json())
     setEntries(hist)
     loadRows()
   }
@@ -133,12 +134,12 @@ export default function TierPriceHistoryPage() {
 
   const del = async (id: string) => {
     if (!confirm("Are you sure you want to delete this price entry?")) return
-    await fetch(`/api/admin/tier-price-history/${selected}`, {
+      await fetch(`/api/admin/variant-price-history/${selected}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     })
-    const hist = await fetch(`/api/admin/tier-price-history/${selected}`).then((r) => r.json())
+    const hist = await fetch(`/api/admin/variant-price-history/${selected}`).then((r) => r.json())
     setEntries(hist)
     loadRows()
   }
@@ -150,7 +151,7 @@ export default function TierPriceHistoryPage() {
         (row) =>
           row.categoryName.toLowerCase().includes(searchTerm.toLowerCase()) ||
           row.serviceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          row.tierName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          row.variantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
           row.current?.actualPrice?.toString().includes(searchTerm) ||
           row.upcoming?.actualPrice?.toString().includes(searchTerm),
       )
@@ -160,13 +161,13 @@ export default function TierPriceHistoryPage() {
       if (cat !== 0) return cat
       const serv = a.serviceName.localeCompare(b.serviceName)
       if (serv !== 0) return serv
-      return a.tierName.localeCompare(b.tierName)
+      return a.variantName.localeCompare(b.variantName)
     })
   }, [rows, searchTerm])
 
-  const tiersWithCurrentPrice = rows.filter((row) => row.current).length
-  const tiersWithUpcomingPrice = rows.filter((row) => row.upcoming).length
-  const tiersWithoutPrice = rows.filter((row) => !row.current && !row.upcoming).length
+  const variantsWithCurrentPrice = rows.filter((row) => row.current).length
+  const variantsWithUpcomingPrice = rows.filter((row) => row.upcoming).length
+  const variantsWithoutPrice = rows.filter((row) => !row.current && !row.upcoming).length
 
   // Determine if the current form's start date is in the past (for disabling)
   const isStartDateInPast = useMemo(() => {
@@ -192,55 +193,55 @@ export default function TierPriceHistoryPage() {
       <div className="container mx-auto py-8 px-4 md:px-6 bg-gray-50 min-h-screen">
         <h1 className="text-4xl font-extrabold mb-2 text-gray-900 tracking-tight">Salon Pricing & Offers</h1>
         <p className="text-lg text-muted-foreground mb-8">
-          Effortlessly manage and update all service tier prices and special offers.
+          Effortlessly manage and update all service variant prices and special offers.
         </p>
         {/* Info Graphics / Summary Cards */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-10">
           <Card className="shadow-lg border-l-4 border-blue-500">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-blue-700">Total Service Tiers</CardTitle>
+              <CardTitle className="text-sm font-medium text-blue-700">Total Service Variants</CardTitle>
               <Tag className="h-5 w-5 text-blue-500" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-gray-900">{rows.length}</div>
-              <p className="text-xs text-muted-foreground mt-1">All available service tiers</p>
+              <p className="text-xs text-muted-foreground mt-1">All available service variants</p>
             </CardContent>
           </Card>
           <Card className="shadow-lg border-l-4 border-green-500">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-green-700">Tiers with Active Pricing</CardTitle>
+              <CardTitle className="text-sm font-medium text-green-700">Variants with Active Pricing</CardTitle>
               <IndianRupee className="h-5 w-5 text-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-900">{tiersWithCurrentPrice}</div>
+              <div className="text-3xl font-bold text-gray-900">{variantsWithCurrentPrice}</div>
               <p className="text-xs text-muted-foreground mt-1">Currently configured prices</p>
             </CardContent>
           </Card>
           <Card className="shadow-lg border-l-4 border-purple-500">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-purple-700">Tiers with Upcoming Offers</CardTitle>
+              <CardTitle className="text-sm font-medium text-purple-700">Variants with Upcoming Offers</CardTitle>
               <Calendar className="h-5 w-5 text-purple-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-900">{tiersWithUpcomingPrice}</div>
+              <div className="text-3xl font-bold text-gray-900">{variantsWithUpcomingPrice}</div>
               <p className="text-xs text-muted-foreground mt-1">Future price changes or promotions</p>
             </CardContent>
           </Card>
           <Card className="shadow-lg border-l-4 border-red-500">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-red-700">Tiers Needing Price Setup</CardTitle>
+              <CardTitle className="text-sm font-medium text-red-700">Variants Needing Price Setup</CardTitle>
               <Info className="h-5 w-5 text-red-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-900">{tiersWithoutPrice}</div>
-              <p className="text-xs text-muted-foreground mt-1">Tiers without any price configuration</p>
+              <div className="text-3xl font-bold text-gray-900">{variantsWithoutPrice}</div>
+              <p className="text-xs text-muted-foreground mt-1">Variants without any price configuration</p>
             </CardContent>
           </Card>
         </div>
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="text-2xl font-semibold">Service Tier Price List</CardTitle>
-            <CardDescription>Browse, filter, and manage pricing details for each service tier.</CardDescription>
+            <CardTitle className="text-2xl font-semibold">Service Variant Price List</CardTitle>
+            <CardDescription>Browse, filter, and manage pricing details for each service variant.</CardDescription>
           </CardHeader>
           <CardContent>
             {/* Search and Filters */}
@@ -248,7 +249,7 @@ export default function TierPriceHistoryPage() {
               <div className="relative col-span-full xl:col-span-2">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by category, service, or tier..."
+                  placeholder="Search by category, service, or variant..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9 pr-4 py-2 rounded-md border focus-visible:ring-blue-500"
@@ -263,7 +264,7 @@ export default function TierPriceHistoryPage() {
                     <TableHead className="w-[60px] text-center">Sl No.</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Service</TableHead>
-                    <TableHead>Tier</TableHead>
+                    <TableHead>Variant</TableHead>
                     <TableHead>Current Price</TableHead>
                     <TableHead>Current Ends</TableHead>
                     <TableHead>Upcoming Price</TableHead>
@@ -278,7 +279,7 @@ export default function TierPriceHistoryPage() {
                         <TableCell className="font-medium text-center text-muted-foreground">{index + 1}</TableCell>
                         <TableCell className="font-semibold text-gray-800">{row.categoryName}</TableCell>
                         <TableCell>{row.serviceName}</TableCell>
-                        <TableCell>{row.tierName}</TableCell>
+                        <TableCell>{row.variantName}</TableCell>
                         <TableCell>
                           {row.current ? (
                             <div className="flex flex-col items-start gap-1">
@@ -348,14 +349,12 @@ export default function TierPriceHistoryPage() {
                       <TableCell colSpan={9} className="h-32 text-center text-muted-foreground">
                         <div className="flex flex-col items-center justify-center gap-2">
                           <Sparkles className="h-8 w-8 text-gray-400" />
-                          <p>No matching service tiers found.</p>
+                          <p>No matching service variants found.</p>
                           <Button
                             variant="link"
                             onClick={() => {
                               setSearchTerm("")
-                              setCategoryFilter([])
-                              setServiceFilter([])
-                              setTierFilter([])
+                              // reset additional filters here if added
                             }}
                           >
                             Clear all filters
@@ -373,9 +372,14 @@ export default function TierPriceHistoryPage() {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="sm:max-w-[500px] p-6 max-h-[80vh] overflow-y-auto text-gray-900">
 
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-bold">Edit Price History</DialogTitle>
-              <DialogDescription>Manage individual price entries for this service tier.</DialogDescription>
+            <DialogHeader className="flex items-start justify-between">
+              <div>
+                <DialogTitle className="text-2xl font-bold">Edit Price History</DialogTitle>
+                <DialogDescription>Manage individual price entries for this service variant.</DialogDescription>
+              </div>
+              <Button variant="ghost" size="sm" onClick={closeVariantDetails} className="text-gray-500 hover:bg-gray-100">
+                <X className="h-4 w-4" />
+              </Button>
             </DialogHeader>
             <Separator className="my-4" />
             <form onSubmit={save} className="space-y-4">
@@ -442,7 +446,7 @@ export default function TierPriceHistoryPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={closeTierDetails}
+                  onClick={closeVariantDetails}
                   className="hover:bg-gray-100 bg-transparent"
                 >
                   Cancel
