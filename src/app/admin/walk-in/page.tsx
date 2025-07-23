@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { format } from "date-fns"
 
 import {
@@ -98,6 +98,8 @@ export default function AdminBooking() {
   const [edit, setEdit] = useState<Booking | null>(null)
   const [editStaffId, setEditStaffId] = useState("")
   const [editStart, setEditStart] = useState("")
+  const formRef = useRef<HTMLFormElement>(null)
+  const [attemptSubmit, setAttemptSubmit] = useState(false)
 
 
   // Original load functions - no dummy data here
@@ -380,6 +382,16 @@ export default function AdminBooking() {
     }
   }
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setAttemptSubmit(true)
+    if (!formRef.current?.checkValidity()) {
+      formRef.current?.reportValidity()
+      return
+    }
+    saveBooking()
+  }
+
   const bookingsFor = (id: string, time: string) =>
     bookings.filter((b) => b.staffId === id && b.date === date && b.start === time)
 
@@ -415,7 +427,7 @@ export default function AdminBooking() {
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Booking Form - Left Side */}
-        <div className="space-y-6">
+        <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
           {/* Customer Information */}
           <Card className="border-l-4 border-blue-500 shadow-md">
             <CardHeader className="pb-3">
@@ -460,7 +472,9 @@ export default function AdminBooking() {
                 </div>
                 <div className="space-y-2">
                   <Label className="text-sm">Gender</Label>
-                  <div className="flex items-center gap-4 h-9">
+                  <div
+                    className={`flex items-center gap-4 h-9 ${attemptSubmit && !gender ? "border border-red-500 rounded-md px-2" : ""}`}
+                  >
                     <label className="flex items-center gap-1 text-sm">
                       <input
                         type="radio"
@@ -468,6 +482,7 @@ export default function AdminBooking() {
                         value="male"
                         checked={gender === "male"}
                         onChange={(e) => setGender(e.target.value)}
+                        required
                       />
                       Male
                     </label>
@@ -608,6 +623,8 @@ export default function AdminBooking() {
                               onValueChange={(value) =>
                                 setItems(items.map((it, i) => (i === idx ? { ...it, staffId: value, start: "" } : it)))
                               }
+                              required
+                              className={`h-8 text-xs ${attemptSubmit && !item.staffId ? "border-red-500 focus:ring-red-500" : ""}`}
                             >
                               <SelectTrigger className="h-8 text-xs">
                                 <SelectValue placeholder="Select staff" />
@@ -629,6 +646,8 @@ export default function AdminBooking() {
                                 setItems(items.map((it, i) => (i === idx ? { ...it, start: value } : it)))
                               }
                               disabled={!item.staffId}
+                              required
+                              className={`h-8 text-xs ${attemptSubmit && !item.start ? "border-red-500 focus:ring-red-500" : ""}`}
                             >
                               <SelectTrigger className="h-8 text-xs">
                                 <SelectValue placeholder={item.staffId ? "Select time" : "Select staff first"} />
@@ -666,10 +685,8 @@ export default function AdminBooking() {
                       <DollarSign className="h-4 w-4 text-gray-600" /> Total: {totalDuration}m • ₹{totalAmount}
                     </span>
                     <Button
-                      onClick={saveBooking}
-                      disabled={!gender || items.length === 0 || (phone && phone.length !== 10) || items.some((i) => !i.staffId || !i.start)}
-                      className="px-6 py-2 bg-blue-600 hover:bg-blue-700"
-
+                      type="submit"
+                      className="px-8 py-3 bg-blue-600 hover:bg-blue-700"
                     >
                       Confirm Booking
                     </Button>
@@ -678,7 +695,7 @@ export default function AdminBooking() {
               )}
             </CardContent>
           </Card>
-        </div>
+        </form>
 
         {/* Schedule Grid - Right Side */}
 
