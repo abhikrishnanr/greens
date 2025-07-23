@@ -159,6 +159,8 @@ model Booking {
   id        String   @id @default(uuid())
   customer  String   @db.VarChar(191)
   phone     String   @db.VarChar(191)
+  gender    String   @db.VarChar(10)
+  age       Int?
   staffId   String   @db.VarChar(191)
   staff     User     @relation(fields: [staffId], references: [id])
   date      String   @db.VarChar(10)
