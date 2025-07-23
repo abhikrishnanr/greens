@@ -64,8 +64,10 @@ interface Selected {
 
 interface Booking {
   id: string
-  customer: string
-  phone: string
+  customer: string | null
+  phone: string | null
+  gender: string
+  age: number | null
   items: Selected[]
   staffId: string
   date: string
@@ -88,6 +90,8 @@ export default function AdminBooking() {
   const [staff, setStaff] = useState<Staff[]>([])
   const [customer, setCustomer] = useState("")
   const [phone, setPhone] = useState("")
+  const [gender, setGender] = useState("")
+  const [age, setAge] = useState("")
   const [date, setDate] = useState(() => format(new Date(), "yyyy-MM-dd"))
   const [bookings, setBookings] = useState<Booking[]>([])
   const [result, setResult] = useState<{ success: boolean; message: string } | null>(null)
@@ -117,18 +121,10 @@ export default function AdminBooking() {
       return
     }
     try {
-      const res = await fetch(`/api/admin/services-new/${category}`)
+      const res = await fetch(`/api/admin/services-walkin/${category}`)
       if (!res.ok) throw new Error("Failed to fetch services")
       const data: Service[] = await res.json()
-      const enriched: Service[] = []
-      for (const svc of data) {
-        const tRes = await fetch(`/api/admin/service-variants/${svc.id}`)
-        const variants: Variant[] = await tRes.json()
-        if (variants.some((t) => t.currentPrice)) {
-          enriched.push({ ...svc, variants })
-        }
-      }
-      setServices(enriched)
+      setServices(data.filter((s) => s.variants.some((v) => v.currentPrice)))
     } catch (error) {
       console.error("Error loading services:", error)
       setResult({ success: false, message: "Failed to load services for this category." })
@@ -284,11 +280,11 @@ export default function AdminBooking() {
 
   const saveBooking = async () => {
 
-    if (!customer || !phone || items.length === 0) {
-      setResult({ success: false, message: "Please fill in customer details and add at least one service." })
+    if (!gender || items.length === 0) {
+      setResult({ success: false, message: "Please select gender and add at least one service." })
       return
     }
-    if (phone.length !== 10 || !/^\d{10}$/.test(phone)) {
+    if (phone && (phone.length !== 10 || !/^\d{10}$/.test(phone))) {
       setResult({ success: false, message: "Phone number must be exactly 10 digits." })
       return
     }
@@ -304,7 +300,15 @@ export default function AdminBooking() {
       const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customer, phone, date, color, items }),
+        body: JSON.stringify({
+          customer: customer || null,
+          phone: phone || null,
+          gender,
+          age: age ? Number(age) : null,
+          date,
+          color,
+          items,
+        }),
       })
       if (res.ok) {
         const booking: Booking = await res.json()
@@ -319,6 +323,8 @@ export default function AdminBooking() {
     } finally {
       setCustomer("")
       setPhone("")
+      setGender("")
+      setAge("")
       setItems([])
     }
   }
@@ -444,6 +450,42 @@ export default function AdminBooking() {
                     maxLength={10}
                   />
                   {isPhoneInvalid && <p className="text-xs text-red-500">Phone number must be exactly 10 digits.</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm">Gender</Label>
+                  <div className="flex items-center gap-4 h-9">
+                    <label className="flex items-center gap-1 text-sm">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="male"
+                        checked={gender === "male"}
+                        onChange={(e) => setGender(e.target.value)}
+                      />
+                      Male
+                    </label>
+                    <label className="flex items-center gap-1 text-sm">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="female"
+                        checked={gender === "female"}
+                        onChange={(e) => setGender(e.target.value)}
+                      />
+                      Female
+                    </label>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="age" className="text-sm">Approx Age</Label>
+                  <Input
+                    id="age"
+                    type="number"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    placeholder="in years"
+                    className="h-9"
+                  />
                 </div>
               </div>
             </CardContent>
@@ -618,7 +660,7 @@ export default function AdminBooking() {
                     </span>
                     <Button
                       onClick={saveBooking}
-                      disabled={!customer || !phone || phone.length !== 10 || items.some((i) => !i.staffId || !i.start)}
+                      disabled={!gender || items.length === 0 || (phone && phone.length !== 10) || items.some((i) => !i.staffId || !i.start)}
                       className="px-6 py-2 bg-blue-600 hover:bg-blue-700"
 
                     >
