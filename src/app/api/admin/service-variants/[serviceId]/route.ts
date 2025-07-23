@@ -1,31 +1,40 @@
-import { PrismaClient } from '@prisma/client'
 import { NextResponse } from 'next/server'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/lib/prisma'
 
 export async function GET(req: Request, { params }: { params: { serviceId: string } }) {
-  const { serviceId } = await params
+  const { serviceId } = params
+  const now = new Date()
   const variants = await prisma.serviceTier.findMany({
     where: { serviceId },
-    include: { priceHistory: true },
+    select: {
+      id: true,
+      name: true,
+      duration: true,
+      priceHistory: {
+        where: {
+          startDate: { lte: now },
+          OR: [{ endDate: null }, { endDate: { gt: now } }],
+        },
+        orderBy: { startDate: 'desc' },
+        take: 1,
+        select: { actualPrice: true, offerPrice: true },
+      },
+    },
     orderBy: { name: 'asc' },
   })
-  const now = new Date()
-  const response = variants.map(t => {
-    const current = t.priceHistory.find(ph => {
-      const start = ph.startDate
-      const end = ph.endDate
-      return start <= now && (!end || now < end)
-    })
-    return {
-      id: t.id,
-      name: t.name,
-      duration: t.duration,
-      currentPrice: current
-        ? { actualPrice: current.actualPrice, offerPrice: current.offerPrice }
-        : null,
-    }
-  })
+
+  const response = variants.map((t) => ({
+    id: t.id,
+    name: t.name,
+    duration: t.duration ?? null,
+    currentPrice: t.priceHistory[0]
+      ? {
+          actualPrice: t.priceHistory[0].actualPrice,
+          offerPrice: t.priceHistory[0].offerPrice,
+        }
+      : null,
+  }))
+
   return NextResponse.json(response)
 }
 
