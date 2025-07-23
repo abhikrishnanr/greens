@@ -407,7 +407,7 @@ export default function HomePage() {
               💫 Why Choose Greens Beauty?
             </h2>
             <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-              Experience the difference with our premium service tiers and professional expertise
+              Experience the difference with our premium service variants and professional expertise
             </p>
           </motion.div>
 

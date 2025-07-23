@@ -28,7 +28,7 @@ interface Category {
   name: string
 }
 
-interface Tier {
+interface Variant {
   id: string
   name: string
   duration?: number | null
@@ -38,7 +38,7 @@ interface Tier {
 interface Service {
   id: string
   name: string
-  tiers: Tier[]
+  variants: Variant[]
 }
 
 interface Staff {
@@ -52,7 +52,7 @@ interface StaffApi extends Staff {
 
 interface Selected {
   serviceId: string
-  tierId: string
+  variantId: string
   name: string
   duration: number
   price: number
@@ -78,7 +78,7 @@ export default function AdminBooking() {
   const [category, setCategory] = useState("")
   const [services, setServices] = useState<Service[]>([])
   const [selectedSvc, setSelectedSvc] = useState("")
-  const [tiers, setTiers] = useState<Tier[]>([])
+  const [variants, setVariants] = useState<Variant[]>([])
   const [selectedTier, setSelectedTier] = useState("")
   const [items, setItems] = useState<Selected[]>([])
   const [staff, setStaff] = useState<Staff[]>([])
@@ -107,7 +107,7 @@ export default function AdminBooking() {
   const loadServices = async () => {
     if (!category) {
       setServices([])
-      setTiers([])
+      setVariants([])
       setSelectedSvc("")
       return
     }
@@ -117,10 +117,10 @@ export default function AdminBooking() {
       const data: Service[] = await res.json()
       const enriched: Service[] = []
       for (const svc of data) {
-        const tRes = await fetch(`/api/admin/service-tiers/${svc.id}`)
-        const tiers: Tier[] = await tRes.json()
-        if (tiers.some((t) => t.currentPrice)) {
-          enriched.push({ ...svc, tiers })
+        const tRes = await fetch(`/api/admin/service-variants/${svc.id}`)
+        const variants: Variant[] = await tRes.json()
+        if (variants.some((t) => t.currentPrice)) {
+          enriched.push({ ...svc, variants })
         }
       }
       setServices(enriched)
@@ -167,12 +167,12 @@ export default function AdminBooking() {
   useEffect(() => {
     loadServices()
     setSelectedSvc("")
-    setTiers([])
+    setVariants([])
   }, [category])
   useEffect(() => {
     if (!selectedSvc) return
     const svc = services.find((s) => s.id === selectedSvc)
-    setTiers(svc?.tiers || [])
+    setVariants(svc?.variants || [])
   }, [selectedSvc])
   useEffect(() => {
     localStorage.setItem("walkin-bookings", JSON.stringify(bookings))
@@ -185,19 +185,19 @@ export default function AdminBooking() {
   }, [edit])
 
   const addItem = () => {
-    const tier = tiers.find((t) => t.id === selectedTier)
-    if (!tier) return
+    const variant = variants.find((t) => t.id === selectedTier)
+    if (!variant) return
 
-    const price = tier.currentPrice?.offerPrice ?? tier.currentPrice?.actualPrice ?? 0
-    const duration = tier.duration || 0
+    const price = variant.currentPrice?.offerPrice ?? variant.currentPrice?.actualPrice ?? 0
+    const duration = variant.duration || 0
     const serviceName = services.find((s) => s.id === selectedSvc)?.name || ""
 
     setItems([
       ...items,
       {
         serviceId: selectedSvc,
-        tierId: tier.id,
-        name: `${serviceName} - ${tier.name}`,
+        variantId: variant.id,
+        name: `${serviceName} - ${variant.name}`,
         duration,
         price,
         staffId: "",
@@ -423,7 +423,7 @@ export default function AdminBooking() {
                 <Scissors className="h-5 w-5 text-green-600" /> Select Services
               </CardTitle>
               <CardDescription className="text-sm text-gray-500">
-                Choose the services and tiers, then assign staff and time for each.
+                Choose the services and variants, then assign staff and time for each.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -463,16 +463,16 @@ export default function AdminBooking() {
                 )}
               </div>
 
-              {tiers.length > 0 && (
+              {variants.length > 0 && (
                 <div className="space-y-2">
-                  <Label className="text-sm">Tier</Label>
+                  <Label className="text-sm">Variant</Label>
                   <div className="flex gap-2">
                     <Select value={selectedTier} onValueChange={setSelectedTier}>
                       <SelectTrigger className="flex-1 h-9">
-                        <SelectValue placeholder="Select tier" />
+                        <SelectValue placeholder="Select variant" />
                       </SelectTrigger>
                       <SelectContent>
-                        {tiers.map((t) => (
+                        {variants.map((t) => (
                           <SelectItem key={t.id} value={t.id}>
                             {t.name} ({t.duration}m) - ₹{t.currentPrice?.actualPrice}
                           </SelectItem>
@@ -494,7 +494,7 @@ export default function AdminBooking() {
                   </Label>
                   <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
                     {items.map((item, idx) => (
-                      <div key={item.tierId} className="border rounded-md p-3 bg-gray-50">
+                      <div key={item.variantId} className="border rounded-md p-3 bg-gray-50">
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-medium text-sm truncate" title={item.name}>
                             {item.name}
