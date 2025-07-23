@@ -257,7 +257,7 @@ export default function VariantPriceHistoryPage() {
               </div>
             </div>
             {/* Main Table */}
-            <div className="rounded-lg border overflow-hidden shadow-sm">
+            <div className="rounded-lg border overflow-x-auto shadow-sm">
               <Table>
                 <TableHeader className="bg-gray-100">
                   <TableRow>
@@ -459,7 +459,7 @@ export default function VariantPriceHistoryPage() {
             {entries.length > 0 && (
               <div className="mt-6 border-t pt-4">
                 <h3 className="text-lg font-semibold mb-3">Historical Price Entries</h3>
-                <div className="rounded-md border overflow-hidden">
+                <div className="rounded-md border overflow-x-auto">
                   <Table>
                     <TableHeader className="bg-gray-50">
                       <TableRow>
