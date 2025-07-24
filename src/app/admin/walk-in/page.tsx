@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
+import { useSearchParams } from 'next/navigation'
 import { format } from "date-fns"
 
 import {
@@ -100,6 +101,17 @@ export default function AdminBooking() {
   const [editStart, setEditStart] = useState("")
   const formRef = useRef<HTMLFormElement>(null)
   const [attemptSubmit, setAttemptSubmit] = useState(false)
+
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const n = searchParams.get('name')
+    const p = searchParams.get('phone')
+    const g = searchParams.get('gender')
+    if (n) setCustomer(n)
+    if (p) setPhone(p)
+    if (g) setGender(g)
+  }, [searchParams])
 
 
   // Original load functions - no dummy data here

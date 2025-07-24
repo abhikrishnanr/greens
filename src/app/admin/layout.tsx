@@ -32,6 +32,7 @@ const sections: {
     heading: 'Salon Management',
     items: [
       { href: '/admin/staff', label: 'Staff', icon: MdPeople },
+      { href: '/admin/customers', label: 'Customers', icon: MdPeople },
       { href: '/admin/branches', label: 'Branches', icon: MdStore },
       {
         href: '/admin/service-categories',
