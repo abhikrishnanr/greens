@@ -10,6 +10,9 @@ export default function Header() {
 
   const navLinks = (
     <>
+     <Link href="/" className="hover:text-green-400 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+        Home {/* Added Home link */}
+      </Link>
       <Link href="#" className="hover:text-green-400 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
         Explore Services
       </Link>

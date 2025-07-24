@@ -7,7 +7,6 @@ import { FiShoppingCart, FiPhone, FiMapPin, FiMail, FiInstagram } from "react-ic
 import { MdStar, MdDiamond, MdEco } from "react-icons/md"
 import { motion, AnimatePresence } from "framer-motion"
 import Header from "@/components/Header"
-import { Users, Sparkles, Crown, Paintbrush, Heart, Flower, Leaf, GalleryHorizontal, Home } from "lucide-react"
 
 // ---- Tier/Type labels & badge colors ----
 const TIER_LABELS = {
@@ -24,7 +23,7 @@ const TIER_LABELS = {
     helper: "Best value—trusted brands & great results.",
   },
   basic: {
-    color: "bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-300 border-green-500/40",
+    color: "bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-300 border-green-300/40",
     label: "Basic",
     icon: <MdEco className="inline mr-1 -mt-0.5 text-green-400" />,
     helper: "Simple, everyday care. Fast & affordable.",
@@ -35,11 +34,11 @@ const HERO_CATEGORIES = [
   {
     id: "home",
     name: "Home",
-    icon: <Home fill="currentColor" className="w-6 h-6" />,
-    backgroundImage: "/salon_bg_poster.jpg", // Use video poster for home background
-    videoSrc: "/home-bg-video.mp4", // Add video source
+    iconUrl: "/icons/home-green-gray.png",
+    backgroundImage: "/salon_bg_poster.jpg",
+    videoSrc: "/home-bg-video.mp4",
     heroTitle: "Welcome to Greens Beauty Salon",
-    heroDescription: "Here Beauty Begins with Peace of Mind",
+    heroDescription: "Here Beauty Begins with Peace of Mind", // Re-added description
     buttonLink: "#services",
     heroTitleColor: "text-white",
     heroDescriptionColor: "text-white",
@@ -49,7 +48,7 @@ const HERO_CATEGORIES = [
   {
     id: "family-salon",
     name: "Family Salon",
-    icon: <Users fill="currentColor" className="w-6 h-6" />,
+    iconUrl: "/icons/users-green-gray.png",
     backgroundImage: "/family-salon-interior.png",
     heroTitle: "Family Salon",
     heroDescription:
@@ -63,7 +62,7 @@ const HERO_CATEGORIES = [
   {
     id: "beauty-studio",
     name: "Beauty Studio",
-    icon: <Sparkles fill="currentColor" className="w-6 h-6" />,
+    iconUrl: "/icons/sparkles-green-gray.png",
     backgroundImage: "/beauty-studio-glam.png",
     heroTitle: "Beauty Studio",
     heroDescription:
@@ -77,7 +76,7 @@ const HERO_CATEGORIES = [
   {
     id: "celebrity-salon",
     name: "Celebrity Salon",
-    icon: <Crown fill="currentColor" className="w-6 h-6" />,
+    iconUrl: "/icons/crown-green-gray.png",
     backgroundImage: "/celebrity-hair-styling.png",
     heroTitle: "Celebrity Salon",
     heroDescription:
@@ -91,7 +90,7 @@ const HERO_CATEGORIES = [
   {
     id: "makeover-studio",
     name: "Makeover Studio",
-    icon: <Paintbrush fill="currentColor" className="w-6 h-6" />,
+    iconUrl: "/icons/paintbrush-green-gray.png",
     backgroundImage: "/makeover-studio-transformation.png",
     heroTitle: "Makeover Studio",
     heroDescription: "Complete transformation services, from hair to makeup, for any occasion or personal desire.",
@@ -104,7 +103,7 @@ const HERO_CATEGORIES = [
   {
     id: "bridal-lounge",
     name: "Bridal Lounge",
-    icon: <Heart fill="currentColor" className="w-6 h-6" />,
+    iconUrl: "/icons/heart-green-gray.png",
     backgroundImage: "/bridal-makeup-lounge.png",
     heroTitle: "Bridal Lounge",
     heroDescription:
@@ -118,7 +117,7 @@ const HERO_CATEGORIES = [
   {
     id: "floral-studio",
     name: "Floral Studio",
-    icon: <Flower fill="currentColor" className="w-6 h-6" />,
+    iconUrl: "/icons/flower-green-gray.png",
     backgroundImage: "/floral-arrangement-studio.png",
     heroTitle: "Floral Studio",
     heroDescription:
@@ -132,7 +131,7 @@ const HERO_CATEGORIES = [
   {
     id: "floral-decor",
     name: "Floral Decor",
-    icon: <Leaf fill="currentColor" className="w-6 h-6" />,
+    iconUrl: "/icons/leaf-green-gray.png",
     backgroundImage: "/elegant-floral-event.png",
     heroTitle: "Floral Decor",
     heroDescription:
@@ -146,8 +145,8 @@ const HERO_CATEGORIES = [
   {
     id: "event-portfolio",
     name: "Event Portfolio",
-    icon: <GalleryHorizontal fill="currentColor" className="w-6 h-6" />,
-    backgroundImage: "/event.jpg",
+    iconUrl: "/icons/gallery-green-gray.png",
+    backgroundImage: "/event-planning-portfolio.png",
     heroTitle: "Event Portfolio",
     heroDescription:
       "Complete event solutions, from meticulous planning to flawless execution, for seamless celebrations.",
@@ -234,8 +233,8 @@ export default function HomePage() {
       <section className="relative flex flex-col overflow-hidden min-h-[70vh] md:min-h-[70vh]">
         {/* Categories Section (Light Grey Bar) */}
         <div className="w-full overflow-x-auto py-2 scrollbar-hide bg-gray-100 shadow-lg">
-          <div className="flex gap-0 justify-start px-4">
-            {HERO_CATEGORIES.map((cat, idx) => (
+          <div className="flex gap-0 justify-start px-4 md:justify-center">
+            {HERO_CATEGORIES.filter((cat) => cat.id !== "home").map((cat, idx) => (
               <motion.button
                 key={cat.id}
                 className={`flex flex-col items-center justify-center p-3 min-w-[100px] text-center transition-all duration-300 relative
@@ -254,7 +253,13 @@ export default function HomePage() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3, delay: 0.1 + idx * 0.05 }}
               >
-                <div className="w-10 h-10 flex items-center justify-center text-current mb-1">{cat.icon}</div>
+                <Image
+                  src={cat.iconUrl || "/placeholder.svg"}
+                  alt={cat.name}
+                  width={32} // Increased icon size
+                  height={32} // Increased icon size
+                  className="w-8 h-8 mb-1" // Tailwind classes for size
+                />
                 <span className="text-xs font-medium whitespace-nowrap">{cat.name}</span>
               </motion.button>
             ))}
@@ -265,7 +270,7 @@ export default function HomePage() {
         <AnimatePresence mode="wait">
           <motion.div
             key={currentHeroContent.id}
-            className="relative flex-1 w-full flex items-center justify-center p-8 text-center overflow-hidden"
+            className="relative flex-1 w-full flex items-end justify-center p-8 text-center overflow-hidden pb-28" // Adjusted padding-bottom to pb-28
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
@@ -288,27 +293,30 @@ export default function HomePage() {
                 alt={currentHeroContent.name || "Background"}
                 layout="fill"
                 objectFit="cover"
-                priority // Prioritize loading for the main hero image
+                priority
                 className="absolute inset-0 z-0"
               />
             )}
-            <div className="absolute inset-0 bg-gradient-to-b from-gray-900/70 via-gray-900/80 to-gray-900/90 z-10" />
-
-            <div className="relative z-20 text-white max-w-3xl space-y-6">
-              <h1
-                className={`text-5xl md:text-7xl font-bold tracking-wide font-[Pacifico] ${currentHeroContent.heroTitleColor}`}
-              >
+            {/* Dark gradient overlay for the bottom 50% */}
+            <div className="absolute inset-x-0 bottom-0 h-[50%] bg-gradient-to-t from-gray-900 to-transparent z-10" />{" "}
+            {/* Increased height and intensity */}
+            <div className="relative z-20 text-white max-w-3xl space-y-2">
+              <h1 className={`text-2xl md:text-3xl font-bold tracking-wide ${currentHeroContent.heroTitleColor}`}>
                 {currentHeroContent.heroTitle}
               </h1>
-              <p className={`text-xl md:text-2xl leading-relaxed ${currentHeroContent.heroDescriptionColor}`}>
-                {currentHeroContent.heroDescription}
-              </p>
-              <Link
-                href={currentHeroContent.buttonLink || "#"}
-                className={`inline-flex px-8 py-4 rounded-full font-semibold text-lg shadow-lg transition-all duration-300 ${currentHeroContent.buttonBgColor} ${currentHeroContent.buttonTextColor} hover:scale-105`}
-              >
-                Explore Now
-              </Link>
+              {selectedHeroCategory === "home" ? (
+                <p className={`text-base md:text-lg leading-relaxed ${currentHeroContent.heroDescriptionColor}`}>
+                  {currentHeroContent.heroDescription}
+                </p>
+              ) : (
+                <Link
+                  href={currentHeroContent.buttonLink || "#"}
+                  className="inline-flex px-8 py-2 font-semibold text-md shadow-lg transition-all duration-300 bg-transparent border-white text-[#ffffff] hover:scale-105"
+                  style={{ border: "2px solid #fff" }}
+                >
+                  {"24 items | Rs. 300 onwards >"}
+                </Link>
+              )}
             </div>
           </motion.div>
         </AnimatePresence>
@@ -320,7 +328,7 @@ export default function HomePage() {
           <h2 className="text-xl font-semibold mb-4">Discover Our Rates</h2>
           <div className="flex justify-center gap-4 mb-6">
             <button
-              className={`px-6 py-3 rounded-full font-bold transition-colors duration-300 ${
+              className={`px-6 py-3 rounded-md font-bold transition-colors duration-300 ${
                 selectedGenderTab === "WOMEN"
                   ? "bg-pink-500 text-white"
                   : "bg-transparent text-pink-500 border border-pink-500"
@@ -330,7 +338,7 @@ export default function HomePage() {
               For WOMEN
             </button>
             <button
-              className={`px-6 py-3 rounded-full font-bold transition-colors duration-300 ${
+              className={`px-6 py-3 rounded-md font-bold transition-colors duration-300 ${
                 selectedGenderTab === "MEN"
                   ? "bg-blue-500 text-white"
                   : "bg-transparent text-blue-500 border border-blue-500"
@@ -342,20 +350,16 @@ export default function HomePage() {
           </div>
           <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-lg">
             {currentGenderServices.map((service, idx) => (
-              <span
+              <Link
                 key={idx}
+                href="#" // You might want to replace '#' with actual service links
                 className={`whitespace-nowrap ${
                   selectedGenderTab === "WOMEN" ? "text-pink-500" : "text-blue-500"
-                } ${idx < currentGenderServices.length - 1 ? "border-r-2" : ""} ${
-                  idx < currentGenderServices.length - 1
-                    ? selectedGenderTab === "WOMEN"
-                      ? "border-pink-500"
-                      : "border-blue-500"
-                    : ""
-                } pr-4`}
+                } hover:underline`}
               >
                 {service}
-              </span>
+                {idx < currentGenderServices.length - 1 && <span className="mx-2 text-gray-400">•</span>}
+              </Link>
             ))}
           </div>
         </div>
@@ -478,7 +482,7 @@ export default function HomePage() {
                     key={cat.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
+                    exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.5, delay: idx * 0.1 }}
                     className="bg-gradient-to-br from-gray-800/60 to-gray-700/60 backdrop-blur-md rounded-3xl shadow-lg border border-gray-700/50 overflow-hidden hover:shadow-green-400/20 hover:border-green-400/40 transform hover:scale-[1.02] transition-all duration-300"
                   >
