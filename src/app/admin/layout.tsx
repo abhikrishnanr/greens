@@ -42,6 +42,7 @@ const sections: {
       { href: '/admin/walk-in', label: 'Walk-in', icon: MdEvent },
       { href: '/admin/billing', label: 'Billing', icon: MdReceipt },
       { href: '/admin/billing-history', label: 'Billing History', icon: MdHistory },
+
     ],
   },
 ]

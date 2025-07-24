@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+
 import { format } from 'date-fns'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -36,6 +37,7 @@ export default function BillingPage() {
   const [billingName, setBillingName] = useState('')
   const [billingAddress, setBillingAddress] = useState('')
   const router = useRouter()
+
 
   useEffect(() => {
     fetch(`/api/billing-services?date=${date}`)
@@ -104,6 +106,7 @@ export default function BillingPage() {
     })
     setSelected([])
     router.push(`/admin/billing-history?date=${date}`)
+
   }
 
   return (
