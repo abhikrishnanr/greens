@@ -196,6 +196,8 @@ model Billing {
   amountBefore   Float
   amountAfter    Float
   voucherCode    String?  @db.VarChar(191)
+  paymentMethod  String   @default("cash") @db.VarChar(191)
+  paidAt         DateTime? @db.Timestamp(3)
   scheduledAt    DateTime @db.Timestamp(3)
   createdAt      DateTime @default(now()) @db.Timestamp(3)
 }

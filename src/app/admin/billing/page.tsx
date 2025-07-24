@@ -36,6 +36,7 @@ export default function BillingPage() {
   const [voucher, setVoucher] = useState('')
   const [billingName, setBillingName] = useState('')
   const [billingAddress, setBillingAddress] = useState('')
+  const [method, setMethod] = useState('cash')
   const router = useRouter()
 
 
@@ -105,6 +106,8 @@ export default function BillingPage() {
         billingAddress: billingAddress || null,
         phones,
         voucherCode: coupon?.code || null,
+        paymentMethod: method,
+        paidAt: method === 'paylater' ? null : new Date().toISOString(),
         services: svcData,
       }),
     })
@@ -178,6 +181,7 @@ export default function BillingPage() {
                 {coupon && (
                   <p>Discount: -₹{discount.toFixed(2)} ({coupon.code})</p>
                 )}
+                <p>GST (18%): ₹{(finalTotal * 0.18).toFixed(2)}</p>
                 <p className="font-bold">Final: ₹{finalTotal.toFixed(2)}</p>
                 <div className="grid gap-2">
                   <Input placeholder="Billing Name" value={billingName} onChange={e => setBillingName(e.target.value)} />
@@ -186,6 +190,12 @@ export default function BillingPage() {
                     <Input placeholder="Voucher Code" value={voucher} onChange={e => setVoucher(e.target.value)} />
                     <Button type="button" onClick={applyVoucher}>Apply</Button>
                   </div>
+                  <select value={method} onChange={e => setMethod(e.target.value)} className="border px-2 py-1 rounded">
+                    <option value="cash">Cash</option>
+                    <option value="upi">UPI</option>
+                    <option value="card">Card</option>
+                    <option value="paylater">Pay Later</option>
+                  </select>
                   <Button type="button" onClick={confirmBilling}>Confirm Billing</Button>
                 </div>
               </CardContent>

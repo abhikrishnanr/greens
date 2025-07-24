@@ -12,6 +12,7 @@ import {
   MdCategory,
   MdDesignServices,
   MdHistory,
+  MdPayment,
   MdLogout,
   MdEvent,
   MdReceipt,
@@ -42,6 +43,7 @@ const sections: {
       { href: '/admin/walk-in', label: 'Walk-in', icon: MdEvent },
       { href: '/admin/billing', label: 'Billing', icon: MdReceipt },
       { href: '/admin/billing-history', label: 'Billing History', icon: MdHistory },
+      { href: '/admin/paylater-bills', label: 'Pay Later', icon: MdPayment },
 
     ],
   },
