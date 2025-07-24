@@ -755,7 +755,7 @@ export default function AdminBooking() {
                                     <SelectItem
                                       key={t}
                                       value={t}
-                                      className={isBusy ? 'bg-yellow-200' : ''}
+                                      style={isBusy ? { backgroundColor: '#fef08a' } : undefined}
                                     >
                                       {t}
                                     </SelectItem>
@@ -999,7 +999,7 @@ export default function AdminBooking() {
                         <SelectItem
                           key={t}
                           value={t}
-                          className={isBusy ? 'bg-yellow-200' : ''}
+                          style={isBusy ? { backgroundColor: '#fef08a' } : undefined}
                         >
                           {t}
                         </SelectItem>
