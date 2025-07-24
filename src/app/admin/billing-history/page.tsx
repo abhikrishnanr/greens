@@ -22,7 +22,8 @@ import {
 
 const SALON_INFO = {
   name: "Greens Beauty Salon",
-  logo: "/placeholder.svg?height=50&width=50&text=Logo", // Using placeholder for logo
+  // use actual logo served from the public folder
+  logo: "/logo.png",
   address: "TC 45/215, Kunjalumood Junction, Karamana PO, Trivandrum",
   phone: "+91 8891 467678",
   email: "greensalon@gmail.com",
@@ -540,14 +541,14 @@ export default function BillingHistoryPage() {
             onClick={() => setViewBill(null)}
           >
             <div
-              className="relative z-50 w-full max-w-md rounded-lg border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg"
+              className="relative z-50 w-full max-w-md rounded-lg border bg-white text-black p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg"
               onClick={(e) => e.stopPropagation()}
             >
-              <img src={SALON_INFO.logo || "/placeholder.svg"} className="h-12 mx-auto my-4" alt="Salon Logo" />
+              <img src={SALON_INFO.logo} className="h-12 mx-auto my-4" alt="Salon Logo" />
               <div className="flex flex-col space-y-1.5 text-center sm:text-left">
                 <h3 className="text-lg font-semibold leading-none tracking-tight">Billing Details</h3>
               </div>
-              <div className="p-4 space-y-2 text-sm text-muted-foreground">
+              <div className="p-4 space-y-2 text-sm">
                 <div className="flex items-center gap-2">
                   <Hash className="h-4 w-4 text-primary" />
                   <strong>Bill ID:</strong> {viewBill.id}
