@@ -97,6 +97,9 @@ export default function AdminBooking() {
   const [edit, setEdit] = useState<Booking | null>(null)
   const [editStaffId, setEditStaffId] = useState("")
   const [editStart, setEditStart] = useState("")
+  const [editItem, setEditItem] = useState<(Selected & { bookingId: string }) | null>(null)
+  const [editItemStaffId, setEditItemStaffId] = useState("")
+  const [editItemStart, setEditItemStart] = useState("")
   const formRef = useRef<HTMLFormElement>(null)
   const [attemptSubmit, setAttemptSubmit] = useState(false)
 
@@ -184,6 +187,12 @@ export default function AdminBooking() {
       setEditStart(edit.start)
     }
   }, [edit])
+  useEffect(() => {
+    if (editItem) {
+      setEditItemStaffId(editItem.staffId)
+      setEditItemStart(editItem.start)
+    }
+  }, [editItem])
 
   const addItem = () => {
     const variant = variants.find((t) => t.id === selectedTier)
@@ -246,18 +255,27 @@ export default function AdminBooking() {
     return h * 60 + m
   }
 
-  const hasConflict = (staffId: string, start: string, duration: number, idx: number) => {
+  const hasConflict = (
+    staffId: string,
+    start: string,
+    duration: number,
+    idx?: number,
+    itemId?: string,
+  ) => {
     if (!staffId) return false
     const st = toMin(start)
     const en = st + duration
     for (const b of bookings) {
-      if (b.staffId !== staffId || b.date !== date) continue
-      const bst = toMin(b.start)
-      const ben = bst + b.items.reduce((a, i) => a + i.duration, 0)
-      if (st < ben && en > bst) return true
+      for (const it of b.items) {
+        if (itemId && it.id === itemId) continue
+        if (it.staffId !== staffId) continue
+        const bst = toMin(it.start)
+        const ben = bst + it.duration
+        if (st < ben && en > bst) return true
+      }
     }
     for (let i = 0; i < items.length; i++) {
-      if (i === idx) continue
+      if (idx !== undefined && i === idx) continue
       const it = items[i]
       if (it.staffId !== staffId || !it.start) continue
       const ist = toMin(it.start)
@@ -365,6 +383,58 @@ export default function AdminBooking() {
     }
   }
 
+  const updateBookingItem = async () => {
+    if (!editItem) return
+    try {
+      const res = await fetch('/api/booking-items', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: editItem.id, staffId: editItemStaffId, start: editItemStart }),
+      })
+      if (res.ok) {
+        const updated = await res.json()
+        setBookings(bs =>
+          bs.map(b =>
+            b.id === editItem.bookingId
+              ? { ...b, items: b.items.map(it => (it.id === updated.id ? updated : it)), staffId: updated.staffId, start: updated.start }
+              : b,
+          ),
+        )
+        setEditItem(null)
+        setResult({ success: true, message: 'Booking updated successfully!' })
+      } else {
+        throw new Error('Request failed')
+      }
+    } catch (err) {
+      console.error('Failed updating booking item', err)
+      setResult({ success: false, message: 'Failed to update booking.' })
+    }
+  }
+
+  const cancelBookingItem = async () => {
+    if (!editItem) return
+    if (!window.confirm('Cancel this booking?')) return
+    try {
+      const res = await fetch(`/api/booking-items?id=${editItem.id}`, { method: 'DELETE' })
+      if (res.ok || res.status === 204) {
+        setBookings(bs =>
+          bs
+            .map(b =>
+              b.id === editItem.bookingId ? { ...b, items: b.items.filter(it => it.id !== editItem.id) } : b,
+            )
+            .filter(b => b.items.length > 0),
+        )
+        setEditItem(null)
+        setResult({ success: true, message: 'Booking cancelled successfully!' })
+      } else {
+        throw new Error('Request failed')
+      }
+    } catch (err) {
+      console.error('Failed cancelling booking item', err)
+      setResult({ success: false, message: 'Failed to cancel booking.' })
+    }
+  }
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setAttemptSubmit(true)
@@ -376,8 +446,12 @@ export default function AdminBooking() {
     saveBooking()
   }
 
-  const bookingsFor = (id: string, time: string) =>
-    bookings.filter((b) => b.staffId === id && b.date === date && b.start === time)
+  const bookingItems = bookings.flatMap((b) =>
+    b.items.map((it) => ({ ...it, bookingId: b.id, color: b.color, customer: b.customer, phone: b.phone }))
+  )
+
+  const itemsFor = (id: string, time: string) =>
+    bookingItems.filter((it) => it.staffId === id && it.start === time)
 
   const isPhoneInvalid = phone.length > 0 && phone.length !== 10
 
@@ -693,19 +767,19 @@ export default function AdminBooking() {
                         <td className="border border-gray-200 p-1 text-gray-600 font-mono align-top">{time}</td>
                         {staff.map((st) => (
                           <td key={st.id + time} className="border border-gray-200 h-10 relative p-0 align-top">
-                            {bookingsFor(st.id, time).map((b, i, arr) => (
+                            {itemsFor(st.id, time).map((it, i, arr) => (
                               <div
-                                key={b.id}
+                                key={it.id}
                                 className="absolute inset-0 text-white flex items-center justify-center text-[10px] cursor-pointer px-1 rounded-sm m-0.5 overflow-hidden whitespace-nowrap text-ellipsis"
                                 style={{
-                                  background: b.color,
+                                  background: it.color,
                                   width: `${100 / arr.length}%`,
                                   left: `${(i * 100) / arr.length}%`,
                                 }}
-                                title={`${b.customer} - ${b.items.map((it) => it.name).join(", ")} - ₹${b.items.reduce((a, i) => a + i.price, 0)}`}
-                                onClick={() => setEdit(b)}
+                                title={`${it.customer} - ${it.name} - ₹${it.price}`}
+                                onClick={() => setEditItem(it)}
                               >
-                                {b.items.map((it) => it.name).join(", ")}
+                                {it.name}
                               </div>
                             ))}
                           </td>
@@ -798,6 +872,80 @@ export default function AdminBooking() {
                   Save Changes
                 </Button>
                 <Button onClick={() => setEdit(null)} variant="outline" size="sm">
+                  Close
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {editItem && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
+          <Card className="w-full max-w-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Edit Booking</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-sm space-y-1">
+                <p>
+                  <span className="font-medium">Customer:</span> {editItem.customer}
+                </p>
+                <p>
+                  <span className="font-medium">Phone:</span> {editItem.phone}
+                </p>
+                <p>
+                  <span className="font-medium">Service:</span> {editItem.name}
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm">Staff</Label>
+                <Select value={editItemStaffId} onValueChange={setEditItemStaffId}>
+                  <SelectTrigger className="h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {staff.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm">Time</Label>
+                <Select value={editItemStart} onValueChange={setEditItemStart}>
+                  <SelectTrigger className="h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {allTimes.map((t) => (
+                      <SelectItem
+                        key={t}
+                        value={t}
+                        style={
+                          editItemStaffId && hasConflict(editItemStaffId, t, editItem.duration, undefined, editItem.id)
+                            ? { backgroundColor: '#fef08a' }
+                            : undefined
+                        }
+                      >
+                        {t}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-2 pt-2">
+                <Button onClick={cancelBookingItem} variant="destructive" size="sm" className="flex-1">
+                  <Trash2 className="w-4 h-4 mr-1" />
+                  Cancel Booking
+                </Button>
+                <Button onClick={updateBookingItem} size="sm" className="flex-1">
+                  <Edit className="w-4 h-4 mr-1" />
+                  Save Changes
+                </Button>
+                <Button onClick={() => setEditItem(null)} variant="outline" size="sm">
                   Close
                 </Button>
               </div>
