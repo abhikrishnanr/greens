@@ -2,8 +2,30 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '@/lib/prisma'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === 'GET') {
+    const date = req.query.date as string | undefined
+    if (!date) return res.status(400).json({ error: 'Missing date' })
+    try {
+      const start = new Date(`${date}T00:00:00`)
+      const end = new Date(`${date}T23:59:59`)
+      const bills = await prisma.billing.findMany({
+        where: {
+          scheduledAt: {
+            gte: start,
+            lte: end,
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+      return res.json(bills)
+    } catch (err) {
+      console.error('billing fetch error', err)
+      return res.status(500).json({ error: 'Failed to load billing' })
+    }
+  }
   if (req.method !== 'POST') {
-    res.setHeader('Allow', ['POST'])
+    res.setHeader('Allow', ['GET', 'POST'])
+
     return res.status(405).end(`Method ${req.method} Not Allowed`)
   }
   const data = req.body as {
