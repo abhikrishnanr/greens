@@ -292,7 +292,7 @@ export default function AdminBooking() {
       for (let m = 0; m < dur; m += 15) {
         const d = new Date(date)
         d.setHours(0, 0, 0, 0)
-        slots.add(format(new Date(d.getTime() + minutes * 60000), 'HH:mm'))
+        slots.add(format(new Date(d.getTime() + minutes * 60000), "HH:mm"))
         minutes += 15
       }
     }
@@ -310,6 +310,23 @@ export default function AdminBooking() {
       mark(it.start, it.duration)
     }
     return slots
+  }
+
+  const hasBusyRange = (
+    busy: Set<string>,
+    start: string,
+    duration: number,
+  ) => {
+    let minutes = toMin(start)
+    for (let m = 0; m < duration; m += 15) {
+      const d = new Date(date)
+      d.setHours(0, 0, 0, 0)
+      if (busy.has(format(new Date(d.getTime() + minutes * 60000), "HH:mm"))) {
+        return true
+      }
+      minutes += 15
+    }
+    return false
   }
 
   const saveBooking = async () => {
@@ -729,16 +746,16 @@ export default function AdminBooking() {
                               </SelectTrigger>
                               <SelectContent>
                                 {timeOptionsFor(item.duration).map((t) => {
-                                  const busy = item.staffId ? busySlots(item.staffId, idx) : null
+                                  const busy = item.staffId
+                                    ? busySlots(item.staffId, idx)
+                                    : null
+                                  const isBusy =
+                                    busy && hasBusyRange(busy, t, item.duration)
                                   return (
                                     <SelectItem
                                       key={t}
                                       value={t}
-                                      style={
-                                        busy && busy.has(t)
-                                          ? { backgroundColor: '#fef08a' }
-                                          : undefined
-                                      }
+                                      className={isBusy ? 'bg-yellow-200' : ''}
                                     >
                                       {t}
                                     </SelectItem>
@@ -974,12 +991,15 @@ export default function AdminBooking() {
                   </SelectTrigger>
                   <SelectContent>
                     {allTimes.map((t) => {
-                      const busy = editItemStaffId ? busySlots(editItemStaffId, undefined, editItem.id) : null
+                      const busy = editItemStaffId
+                        ? busySlots(editItemStaffId, undefined, editItem.id)
+                        : null
+                      const isBusy = busy && hasBusyRange(busy, t, editItem.duration)
                       return (
                         <SelectItem
                           key={t}
                           value={t}
-                          style={busy && busy.has(t) ? { backgroundColor: '#fef08a' } : undefined}
+                          className={isBusy ? 'bg-yellow-200' : ''}
                         >
                           {t}
                         </SelectItem>
