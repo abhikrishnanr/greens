@@ -146,7 +146,7 @@ const HERO_CATEGORIES = [
     id: "event-portfolio",
     name: "Event Portfolio",
     iconUrl: "/icons/gallery-green-gray.png",
-    backgroundImage: "/event-planning-portfolio.png",
+    backgroundImage: "/event.jpg",
     heroTitle: "Event Portfolio",
     heroDescription:
       "Complete event solutions, from meticulous planning to flawless execution, for seamless celebrations.",
