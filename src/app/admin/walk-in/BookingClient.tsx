@@ -285,6 +285,33 @@ export default function AdminBooking() {
     return false
   }
 
+  const busySlots = (staffId: string, idx?: number, itemId?: string) => {
+    const slots = new Set<string>()
+    const mark = (start: string, dur: number) => {
+      let minutes = toMin(start)
+      for (let m = 0; m < dur; m += 15) {
+        const d = new Date(date)
+        d.setHours(0, 0, 0, 0)
+        slots.add(format(new Date(d.getTime() + minutes * 60000), 'HH:mm'))
+        minutes += 15
+      }
+    }
+    for (const b of bookings) {
+      for (const it of b.items) {
+        if (itemId && it.id === itemId) continue
+        if (it.staffId !== staffId) continue
+        mark(it.start, it.duration)
+      }
+    }
+    for (let i = 0; i < items.length; i++) {
+      if (idx !== undefined && i === idx) continue
+      const it = items[i]
+      if (it.staffId !== staffId || !it.start) continue
+      mark(it.start, it.duration)
+    }
+    return slots
+  }
+
   const saveBooking = async () => {
     if (!gender || items.length === 0) {
       setResult({ success: false, message: "Please select gender and add at least one service." })
@@ -454,6 +481,15 @@ export default function AdminBooking() {
     bookingItems.filter((it) => it.staffId === id && it.start === time)
 
   const isPhoneInvalid = phone.length > 0 && phone.length !== 10
+
+  const staffSummary = staff.map((s) => ({
+    id: s.id,
+    name: s.name,
+    count:
+      bookings.reduce((acc, b) => acc + b.items.filter((it) => it.staffId === s.id).length, 0) +
+      items.filter((it) => it.staffId === s.id).length,
+  }))
+  const maxCount = Math.max(1, ...staffSummary.map((s) => s.count))
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
@@ -692,19 +728,22 @@ export default function AdminBooking() {
                                 <SelectValue placeholder={item.staffId ? "Select time" : "Select staff first"} />
                               </SelectTrigger>
                               <SelectContent>
-                                {timeOptionsFor(item.duration).map((t) => (
-                                  <SelectItem
-                                    key={t}
-                                    value={t}
-                                    style={
-                                      item.staffId && hasConflict(item.staffId, t, item.duration, idx)
-                                        ? { backgroundColor: "#fef08a" }
-                                        : undefined
-                                    }
-                                  >
-                                    {t}
-                                  </SelectItem>
-                                ))}
+                                {timeOptionsFor(item.duration).map((t) => {
+                                  const busy = item.staffId ? busySlots(item.staffId, idx) : null
+                                  return (
+                                    <SelectItem
+                                      key={t}
+                                      value={t}
+                                      style={
+                                        busy && busy.has(t)
+                                          ? { backgroundColor: '#fef08a' }
+                                          : undefined
+                                      }
+                                    >
+                                      {t}
+                                    </SelectItem>
+                                  )
+                                })}
                               </SelectContent>
                             </Select>
                           </div>
@@ -745,6 +784,20 @@ export default function AdminBooking() {
                 View and manage appointments for {format(new Date(date), "MMMM dd, yyyy")}. Click on a booking to edit.
               </CardDescription>
             </CardHeader>
+            <div className="px-4 space-y-1">
+              {staffSummary.map((s) => (
+                <div key={s.id} className="flex items-center gap-2">
+                  <span className="text-xs w-20">{s.name}</span>
+                  <div className="flex-1 bg-gray-200 h-2 rounded">
+                    <div
+                      className="bg-purple-400 h-2 rounded"
+                      style={{ width: `${(s.count / maxCount) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-xs w-6 text-right">{s.count}</span>
+                </div>
+              ))}
+            </div>
             <CardContent className="p-0">
               <div className="overflow-auto max-h-[700px]">
                 <table className="w-full text-xs border-collapse">
@@ -920,19 +973,18 @@ export default function AdminBooking() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {allTimes.map((t) => (
-                      <SelectItem
-                        key={t}
-                        value={t}
-                        style={
-                          editItemStaffId && hasConflict(editItemStaffId, t, editItem.duration, undefined, editItem.id)
-                            ? { backgroundColor: '#fef08a' }
-                            : undefined
-                        }
-                      >
-                        {t}
-                      </SelectItem>
-                    ))}
+                    {allTimes.map((t) => {
+                      const busy = editItemStaffId ? busySlots(editItemStaffId, undefined, editItem.id) : null
+                      return (
+                        <SelectItem
+                          key={t}
+                          value={t}
+                          style={busy && busy.has(t) ? { backgroundColor: '#fef08a' } : undefined}
+                        >
+                          {t}
+                        </SelectItem>
+                      )
+                    })}
                   </SelectContent>
                 </Select>
               </div>
