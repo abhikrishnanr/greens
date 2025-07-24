@@ -185,6 +185,7 @@ model BookingItem {
 
 model Billing {
   id             String   @id @default(uuid())
+  billId         String   @db.VarChar(191)
   customerId     String?  @db.VarChar(191)
   phone          String?  @db.VarChar(191)
   billingName    String?  @db.VarChar(191)

@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '@/lib/prisma'
+import { randomUUID } from 'crypto'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
@@ -8,7 +9,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       const start = new Date(`${date}T00:00:00`)
       const end = new Date(`${date}T23:59:59`)
-      const bills = await prisma.billing.findMany({
+      const items = await prisma.billing.findMany({
         where: {
           scheduledAt: {
             gte: start,
@@ -17,7 +18,39 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         },
         orderBy: { createdAt: 'desc' },
       })
-      return res.json(bills)
+      const bills: Record<string, any> = {}
+      for (const it of items) {
+        const b = bills[it.billId] || {
+          id: it.billId,
+          billingName: it.billingName,
+          billingAddress: it.billingAddress,
+          voucherCode: it.voucherCode,
+          createdAt: it.createdAt,
+          items: [] as any[],
+          phones: new Set<string>(),
+          totalBefore: 0,
+          totalAfter: 0,
+        }
+        b.items.push({
+          phone: it.phone,
+          category: it.category,
+          service: it.service,
+          variant: it.variant,
+          amountBefore: it.amountBefore,
+          amountAfter: it.amountAfter,
+          scheduledAt: it.scheduledAt,
+        })
+        if (it.phone) b.phones.add(it.phone)
+        b.totalBefore += it.amountBefore
+        b.totalAfter += it.amountAfter
+        bills[it.billId] = b
+      }
+      return res.json(
+        Object.values(bills).map(b => ({
+          ...b,
+          phones: Array.from(b.phones),
+        }))
+      )
     } catch (err) {
       console.error('billing fetch error', err)
       return res.status(500).json({ error: 'Failed to load billing' })
@@ -30,11 +63,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
   const data = req.body as {
     customerId?: string | null
-    phone?: string | null
     billingName?: string | null
     billingAddress?: string | null
     voucherCode?: string | null
     services: {
+      phone: string | null
       category: string
       service: string
       variant: string
@@ -44,11 +77,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }[]
   }
   try {
+    const billId = randomUUID()
     for (const s of data.services) {
       await prisma.billing.create({
         data: {
           customerId: data.customerId || null,
-          phone: data.phone || null,
+          billId,
+          phone: s.phone,
           billingName: data.billingName || null,
           billingAddress: data.billingAddress || null,
           category: s.category,
