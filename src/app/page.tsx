@@ -3,11 +3,11 @@ import { useState, useEffect, useMemo } from "react"
 import { useCart } from "@/contexts/CartContext"
 import Link from "next/link"
 import Image from "next/image"
-import { FiShoppingCart, FiPhone, FiSearch, FiMapPin, FiMail, FiInstagram } from "react-icons/fi"
+import { FiShoppingCart, FiPhone, FiMapPin, FiMail, FiInstagram } from "react-icons/fi"
 import { MdStar, MdDiamond, MdEco } from "react-icons/md"
 import { motion, AnimatePresence } from "framer-motion"
 import Header from "@/components/Header"
-import { Search, Home, Users, Sparkles, Crown, Paintbrush, Heart, Flower, Leaf, GalleryHorizontal } from "lucide-react"
+import { Users, Sparkles, Crown, Paintbrush, Heart, Flower, Leaf, GalleryHorizontal, Home } from "lucide-react"
 
 // ---- Tier/Type labels & badge colors ----
 const TIER_LABELS = {
@@ -37,86 +37,148 @@ const HERO_CATEGORIES = [
     name: "Home",
     icon: <Home fill="currentColor" className="w-6 h-6" />,
     backgroundImage: "/salon_bg_poster.jpg", // Use video poster for home background
-    description:
-      "Discover premium beauty treatments and services designed to enhance your natural beauty and provide ultimate relaxation.",
+    videoSrc: "/home-bg-video.mp4", // Add video source
+    heroTitle: "Welcome to Greens Beauty Salon",
+    heroDescription: "Here Beauty Begins with Peace of Mind",
     buttonLink: "#services",
-    tabGradient: "from-[#6A3AB2] to-[#522B8C]", // Active tab gradient
+    heroTitleColor: "text-white",
+    heroDescriptionColor: "text-white",
+    buttonBgColor: "bg-white",
+    buttonTextColor: "text-[#522B8C]",
   },
   {
     id: "family-salon",
     name: "Family Salon",
     icon: <Users fill="currentColor" className="w-6 h-6" />,
     backgroundImage: "/family-salon-interior.png",
-    description: "Complete care for the whole family, offering a wide range of services for all ages and preferences.",
+    heroTitle: "Family Salon",
+    heroDescription:
+      "Complete care for the whole family, offering a wide range of services for all ages and preferences.",
     buttonLink: "#services",
-    tabGradient: "from-[#6A3AB2] to-[#522B8C]",
+    heroTitleColor: "text-white",
+    heroDescriptionColor: "text-white",
+    buttonBgColor: "bg-white",
+    buttonTextColor: "text-[#522B8C]",
   },
   {
     id: "beauty-studio",
     name: "Beauty Studio",
     icon: <Sparkles fill="currentColor" className="w-6 h-6" />,
     backgroundImage: "/beauty-studio-glam.png",
-    description: "Premium beauty treatments including facials, makeup, and skincare for a radiant and refreshed look.",
+    heroTitle: "Beauty Studio",
+    heroDescription:
+      "Premium beauty treatments including facials, makeup, and skincare for a radiant and refreshed look.",
     buttonLink: "#services",
-    tabGradient: "from-[#6A3AB2] to-[#522B8C]",
+    heroTitleColor: "text-white",
+    heroDescriptionColor: "text-white",
+    buttonBgColor: "bg-white",
+    buttonTextColor: "text-[#522B8C]",
   },
   {
     id: "celebrity-salon",
     name: "Celebrity Salon",
     icon: <Crown fill="currentColor" className="w-6 h-6" />,
     backgroundImage: "/celebrity-hair-styling.png",
-    description:
+    heroTitle: "Celebrity Salon",
+    heroDescription:
       "Experience luxury styling and exclusive services fit for a celebrity, with top-tier products and experts.",
     buttonLink: "#services",
-    tabGradient: "from-[#6A3AB2] to-[#522B8C]",
+    heroTitleColor: "text-white",
+    heroDescriptionColor: "text-white",
+    buttonBgColor: "bg-white",
+    buttonTextColor: "text-[#522B8C]",
   },
   {
     id: "makeover-studio",
     name: "Makeover Studio",
     icon: <Paintbrush fill="currentColor" className="w-6 h-6" />,
     backgroundImage: "/makeover-studio-transformation.png",
-    description: "Complete transformation services, from hair to makeup, for any occasion or personal desire.",
+    heroTitle: "Makeover Studio",
+    heroDescription: "Complete transformation services, from hair to makeup, for any occasion or personal desire.",
     buttonLink: "#services",
-    tabGradient: "from-[#6A3AB2] to-[#522B8C]",
+    heroTitleColor: "text-white",
+    heroDescriptionColor: "text-white",
+    buttonBgColor: "bg-white",
+    buttonTextColor: "text-[#522B8C]",
   },
   {
     id: "bridal-lounge",
     name: "Bridal Lounge",
     icon: <Heart fill="currentColor" className="w-6 h-6" />,
     backgroundImage: "/bridal-makeup-lounge.png",
-    description:
+    heroTitle: "Bridal Lounge",
+    heroDescription:
       "Specialized bridal services to make your big day unforgettable, ensuring you look your absolute best.",
     buttonLink: "#services",
-    tabGradient: "from-[#6A3AB2] to-[#522B8C]",
+    heroTitleColor: "text-white",
+    heroDescriptionColor: "text-white",
+    buttonBgColor: "bg-white",
+    buttonTextColor: "text-[#522B8C]",
   },
   {
     id: "floral-studio",
     name: "Floral Studio",
     icon: <Flower fill="currentColor" className="w-6 h-6" />,
     backgroundImage: "/floral-arrangement-studio.png",
-    description: "Artistic floral designs for all your events and special moments, crafted with passion and precision.",
+    heroTitle: "Floral Studio",
+    heroDescription:
+      "Artistic floral designs for all your events and special moments, crafted with passion and precision.",
     buttonLink: "#services",
-    tabGradient: "from-[#6A3AB2] to-[#522B8C]",
+    heroTitleColor: "text-white",
+    heroDescriptionColor: "text-white",
+    buttonBgColor: "bg-white",
+    buttonTextColor: "text-[#522B8C]",
   },
   {
     id: "floral-decor",
     name: "Floral Decor",
     icon: <Leaf fill="currentColor" className="w-6 h-6" />,
     backgroundImage: "/elegant-floral-event.png",
-    description:
+    heroTitle: "Floral Decor",
+    heroDescription:
       "Comprehensive event decoration services with stunning floral arrangements to elevate any celebration.",
     buttonLink: "#services",
-    tabGradient: "from-[#6A3AB2] to-[#522B8C]",
+    heroTitleColor: "text-white",
+    heroDescriptionColor: "text-white",
+    buttonBgColor: "bg-white",
+    buttonTextColor: "text-[#522B8C]",
   },
   {
     id: "event-portfolio",
     name: "Event Portfolio",
     icon: <GalleryHorizontal fill="currentColor" className="w-6 h-6" />,
     backgroundImage: "/event-planning-portfolio.png",
-    description: "Complete event solutions, from meticulous planning to flawless execution, for seamless celebrations.",
+    heroTitle: "Event Portfolio",
+    heroDescription:
+      "Complete event solutions, from meticulous planning to flawless execution, for seamless celebrations.",
     buttonLink: "#services",
-    tabGradient: "from-[#6A3AB2] to-[#522B8C]",
+    heroTitleColor: "text-white",
+    heroDescriptionColor: "text-white",
+    buttonBgColor: "bg-white",
+    buttonTextColor: "text-[#522B8C]",
   },
+]
+
+const WOMEN_SERVICES = [
+  "Shahnaz Husain Facials",
+  "Loreal Hair Coloring",
+  "Loreal Hair Styling",
+  "Premium Facials",
+  "Basic Facials",
+  "Threading",
+  "Waxing",
+  "Hair Cutting",
+]
+
+const MEN_SERVICES = [
+  "Men's Haircut & Styling",
+  "Beard Trim & Shave",
+  "Men's Facials",
+  "Hair Coloring for Men",
+  "Manicure & Pedicure for Men",
+  "Body Grooming",
+  "Head Massage",
+  "Hair Treatment",
 ]
 
 export default function HomePage() {
@@ -125,7 +187,8 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [expandedCat, setExpandedCat] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [selectedHeroCategory, setSelectedHeroCategory] = useState<string | null>(null) // null means default video background
+  const [selectedHeroCategory, setSelectedHeroCategory] = useState<string>("home") // Default to 'home'
+  const [selectedGenderTab, setSelectedGenderTab] = useState<"WOMEN" | "MEN">("WOMEN")
 
   useEffect(() => {
     setLoading(true)
@@ -155,151 +218,146 @@ export default function HomePage() {
   }
 
   const currentHeroContent = useMemo(() => {
-    if (selectedHeroCategory) {
-      return HERO_CATEGORIES.find((cat) => cat.id === selectedHeroCategory)
-    }
-    return HERO_CATEGORIES.find((cat) => cat.id === "home") // Default to home content
+    return HERO_CATEGORIES.find((cat) => cat.id === selectedHeroCategory) || HERO_CATEGORIES[0]
   }, [selectedHeroCategory])
+
+  const currentGenderServices = useMemo(() => {
+    return selectedGenderTab === "WOMEN" ? WOMEN_SERVICES : MEN_SERVICES
+  }, [selectedGenderTab])
 
   return (
     <main className="bg-gray-900 min-h-screen font-sans text-gray-100">
       {/* HEADER */}
       <Header />
 
-      {/* HERO SECTION REDESIGNED */}
-      <section className="relative min-h-[90vh] flex flex-col overflow-hidden bg-gradient-to-br from-[#522B8C] to-[#3A1F6A]">
-        {/* Floating particles */}
-        <div className="absolute inset-0 overflow-hidden">
-          {[...Array(8)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-24 h-24 rounded-full bg-gradient-to-br from-purple-500/50 to-indigo-600/50"
-              animate={{
-                x: [0, 100, 0],
-                y: [0, -100, 0],
-                opacity: [0.3, 0.8, 0.3],
-              }}
-              transition={{
-                duration: 8 + i * 2,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "easeInOut",
-              }}
-              style={{
-                left: `${10 + i * 12}%`,
-                top: `${20 + i * 8}%`,
-              }}
-            />
-          ))}
+      {/* HERO SECTION */}
+      <section className="relative flex flex-col overflow-hidden min-h-[70vh] md:min-h-[70vh]">
+        {/* Categories Section (Light Grey Bar) */}
+        <div className="w-full overflow-x-auto py-2 scrollbar-hide bg-gray-100 shadow-lg">
+          <div className="flex gap-0 justify-start px-4">
+            {HERO_CATEGORIES.map((cat, idx) => (
+              <motion.button
+                key={cat.id}
+                className={`flex flex-col items-center justify-center p-3 min-w-[100px] text-center transition-all duration-300 relative
+                  ${
+                    selectedHeroCategory === cat.id
+                      ? `bg-white text-black shadow-md rounded-t-lg`
+                      : "bg-transparent text-gray-600 hover:bg-gray-200"
+                  }
+                  ${idx === 0 ? "rounded-tl-lg" : ""}
+                  ${idx === HERO_CATEGORIES.length - 1 ? "rounded-tr-lg" : ""}
+                `}
+                onClick={() => setSelectedHeroCategory(cat.id)}
+                whileHover={{ scale: 1.05, y: -5 }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: 0.1 + idx * 0.05 }}
+              >
+                <div className="w-10 h-10 flex items-center justify-center text-current mb-1">{cat.icon}</div>
+                <span className="text-xs font-medium whitespace-nowrap">{cat.name}</span>
+              </motion.button>
+            ))}
+          </div>
         </div>
 
-        {/* Content Overlay (Search bar, categories, dynamic text/buttons) */}
-        <div className="relative z-20 flex flex-col items-center justify-start pt-8 px-6 max-w-7xl mx-auto w-full">
-          {/* Search Bar */}
+        {/* Dynamic Hero Content Area */}
+        <AnimatePresence mode="wait">
           <motion.div
-            className="w-full max-w-2xl bg-white/10 backdrop-blur-md rounded-full p-4 flex items-center gap-4 shadow-xl border border-white/30 mb-8"
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <FiSearch className="text-white text-2xl" />
-            <input
-              type="text"
-              placeholder="Search for services..."
-              className="flex-1 bg-transparent outline-none text-white placeholder-gray-300 text-lg"
-            />
-            <button className="text-white hover:text-gray-200 transition-colors">
-              <Search className="w-6 h-6" />
-            </button>
-          </motion.div>
-
-          {/* Categories Section */}
-          <motion.div
-            className="w-full overflow-x-auto py-4 scrollbar-hide bg-[#6A3AB2] rounded-t-xl rounded-b-3xl shadow-xl mb-8"
+            key={currentHeroContent.id}
+            className="relative flex-1 w-full flex items-center justify-center p-8 text-center overflow-hidden"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+            exit={{ opacity: 0, y: -50 }}
+            transition={{ duration: 0.8 }}
           >
-            <div className="flex gap-0 justify-center md:justify-start">
-              {HERO_CATEGORIES.map((cat, idx) => (
-                <motion.button
-                  key={cat.id}
-                  className={`flex flex-col items-center justify-center p-4 min-w-[120px] text-center transition-all duration-300 relative group
-                    ${
-                      selectedHeroCategory === cat.id || (selectedHeroCategory === null && cat.id === "home")
-                        ? `bg-gradient-to-br ${cat.tabGradient} text-white shadow-lg`
-                        : "bg-transparent text-gray-300 hover:bg-white/10"
-                    }
-                    ${idx === 0 ? "rounded-tl-xl" : ""}
-                    ${idx === HERO_CATEGORIES.length - 1 ? "rounded-tr-xl" : ""}
-                    ${
-                      selectedHeroCategory === cat.id || (selectedHeroCategory === null && cat.id === "home")
-                        ? "rounded-b-3xl"
-                        : ""
-                    }
-                  `}
-                  onClick={() => setSelectedHeroCategory(cat.id === "home" ? null : cat.id)}
-                  whileHover={{ scale: 1.05, y: -5 }}
-                  whileTap={{ scale: 0.95 }}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3, delay: 0.5 + idx * 0.05 }}
-                >
-                  <div className="w-12 h-12 flex items-center justify-center text-white mb-2">{cat.icon}</div>
-                  <span className="text-sm font-medium whitespace-nowrap">{cat.name}</span>
-                </motion.button>
-              ))}
+            {currentHeroContent.videoSrc && selectedHeroCategory === "home" ? (
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover"
+                poster={currentHeroContent.backgroundImage}
+              >
+                <source src={currentHeroContent.videoSrc} type="video/mp4" />
+              </video>
+            ) : (
+              <Image
+                src={currentHeroContent.backgroundImage || "/placeholder.svg"}
+                alt={currentHeroContent.name || "Background"}
+                layout="fill"
+                objectFit="cover"
+                priority // Prioritize loading for the main hero image
+                className="absolute inset-0 z-0"
+              />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-b from-gray-900/70 via-gray-900/80 to-gray-900/90 z-10" />
+
+            <div className="relative z-20 text-white max-w-3xl space-y-6">
+              <h1
+                className={`text-5xl md:text-7xl font-bold tracking-wide font-[Pacifico] ${currentHeroContent.heroTitleColor}`}
+              >
+                {currentHeroContent.heroTitle}
+              </h1>
+              <p className={`text-xl md:text-2xl leading-relaxed ${currentHeroContent.heroDescriptionColor}`}>
+                {currentHeroContent.heroDescription}
+              </p>
+              <Link
+                href={currentHeroContent.buttonLink || "#"}
+                className={`inline-flex px-8 py-4 rounded-full font-semibold text-lg shadow-lg transition-all duration-300 ${currentHeroContent.buttonBgColor} ${currentHeroContent.buttonTextColor} hover:scale-105`}
+              >
+                Explore Now
+              </Link>
             </div>
           </motion.div>
+        </AnimatePresence>
+      </section>
 
-          {/* Dynamic Hero Content */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentHeroContent?.id || "default-content"}
-              className="relative w-full h-[calc(90vh-280px)] rounded-3xl overflow-hidden shadow-2xl flex items-center justify-center p-8 text-center"
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -50 }}
-              transition={{ duration: 0.8 }}
+      {/* DISCOVER OUR RATES SECTION */}
+      <section className="bg-gray-100 py-8 text-gray-800">
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="text-xl font-semibold mb-4">Discover Our Rates</h2>
+          <div className="flex justify-center gap-4 mb-6">
+            <button
+              className={`px-6 py-3 rounded-full font-bold transition-colors duration-300 ${
+                selectedGenderTab === "WOMEN"
+                  ? "bg-pink-500 text-white"
+                  : "bg-transparent text-pink-500 border border-pink-500"
+              }`}
+              onClick={() => setSelectedGenderTab("WOMEN")}
             >
-              {selectedHeroCategory === null ? (
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="absolute inset-0 w-full h-full object-cover"
-                  poster="/salon_bg_poster.jpg"
-                >
-                  <source src="/home-bg-video.mp4" type="video/mp4" />
-                </video>
-              ) : (
-                <Image
-                  src={currentHeroContent?.backgroundImage || "/placeholder.svg"}
-                  alt={currentHeroContent?.name || "Background"}
-                  layout="fill"
-                  objectFit="cover"
-                  priority // Prioritize loading for the main hero image
-                  className="absolute inset-0 z-0"
-                />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-b from-gray-900/70 via-gray-900/80 to-gray-900/90 z-10" />
-              <div className="relative z-20 text-white max-w-3xl space-y-6">
-                <h1
-                  className="text-5xl md:text-7xl font-bold tracking-wide font-[Pacifico]"
-                  style={{ color: "#41eb70" }}
-                >
-                  {currentHeroContent?.name === "Home" ? "Greens Beauty Salon" : currentHeroContent?.name}
-                </h1>
-                <p className="text-xl md:text-2xl text-gray-200 leading-relaxed">{currentHeroContent?.description}</p>
-                <Link
-                  href={currentHeroContent?.buttonLink || "#"}
-                  className="inline-flex px-8 py-4 rounded-full font-semibold text-lg shadow-lg transition-all duration-300 bg-white text-[#522B8C] hover:bg-gray-200 hover:scale-105"
-                >
-                  Explore Now
-                </Link>
-              </div>
-            </motion.div>
-          </AnimatePresence>
+              For WOMEN
+            </button>
+            <button
+              className={`px-6 py-3 rounded-full font-bold transition-colors duration-300 ${
+                selectedGenderTab === "MEN"
+                  ? "bg-blue-500 text-white"
+                  : "bg-transparent text-blue-500 border border-blue-500"
+              }`}
+              onClick={() => setSelectedGenderTab("MEN")}
+            >
+              For MEN
+            </button>
+          </div>
+          <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-lg">
+            {currentGenderServices.map((service, idx) => (
+              <span
+                key={idx}
+                className={`whitespace-nowrap ${
+                  selectedGenderTab === "WOMEN" ? "text-pink-500" : "text-blue-500"
+                } ${idx < currentGenderServices.length - 1 ? "border-r-2" : ""} ${
+                  idx < currentGenderServices.length - 1
+                    ? selectedGenderTab === "WOMEN"
+                      ? "border-pink-500"
+                      : "border-blue-500"
+                    : ""
+                } pr-4`}
+              >
+                {service}
+              </span>
+            ))}
+          </div>
         </div>
       </section>
 
