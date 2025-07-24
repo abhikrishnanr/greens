@@ -154,6 +154,7 @@ export default function AdminBooking() {
     } catch (err) {
       console.error("Failed loading bookings", err)
       setResult({ success: false, message: "Failed to load bookings for the selected date." })
+
     }
   }
 
@@ -341,6 +342,7 @@ export default function AdminBooking() {
     } catch (err) {
       console.error("Failed updating booking", err)
       setResult({ success: false, message: "Failed to update booking." })
+
     }
   }
 
@@ -369,6 +371,7 @@ export default function AdminBooking() {
     if (!formRef.current?.checkValidity()) {
       formRef.current?.reportValidity()
       return
+
     }
     saveBooking()
   }
