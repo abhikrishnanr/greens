@@ -87,10 +87,12 @@ export default function BillingHistoryPage() {
 
   const downloadPdf = async (b: Bill) => {
     const { PDFDocument } = await import('pdf-lib')
+    const fontkit = (await import('@pdf-lib/fontkit')).default
     const fontBytes = await fetch('/fonts/NotoSans-Regular.ttf').then(res => res.arrayBuffer())
     const logoBytes = await fetch(SALON_INFO.logo).then(res => res.arrayBuffer())
 
     const pdf = await PDFDocument.create()
+    pdf.registerFontkit(fontkit)
     const font = await pdf.embedFont(fontBytes)
     const png = await pdf.embedPng(logoBytes)
     const pageHeight = 600
