@@ -270,7 +270,7 @@ export default function HomePage() {
         <AnimatePresence mode="wait">
           <motion.div
             key={currentHeroContent.id}
-            className="relative flex-1 w-full flex items-end justify-center p-8 text-center overflow-hidden pb-28" // Adjusted padding-bottom to pb-28
+            className="relative flex-1 w-full flex items-end justify-center p-8 text-center overflow-hidden pb-7" // Adjusted padding-bottom to pb-28
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
