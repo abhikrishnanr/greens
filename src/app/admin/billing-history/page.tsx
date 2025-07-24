@@ -33,6 +33,8 @@ interface Bill {
   billingName: string | null
   billingAddress: string | null
   voucherCode: string | null
+  paymentMethod: string
+  paidAt: string | null
   totalBefore: number
   totalAfter: number
   createdAt: string
@@ -58,17 +60,20 @@ export default function BillingHistoryPage() {
 
   const billText = (b: Bill) =>
     `${SALON_INFO.name}\n${SALON_INFO.address}\n${SALON_INFO.phone} | ${SALON_INFO.email}\n` +
+    '------------------------------\n' +
     `Bill ID: ${b.id}\n` +
     `Date: ${format(new Date(b.createdAt), 'yyyy-MM-dd HH:mm')}\n` +
     `Phones: ${b.phones.join(', ')}\n` +
     `Name: ${b.billingName || ''}\n` +
     `Voucher: ${b.voucherCode || 'N/A'}\n` +
+    `Payment: ${b.paymentMethod}\n` +
     b.items
       .map(
         it => `${it.service} - ${it.variant} - ₹${it.amountAfter.toFixed(2)}`,
       )
       .join('\n') +
-    `\nActual: ₹${b.totalBefore.toFixed(2)}\nNet: ₹${b.totalAfter.toFixed(2)}\n${SALON_INFO.website}`
+    '\n------------------------------\n' +
+    `Actual: ₹${b.totalBefore.toFixed(2)}\nGST(18%): ₹${(b.totalAfter*0.18).toFixed(2)}\nNet: ₹${b.totalAfter.toFixed(2)}\n${SALON_INFO.website}`
 
   const printBill = (b: Bill) => {
     const win = window.open('', 'print', 'height=600,width=300')
@@ -86,7 +91,7 @@ export default function BillingHistoryPage() {
   }
 
   const downloadPdf = async (b: Bill) => {
-    const { PDFDocument } = await import('pdf-lib')
+    const { PDFDocument, rgb } = await import('pdf-lib')
     const fontkit = (await import('@pdf-lib/fontkit')).default
     const fontBytes = await fetch('/fonts/NotoSans-Regular.ttf').then(res => res.arrayBuffer())
     const logoBytes = await fetch(SALON_INFO.logo).then(res => res.arrayBuffer())
@@ -95,17 +100,38 @@ export default function BillingHistoryPage() {
     pdf.registerFontkit(fontkit)
     const font = await pdf.embedFont(fontBytes)
     const png = await pdf.embedPng(logoBytes)
-    const pageHeight = 600
-    const page = pdf.addPage([300, pageHeight])
-    const logoDims = png.scale(0.3)
-    page.drawImage(png, { x: (300 - logoDims.width) / 2, y: pageHeight - logoDims.height - 20, ...logoDims })
-    page.drawText(billText(b), {
-      x: 20,
-      y: pageHeight - logoDims.height - 40,
-      size: 12,
-      font,
-      lineHeight: 14,
+    const pageWidth = 595
+    const pageHeight = 842
+    const page = pdf.addPage([pageWidth, pageHeight])
+    const logoDims = png.scale(0.5)
+    page.drawImage(png, { x: (pageWidth - logoDims.width) / 2, y: pageHeight - logoDims.height - 40, ...logoDims })
+    let y = pageHeight - logoDims.height - 60
+    page.drawText(`Bill ID: ${b.id}`, { x: 40, y, size: 12, font })
+    y -= 16
+    page.drawText(`Date: ${format(new Date(b.createdAt), 'yyyy-MM-dd HH:mm')}`, { x: 40, y, size: 12, font })
+    y -= 16
+    page.drawText(`Phones: ${b.phones.join(', ')}`, { x: 40, y, size: 12, font })
+    y -= 16
+    page.drawText(`Name: ${b.billingName || ''}`, { x: 40, y, size: 12, font })
+    y -= 16
+    page.drawText(`Voucher: ${b.voucherCode || 'N/A'}`, { x: 40, y, size: 12, font })
+    y -= 16
+    page.drawText(`Payment: ${b.paymentMethod}`, { x: 40, y, size: 12, font })
+    y -= 24
+    page.drawLine({ start: { x: 40, y }, end: { x: pageWidth - 40, y }, thickness: 1, color: rgb(0.8, 0.8, 0.8) })
+    y -= 16
+    b.items.forEach(it => {
+      page.drawText(`${it.service} - ${it.variant} - ₹${it.amountAfter.toFixed(2)}`, { x: 40, y, size: 12, font })
+      y -= 16
     })
+    y -= 8
+    page.drawLine({ start: { x: 40, y }, end: { x: pageWidth - 40, y }, thickness: 1, color: rgb(0.8, 0.8, 0.8) })
+    y -= 16
+    page.drawText(`Actual: ₹${b.totalBefore.toFixed(2)}`, { x: 40, y, size: 12, font })
+    y -= 16
+    page.drawText(`GST(18%): ₹${(b.totalAfter*0.18).toFixed(2)}`, { x: 40, y, size: 12, font })
+    y -= 16
+    page.drawText(`Net: ₹${b.totalAfter.toFixed(2)}`, { x: 40, y, size: 12, font })
     const blob = new Blob([await pdf.save()], { type: 'application/pdf' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -122,13 +148,21 @@ export default function BillingHistoryPage() {
         <Label>Date</Label>
         <Input type="date" value={date} onChange={e => setDate(e.target.value)} />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <Card>
           <CardHeader>
             <CardTitle>Total Revenue</CardTitle>
           </CardHeader>
           <CardContent className="text-2xl font-bold">
             ₹{bills.reduce((s, b) => s + b.totalAfter, 0).toFixed(2)}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>GST (18%)</CardTitle>
+          </CardHeader>
+          <CardContent className="text-2xl font-bold">
+            ₹{(bills.reduce((s, b) => s + b.totalAfter, 0) * 0.18).toFixed(2)}
           </CardContent>
         </Card>
         <Card>
@@ -158,8 +192,9 @@ export default function BillingHistoryPage() {
               <TableRow>
                 <TableHead>Time</TableHead>
                 <TableHead>Phone/Name</TableHead>
-                <TableHead>Voucher</TableHead>
-                <TableHead>Service</TableHead>
+              <TableHead>Voucher</TableHead>
+              <TableHead>Payment</TableHead>
+              <TableHead>Service</TableHead>
                 <TableHead>Actual</TableHead>
                 <TableHead>Net</TableHead>
                 <TableHead>Actions</TableHead>
@@ -171,6 +206,7 @@ export default function BillingHistoryPage() {
                   <TableCell>{format(new Date(b.createdAt), 'HH:mm')}</TableCell>
                   <TableCell>{b.phones.join(', ')}{b.billingName ? ` - ${b.billingName}` : ''}</TableCell>
                   <TableCell>{b.voucherCode || '-'}</TableCell>
+                  <TableCell>{b.paymentMethod}</TableCell>
                   <TableCell>
                     {b.items.length === 1
                       ? `${b.items[0].service} - ${b.items[0].variant}`
@@ -209,6 +245,8 @@ export default function BillingHistoryPage() {
               </ul>
               <div><strong>Amount Before:</strong> ₹{viewBill.totalBefore.toFixed(2)}</div>
               <div><strong>Voucher:</strong> {viewBill.voucherCode || 'N/A'}</div>
+              <div><strong>Payment:</strong> {viewBill.paymentMethod}</div>
+              <div><strong>GST (18%):</strong> ₹{(viewBill.totalAfter*0.18).toFixed(2)}</div>
               <div><strong>Amount After:</strong> ₹{viewBill.totalAfter.toFixed(2)}</div>
               <div>{SALON_INFO.address}</div>
               <div>{SALON_INFO.phone} | {SALON_INFO.email}</div>

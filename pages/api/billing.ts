@@ -20,16 +20,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       })
       const bills: Record<string, any> = {}
       for (const it of items) {
-        const b = bills[it.billId] || {
-          id: it.billId,
-          billingName: it.billingName,
-          billingAddress: it.billingAddress,
-          voucherCode: it.voucherCode,
-          createdAt: it.createdAt,
-          items: [] as any[],
-          phones: new Set<string>(),
-          totalBefore: 0,
-          totalAfter: 0,
+      const b = bills[it.billId] || {
+        id: it.billId,
+        billingName: it.billingName,
+        billingAddress: it.billingAddress,
+        voucherCode: it.voucherCode,
+        paymentMethod: it.paymentMethod,
+        paidAt: it.paidAt,
+        createdAt: it.createdAt,
+        items: [] as any[],
+        phones: new Set<string>(),
+        totalBefore: 0,
+        totalAfter: 0,
         }
         b.items.push({
           phone: it.phone,
@@ -66,6 +68,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     billingName?: string | null
     billingAddress?: string | null
     voucherCode?: string | null
+    paymentMethod?: string
+    paidAt?: string | null
     services: {
       phone: string | null
       category: string
@@ -92,6 +96,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           amountBefore: s.amountBefore,
           amountAfter: s.amountAfter,
           voucherCode: data.voucherCode || null,
+          paymentMethod: data.paymentMethod || 'cash',
+          paidAt: data.paidAt ? new Date(data.paidAt) : data.paymentMethod === 'paylater' ? null : new Date(),
           scheduledAt: new Date(s.scheduledAt),
         },
       })
