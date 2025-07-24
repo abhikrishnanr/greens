@@ -8,6 +8,15 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader as DHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 
+const SALON_INFO = {
+  name: 'Greens Beauty Salon',
+  logo: '/logo.png',
+  address: 'TC 45/215, Kunjalumood Junction, Karamana PO, Trivandrum',
+  phone: '+91 8891 467678',
+  email: 'greensalon@gmail.com',
+  website: 'https://greensbeautysalon.com',
+}
+
 interface BillItem {
   phone: string | null
   category: string
@@ -48,6 +57,8 @@ export default function BillingHistoryPage() {
   }
 
   const billText = (b: Bill) =>
+    `${SALON_INFO.name}\n${SALON_INFO.address}\n${SALON_INFO.phone} | ${SALON_INFO.email}\n` +
+    `Bill ID: ${b.id}\n` +
     `Date: ${format(new Date(b.createdAt), 'yyyy-MM-dd HH:mm')}\n` +
     `Phones: ${b.phones.join(', ')}\n` +
     `Name: ${b.billingName || ''}\n` +
@@ -57,12 +68,17 @@ export default function BillingHistoryPage() {
         it => `${it.service} - ${it.variant} - ₹${it.amountAfter.toFixed(2)}`,
       )
       .join('\n') +
-    `\nActual: ₹${b.totalBefore.toFixed(2)}\nNet: ₹${b.totalAfter.toFixed(2)}`
+    `\nActual: ₹${b.totalBefore.toFixed(2)}\nNet: ₹${b.totalAfter.toFixed(2)}\n${SALON_INFO.website}`
 
   const printBill = (b: Bill) => {
     const win = window.open('', 'print', 'height=600,width=300')
     if (!win) return
-    win.document.write(`<pre>${billText(b)}</pre>`)
+    win.document.write(`
+      <div style="font-family: monospace; padding: 10px;">
+        <img src="${SALON_INFO.logo}" style="height:50px;margin:0 auto 10px;display:block" />
+        <pre>${billText(b)}</pre>
+      </div>
+    `)
     win.document.close()
     win.focus()
     win.print()
@@ -71,9 +87,23 @@ export default function BillingHistoryPage() {
 
   const downloadPdf = async (b: Bill) => {
     const { PDFDocument } = await import('pdf-lib')
+    const fontBytes = await fetch('/fonts/NotoSans-Regular.ttf').then(res => res.arrayBuffer())
+    const logoBytes = await fetch(SALON_INFO.logo).then(res => res.arrayBuffer())
+
     const pdf = await PDFDocument.create()
-    const page = pdf.addPage([300, 300])
-    page.drawText(billText(b), { x: 20, y: 280, size: 12 })
+    const font = await pdf.embedFont(fontBytes)
+    const png = await pdf.embedPng(logoBytes)
+    const pageHeight = 600
+    const page = pdf.addPage([300, pageHeight])
+    const logoDims = png.scale(0.3)
+    page.drawImage(png, { x: (300 - logoDims.width) / 2, y: pageHeight - logoDims.height - 20, ...logoDims })
+    page.drawText(billText(b), {
+      x: 20,
+      y: pageHeight - logoDims.height - 40,
+      size: 12,
+      font,
+      lineHeight: 14,
+    })
     const blob = new Blob([await pdf.save()], { type: 'application/pdf' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -89,6 +119,32 @@ export default function BillingHistoryPage() {
       <div className="flex items-center gap-2">
         <Label>Date</Label>
         <Input type="date" value={date} onChange={e => setDate(e.target.value)} />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Total Revenue</CardTitle>
+          </CardHeader>
+          <CardContent className="text-2xl font-bold">
+            ₹{bills.reduce((s, b) => s + b.totalAfter, 0).toFixed(2)}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Total Services</CardTitle>
+          </CardHeader>
+          <CardContent className="text-2xl font-bold">
+            {bills.reduce((s, b) => s + b.items.length, 0)}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Bills Generated</CardTitle>
+          </CardHeader>
+          <CardContent className="text-2xl font-bold">
+            {bills.length}
+          </CardContent>
+        </Card>
       </div>
       <Card>
         <CardHeader>
@@ -133,11 +189,13 @@ export default function BillingHistoryPage() {
       </Card>
       <Dialog open={!!viewBill} onOpenChange={open => !open && setViewBill(null)}>
         {viewBill && (
-          <DialogContent onClick={e => e.stopPropagation()}>
+          <DialogContent className="text-black" onClick={e => e.stopPropagation()}>
+            <img src={SALON_INFO.logo} className="h-12 mx-auto my-4" />
             <DHeader>
               <DialogTitle>Billing Details</DialogTitle>
             </DHeader>
             <div className="p-4 space-y-1 text-sm">
+              <div><strong>Bill ID:</strong> {viewBill.id}</div>
               <div><strong>Date:</strong> {format(new Date(viewBill.createdAt), 'yyyy-MM-dd HH:mm')}</div>
               <div><strong>Phones:</strong> {viewBill.phones.join(', ')}</div>
               <div><strong>Name:</strong> {viewBill.billingName || ''}</div>
@@ -150,6 +208,9 @@ export default function BillingHistoryPage() {
               <div><strong>Amount Before:</strong> ₹{viewBill.totalBefore.toFixed(2)}</div>
               <div><strong>Voucher:</strong> {viewBill.voucherCode || 'N/A'}</div>
               <div><strong>Amount After:</strong> ₹{viewBill.totalAfter.toFixed(2)}</div>
+              <div>{SALON_INFO.address}</div>
+              <div>{SALON_INFO.phone} | {SALON_INFO.email}</div>
+              <div>{SALON_INFO.website}</div>
             </div>
             <DialogFooter>
               <Button type="button" onClick={() => setViewBill(null)}>Close</Button>
