@@ -8,19 +8,26 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader as DHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 
-interface Bill {
-  id: string
+interface BillItem {
   phone: string | null
-  billingName: string | null
-  billingAddress: string | null
   category: string
   service: string
   variant: string
   amountBefore: number
   amountAfter: number
-  voucherCode: string | null
   scheduledAt: string
+}
+
+interface Bill {
+  id: string
+  phones: string[]
+  billingName: string | null
+  billingAddress: string | null
+  voucherCode: string | null
+  totalBefore: number
+  totalAfter: number
   createdAt: string
+  items: BillItem[]
 }
 
 export default function BillingHistoryPage() {
@@ -42,10 +49,15 @@ export default function BillingHistoryPage() {
 
   const billText = (b: Bill) =>
     `Date: ${format(new Date(b.createdAt), 'yyyy-MM-dd HH:mm')}\n` +
-    `Phone: ${b.phone || ''}\n` +
+    `Phones: ${b.phones.join(', ')}\n` +
     `Name: ${b.billingName || ''}\n` +
-    `Service: ${b.service} - ${b.variant}\n` +
-    `Amount: ₹${b.amountAfter.toFixed(2)}`
+    `Voucher: ${b.voucherCode || 'N/A'}\n` +
+    b.items
+      .map(
+        it => `${it.service} - ${it.variant} - ₹${it.amountAfter.toFixed(2)}`,
+      )
+      .join('\n') +
+    `\nActual: ₹${b.totalBefore.toFixed(2)}\nNet: ₹${b.totalAfter.toFixed(2)}`
 
   const printBill = (b: Bill) => {
     const win = window.open('', 'print', 'height=600,width=300')
@@ -88,8 +100,10 @@ export default function BillingHistoryPage() {
               <TableRow>
                 <TableHead>Time</TableHead>
                 <TableHead>Phone/Name</TableHead>
+                <TableHead>Voucher</TableHead>
                 <TableHead>Service</TableHead>
-                <TableHead>Amount</TableHead>
+                <TableHead>Actual</TableHead>
+                <TableHead>Net</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -97,9 +111,15 @@ export default function BillingHistoryPage() {
               {bills.map(b => (
                 <TableRow key={b.id}>
                   <TableCell>{format(new Date(b.createdAt), 'HH:mm')}</TableCell>
-                  <TableCell>{b.phone || ''}{b.billingName ? ` - ${b.billingName}` : ''}</TableCell>
-                  <TableCell>{b.service} - {b.variant}</TableCell>
-                  <TableCell>₹{b.amountAfter.toFixed(2)}</TableCell>
+                  <TableCell>{b.phones.join(', ')}{b.billingName ? ` - ${b.billingName}` : ''}</TableCell>
+                  <TableCell>{b.voucherCode || '-'}</TableCell>
+                  <TableCell>
+                    {b.items.length === 1
+                      ? `${b.items[0].service} - ${b.items[0].variant}`
+                      : `${b.items.length} services`}
+                  </TableCell>
+                  <TableCell>₹{b.totalBefore.toFixed(2)}</TableCell>
+                  <TableCell>₹{b.totalAfter.toFixed(2)}</TableCell>
                   <TableCell className="space-x-2">
                     <Button size="sm" onClick={() => setViewBill(b)}>View</Button>
                     <Button size="sm" onClick={() => printBill(b)}>Print</Button>
@@ -119,13 +139,17 @@ export default function BillingHistoryPage() {
             </DHeader>
             <div className="p-4 space-y-1 text-sm">
               <div><strong>Date:</strong> {format(new Date(viewBill.createdAt), 'yyyy-MM-dd HH:mm')}</div>
-              <div><strong>Phone:</strong> {viewBill.phone || ''}</div>
+              <div><strong>Phones:</strong> {viewBill.phones.join(', ')}</div>
               <div><strong>Name:</strong> {viewBill.billingName || ''}</div>
               <div><strong>Address:</strong> {viewBill.billingAddress || ''}</div>
-              <div><strong>Service:</strong> {viewBill.service} - {viewBill.variant}</div>
-              <div><strong>Amount Before:</strong> ₹{viewBill.amountBefore.toFixed(2)}</div>
+              <ul className="list-disc pl-5">
+                {viewBill.items.map((it, idx) => (
+                  <li key={idx}>{it.service} - {it.variant} - ₹{it.amountAfter.toFixed(2)}</li>
+                ))}
+              </ul>
+              <div><strong>Amount Before:</strong> ₹{viewBill.totalBefore.toFixed(2)}</div>
               <div><strong>Voucher:</strong> {viewBill.voucherCode || 'N/A'}</div>
-              <div><strong>Amount After:</strong> ₹{viewBill.amountAfter.toFixed(2)}</div>
+              <div><strong>Amount After:</strong> ₹{viewBill.totalAfter.toFixed(2)}</div>
             </div>
             <DialogFooter>
               <Button type="button" onClick={() => setViewBill(null)}>Close</Button>
