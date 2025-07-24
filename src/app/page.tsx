@@ -1,20 +1,13 @@
 "use client"
-
 import { useState, useEffect, useMemo } from "react"
 import { useCart } from "@/contexts/CartContext"
-import Link from 'next/link'
-import {
-  FiShoppingCart,
-  FiPhone,
-  FiSearch,
-  FiMapPin,
-  FiMail,
-  FiInstagram
-} from "react-icons/fi"
-import { MdMale, MdFemale, MdStar, MdDiamond, MdEco } from "react-icons/md"
+import Link from "next/link"
+import Image from "next/image"
+import { FiShoppingCart, FiPhone, FiSearch, FiMapPin, FiMail, FiInstagram } from "react-icons/fi"
+import { MdStar, MdDiamond, MdEco } from "react-icons/md"
 import { motion, AnimatePresence } from "framer-motion"
 import Header from "@/components/Header"
-
+import { Search, Home, Users, Sparkles, Crown, Paintbrush, Heart, Flower, Leaf, GalleryHorizontal } from "lucide-react"
 
 // ---- Tier/Type labels & badge colors ----
 const TIER_LABELS = {
@@ -38,33 +31,122 @@ const TIER_LABELS = {
   },
 }
 
+const HERO_CATEGORIES = [
+  {
+    id: "home",
+    name: "Home",
+    icon: <Home fill="currentColor" className="w-6 h-6" />,
+    backgroundImage: "/salon_bg_poster.jpg", // Use video poster for home background
+    description:
+      "Discover premium beauty treatments and services designed to enhance your natural beauty and provide ultimate relaxation.",
+    buttonLink: "#services",
+    tabGradient: "from-[#6A3AB2] to-[#522B8C]", // Active tab gradient
+  },
+  {
+    id: "family-salon",
+    name: "Family Salon",
+    icon: <Users fill="currentColor" className="w-6 h-6" />,
+    backgroundImage: "/family-salon-interior.png",
+    description: "Complete care for the whole family, offering a wide range of services for all ages and preferences.",
+    buttonLink: "#services",
+    tabGradient: "from-[#6A3AB2] to-[#522B8C]",
+  },
+  {
+    id: "beauty-studio",
+    name: "Beauty Studio",
+    icon: <Sparkles fill="currentColor" className="w-6 h-6" />,
+    backgroundImage: "/beauty-studio-glam.png",
+    description: "Premium beauty treatments including facials, makeup, and skincare for a radiant and refreshed look.",
+    buttonLink: "#services",
+    tabGradient: "from-[#6A3AB2] to-[#522B8C]",
+  },
+  {
+    id: "celebrity-salon",
+    name: "Celebrity Salon",
+    icon: <Crown fill="currentColor" className="w-6 h-6" />,
+    backgroundImage: "/celebrity-hair-styling.png",
+    description:
+      "Experience luxury styling and exclusive services fit for a celebrity, with top-tier products and experts.",
+    buttonLink: "#services",
+    tabGradient: "from-[#6A3AB2] to-[#522B8C]",
+  },
+  {
+    id: "makeover-studio",
+    name: "Makeover Studio",
+    icon: <Paintbrush fill="currentColor" className="w-6 h-6" />,
+    backgroundImage: "/makeover-studio-transformation.png",
+    description: "Complete transformation services, from hair to makeup, for any occasion or personal desire.",
+    buttonLink: "#services",
+    tabGradient: "from-[#6A3AB2] to-[#522B8C]",
+  },
+  {
+    id: "bridal-lounge",
+    name: "Bridal Lounge",
+    icon: <Heart fill="currentColor" className="w-6 h-6" />,
+    backgroundImage: "/bridal-makeup-lounge.png",
+    description:
+      "Specialized bridal services to make your big day unforgettable, ensuring you look your absolute best.",
+    buttonLink: "#services",
+    tabGradient: "from-[#6A3AB2] to-[#522B8C]",
+  },
+  {
+    id: "floral-studio",
+    name: "Floral Studio",
+    icon: <Flower fill="currentColor" className="w-6 h-6" />,
+    backgroundImage: "/floral-arrangement-studio.png",
+    description: "Artistic floral designs for all your events and special moments, crafted with passion and precision.",
+    buttonLink: "#services",
+    tabGradient: "from-[#6A3AB2] to-[#522B8C]",
+  },
+  {
+    id: "floral-decor",
+    name: "Floral Decor",
+    icon: <Leaf fill="currentColor" className="w-6 h-6" />,
+    backgroundImage: "/elegant-floral-event.png",
+    description:
+      "Comprehensive event decoration services with stunning floral arrangements to elevate any celebration.",
+    buttonLink: "#services",
+    tabGradient: "from-[#6A3AB2] to-[#522B8C]",
+  },
+  {
+    id: "event-portfolio",
+    name: "Event Portfolio",
+    icon: <GalleryHorizontal fill="currentColor" className="w-6 h-6" />,
+    backgroundImage: "/event-planning-portfolio.png",
+    description: "Complete event solutions, from meticulous planning to flawless execution, for seamless celebrations.",
+    buttonLink: "#services",
+    tabGradient: "from-[#6A3AB2] to-[#522B8C]",
+  },
+]
+
 export default function HomePage() {
   const { items, add } = useCart()
   const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedCat, setExpandedCat] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [selectedHeroCategory, setSelectedHeroCategory] = useState<string | null>(null) // null means default video background
 
   useEffect(() => {
     setLoading(true)
-    fetch('/api/v2/service-categories')
-      .then(res => {
-        if (!res.ok) throw new Error('API error')
+    fetch("/api/v2/service-categories")
+      .then((res) => {
+        if (!res.ok) throw new Error("API error")
         return res.json()
       })
-      .then(data => {
+      .then((data) => {
         setCategories(Array.isArray(data) ? data : [])
         setLoading(false)
       })
       .catch(() => {
-        setError('Unable to fetch services.')
+        setError("Unable to fetch services.")
         setLoading(false)
       })
   }, [])
 
   const subServices = useMemo(() => {
     if (!expandedCat) return []
-    const cat = categories.find(c => c.id === expandedCat)
+    const cat = categories.find((c) => c.id === expandedCat)
     return cat ? cat.services : []
   }, [expandedCat, categories])
 
@@ -72,31 +154,26 @@ export default function HomePage() {
     add({ id: service.id, name: service.name, price: service.offerPrice ?? service.mrp })
   }
 
+  const currentHeroContent = useMemo(() => {
+    if (selectedHeroCategory) {
+      return HERO_CATEGORIES.find((cat) => cat.id === selectedHeroCategory)
+    }
+    return HERO_CATEGORIES.find((cat) => cat.id === "home") // Default to home content
+  }, [selectedHeroCategory])
+
   return (
     <main className="bg-gray-900 min-h-screen font-sans text-gray-100">
       {/* HEADER */}
       <Header />
 
-      {/* HERO SECTION WITH VIDEO */}
-      <section className="relative h-[90vh] flex items-center justify-center overflow-hidden">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-          poster="/salon_bg_poster.jpg"
-        >
-          <source src="/home-bg-video.mp4" type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-gradient-to-b from-gray-900/60 via-gray-900/70 to-gray-900/80" />
-
+      {/* HERO SECTION REDESIGNED */}
+      <section className="relative min-h-[90vh] flex flex-col overflow-hidden bg-gradient-to-br from-[#522B8C] to-[#3A1F6A]">
         {/* Floating particles */}
         <div className="absolute inset-0 overflow-hidden">
           {[...Array(8)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute w-2 h-2 bg-green-400/30 rounded-full"
+              className="absolute w-24 h-24 rounded-full bg-gradient-to-br from-purple-500/50 to-indigo-600/50"
               animate={{
                 x: [0, 100, 0],
                 y: [0, -100, 0],
@@ -115,76 +192,115 @@ export default function HomePage() {
           ))}
         </div>
 
-        <motion.div
-          className="relative z-10 text-center px-6 max-w-7xl mx-auto"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.2 }}
-        >
-          <motion.img
-            src="/logo.png"
-            alt="Greens Beauty Salon Logo"
-            className="h-24 mx-auto drop-shadow-2xl mb-8"
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ duration: 1, delay: 0.5, type: "spring" }}
-          />
-          <motion.h1
-            className="text-6xl md:text-8xl font-bold tracking-wide mb-8 font-[Pacifico]"
-            style={{ color: "#41eb70" }}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.7 }}
-          >
-            Greens Beauty Salon
-          </motion.h1>
-          <motion.p
-            className="text-xl md:text-2xl text-gray-200 max-w-4xl mx-auto mb-12 leading-relaxed"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.9 }}
-          >
-            Discover premium beauty treatments and services designed to enhance your natural beauty and provide ultimate
-            relaxation.
-          </motion.p>
-
+        {/* Content Overlay (Search bar, categories, dynamic text/buttons) */}
+        <div className="relative z-20 flex flex-col items-center justify-start pt-8 px-6 max-w-7xl mx-auto w-full">
+          {/* Search Bar */}
           <motion.div
-            className="flex flex-col sm:flex-row gap-6 justify-center"
-            initial={{ opacity: 0, y: 30 }}
+            className="w-full max-w-2xl bg-white/10 backdrop-blur-md rounded-full p-4 flex items-center gap-4 shadow-xl border border-white/30 mb-8"
+            initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1.1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <motion.a
-              href="#services"
-              className="px-8 py-4 rounded-full border-2 font-semibold text-lg shadow-lg transition-all duration-300"
-              style={{
-                borderColor: "#41eb70",
-                color: "#41eb70",
-              }}
-              whileHover={{
-                scale: 1.05,
-                y: -2,
-                backgroundColor: "#41eb70",
-                color: "#1f2937",
-              }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Explore Services
-            </motion.a>
-            <motion.a
-              href="tel:+918891467678"
-              className="px-8 py-4 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
-              style={{
-                backgroundColor: "#41eb70",
-                color: "#1f2937",
-              }}
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Book Now
-            </motion.a>
+            <FiSearch className="text-white text-2xl" />
+            <input
+              type="text"
+              placeholder="Search for services..."
+              className="flex-1 bg-transparent outline-none text-white placeholder-gray-300 text-lg"
+            />
+            <button className="text-white hover:text-gray-200 transition-colors">
+              <Search className="w-6 h-6" />
+            </button>
           </motion.div>
-        </motion.div>
+
+          {/* Categories Section */}
+          <motion.div
+            className="w-full overflow-x-auto py-4 scrollbar-hide bg-[#6A3AB2] rounded-t-xl rounded-b-3xl shadow-xl mb-8"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
+            <div className="flex gap-0 justify-center md:justify-start">
+              {HERO_CATEGORIES.map((cat, idx) => (
+                <motion.button
+                  key={cat.id}
+                  className={`flex flex-col items-center justify-center p-4 min-w-[120px] text-center transition-all duration-300 relative group
+                    ${
+                      selectedHeroCategory === cat.id || (selectedHeroCategory === null && cat.id === "home")
+                        ? `bg-gradient-to-br ${cat.tabGradient} text-white shadow-lg`
+                        : "bg-transparent text-gray-300 hover:bg-white/10"
+                    }
+                    ${idx === 0 ? "rounded-tl-xl" : ""}
+                    ${idx === HERO_CATEGORIES.length - 1 ? "rounded-tr-xl" : ""}
+                    ${
+                      selectedHeroCategory === cat.id || (selectedHeroCategory === null && cat.id === "home")
+                        ? "rounded-b-3xl"
+                        : ""
+                    }
+                  `}
+                  onClick={() => setSelectedHeroCategory(cat.id === "home" ? null : cat.id)}
+                  whileHover={{ scale: 1.05, y: -5 }}
+                  whileTap={{ scale: 0.95 }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: 0.5 + idx * 0.05 }}
+                >
+                  <div className="w-12 h-12 flex items-center justify-center text-white mb-2">{cat.icon}</div>
+                  <span className="text-sm font-medium whitespace-nowrap">{cat.name}</span>
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Dynamic Hero Content */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentHeroContent?.id || "default-content"}
+              className="relative w-full h-[calc(90vh-280px)] rounded-3xl overflow-hidden shadow-2xl flex items-center justify-center p-8 text-center"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -50 }}
+              transition={{ duration: 0.8 }}
+            >
+              {selectedHeroCategory === null ? (
+                <video
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="absolute inset-0 w-full h-full object-cover"
+                  poster="/salon_bg_poster.jpg"
+                >
+                  <source src="/home-bg-video.mp4" type="video/mp4" />
+                </video>
+              ) : (
+                <Image
+                  src={currentHeroContent?.backgroundImage || "/placeholder.svg"}
+                  alt={currentHeroContent?.name || "Background"}
+                  layout="fill"
+                  objectFit="cover"
+                  priority // Prioritize loading for the main hero image
+                  className="absolute inset-0 z-0"
+                />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-b from-gray-900/70 via-gray-900/80 to-gray-900/90 z-10" />
+              <div className="relative z-20 text-white max-w-3xl space-y-6">
+                <h1
+                  className="text-5xl md:text-7xl font-bold tracking-wide font-[Pacifico]"
+                  style={{ color: "#41eb70" }}
+                >
+                  {currentHeroContent?.name === "Home" ? "Greens Beauty Salon" : currentHeroContent?.name}
+                </h1>
+                <p className="text-xl md:text-2xl text-gray-200 leading-relaxed">{currentHeroContent?.description}</p>
+                <Link
+                  href={currentHeroContent?.buttonLink || "#"}
+                  className="inline-flex px-8 py-4 rounded-full font-semibold text-lg shadow-lg transition-all duration-300 bg-white text-[#522B8C] hover:bg-gray-200 hover:scale-105"
+                >
+                  Explore Now
+                </Link>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </section>
 
       {/* SERVICE DIVISIONS */}
@@ -204,17 +320,56 @@ export default function HomePage() {
               Experience comprehensive beauty and wellness services in our luxurious environment
             </p>
           </motion.div>
-
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-6 max-w-7xl mx-auto">
             {[
-              { icon: "ri-group-line", title: "Family Salon", desc: "Complete care for the whole family", gradient: "from-blue-500 to-blue-600" },
-              { icon: "ri-magic-line", title: "Beauty Studio", desc: "Premium beauty treatments", gradient: "from-purple-500 to-purple-600" },
-              { icon: "ri-vip-crown-line", title: "Celebrity Salon", desc: "Luxury styling experience", gradient: "from-amber-500 to-amber-600" },
-              { icon: "ri-brush-line", title: "Makeover Studio", desc: "Complete transformation", gradient: "from-pink-500 to-pink-600" },
-              { icon: "ri-hearts-line", title: "Bridal Lounge", desc: "Special bridal services", gradient: "from-rose-500 to-rose-600" },
-              { icon: "ri-flower-line", title: "Floral Studio", desc: "Artistic floral designs", gradient: "from-green-500 to-green-600" },
-              { icon: "ri-plant-line", title: "Floral Decor", desc: "Event decoration services", gradient: "from-emerald-500 to-emerald-600" },
-              { icon: "ri-gallery-line", title: "Event Portfolio", desc: "Complete event solutions", gradient: "from-indigo-500 to-indigo-600" },
+              {
+                icon: "ri-group-line",
+                title: "Family Salon",
+                desc: "Complete care for the whole family",
+                gradient: "from-blue-500 to-blue-600",
+              },
+              {
+                icon: "ri-magic-line",
+                title: "Beauty Studio",
+                desc: "Premium beauty treatments",
+                gradient: "from-purple-500 to-purple-600",
+              },
+              {
+                icon: "ri-vip-crown-line",
+                title: "Celebrity Salon",
+                desc: "Luxury styling experience",
+                gradient: "from-amber-500 to-amber-600",
+              },
+              {
+                icon: "ri-brush-line",
+                title: "Makeover Studio",
+                desc: "Complete transformation",
+                gradient: "from-pink-500 to-pink-600",
+              },
+              {
+                icon: "ri-hearts-line",
+                title: "Bridal Lounge",
+                desc: "Special bridal services",
+                gradient: "from-rose-500 to-rose-600",
+              },
+              {
+                icon: "ri-flower-line",
+                title: "Floral Studio",
+                desc: "Artistic floral designs",
+                gradient: "from-green-500 to-green-600",
+              },
+              {
+                icon: "ri-plant-line",
+                title: "Floral Decor",
+                desc: "Event decoration services",
+                gradient: "from-emerald-500 to-emerald-600",
+              },
+              {
+                icon: "ri-gallery-line",
+                title: "Event Portfolio",
+                desc: "Complete event solutions",
+                gradient: "from-indigo-500 to-indigo-600",
+              },
             ].map((svc, idx) => (
               <motion.div
                 key={idx}
@@ -242,7 +397,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
       {/* SERVICES SECTION */}
       <section id="services" className="py-20 bg-gradient-to-b from-gray-900 to-gray-800">
         <div className="container mx-auto px-6">
@@ -257,7 +411,6 @@ export default function HomePage() {
               Our Services
             </h2>
           </motion.div>
-
           <div className="space-y-8">
             <AnimatePresence>
               {categories.map((cat, idx) => {
@@ -306,7 +459,6 @@ export default function HomePage() {
                         </motion.span>
                       </div>
                     </motion.button>
-
                     <AnimatePresence>
                       {isOpen && (
                         <motion.div
@@ -317,7 +469,7 @@ export default function HomePage() {
                           className="px-8 pb-8"
                         >
                           <div className="space-y-6">
-                            {subServices.map(svc => (
+                            {subServices.map((svc) => (
                               <div
                                 key={svc.id}
                                 className="bg-gray-700/30 backdrop-blur-sm rounded-xl p-6 border border-gray-600/30 flex items-center justify-between"
@@ -361,7 +513,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
       {/* CART BAR */}
       <AnimatePresence>
         {items.length > 0 && (
@@ -377,13 +528,15 @@ export default function HomePage() {
                 <FiShoppingCart className="text-xl" />
               </div>
               <div>
-                <span className="font-bold text-lg">{items.length} service{items.length > 1 ? "s" : ""} selected</span>
+                <span className="font-bold text-lg">
+                  {items.length} service{items.length > 1 ? "s" : ""} selected
+                </span>
                 <p className="text-sm opacity-90">Ready to book your appointment</p>
               </div>
             </div>
             <motion.button
               className="bg-white text-green-600 px-6 py-3 rounded-xl font-bold hover:bg-gray-100 transition-colors shadow-lg"
-              onClick={() => (window.location.href = '/cart')}
+              onClick={() => (window.location.href = "/cart")}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -392,7 +545,6 @@ export default function HomePage() {
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* ABOUT SECTION */}
       <section className="py-20 bg-gray-900">
         <div className="container mx-auto px-6">
@@ -410,9 +562,8 @@ export default function HomePage() {
               Experience the difference with our premium service variants and professional expertise
             </p>
           </motion.div>
-
           <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            {Object.entries(TIER_LABELS).map(([k, { label, icon }], idx) => ( 
+            {Object.entries(TIER_LABELS).map(([k, { label, icon }], idx) => (
               <motion.div
                 key={k}
                 className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 text-center shadow-xl hover:shadow-2xl hover:shadow-green-400/10 transition-all duration-300 border border-gray-700/50"
@@ -437,7 +588,6 @@ export default function HomePage() {
               </motion.div>
             ))}
           </div>
-
           <motion.div
             className="text-center bg-gray-800/30 backdrop-blur-sm rounded-2xl p-8 border border-gray-700/50 max-w-4xl mx-auto"
             initial={{ opacity: 0, y: 30 }}
@@ -455,7 +605,6 @@ export default function HomePage() {
           </motion.div>
         </div>
       </section>
-
       {/* CONTACT SECTION */}
       <section className="py-20 bg-gradient-to-b from-gray-800 to-gray-900">
         <div className="container mx-auto px-6">
@@ -471,7 +620,6 @@ export default function HomePage() {
             </h2>
             <p className="text-xl text-gray-400">Ready to book your appointment? We're here to help!</p>
           </motion.div>
-
           <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
             <motion.div
               className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-gray-700/50"
@@ -487,7 +635,6 @@ export default function HomePage() {
                 TC 45/215, Kunjalumood Junction, Karamana PO, Trivandrum
               </p>
             </motion.div>
-
             <motion.div
               className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-gray-700/50"
               initial={{ opacity: 0, x: 30 }}
@@ -504,13 +651,18 @@ export default function HomePage() {
                   className="flex items-center gap-4 bg-green-500/10 border border-green-500/30 rounded-xl px-4 py-3 hover:bg-green-500/20 transition-all group"
                   whileHover={{ scale: 1.02 }}
                 >
-                  <FiPhone className="text-xl group-hover:scale-110 transition-transform" style={{ color: "#41eb70" }} />
+                  <FiPhone
+                    className="text-xl group-hover:scale-110 transition-transform"
+                    style={{ color: "#41eb70" }}
+                  />
                   <span className="text-gray-200 font-medium">+91 8891 467678</span>
-                  <span className="ml-auto text-xs px-2 py-1 rounded-full font-bold" style={{ backgroundColor: "rgba(65, 235, 112, 0.2)", color: "#41eb70" }}>
+                  <span
+                    className="ml-auto text-xs px-2 py-1 rounded-full font-bold"
+                    style={{ backgroundColor: "rgba(65, 235, 112, 0.2)", color: "#41eb70" }}
+                  >
                     Call
                   </span>
                 </motion.a>
-
                 <motion.a
                   href="mailto:greensalon@gmail.com"
                   className="flex items-center gap-4 bg-blue-500/10 border border-blue-500/30 rounded-xl px-4 py-3 hover:bg-blue-500/20 transition-all group"
@@ -522,7 +674,6 @@ export default function HomePage() {
                     Email
                   </span>
                 </motion.a>
-
                 <motion.a
                   href="https://instagram.com/greensbeautysalon"
                   target="_blank"
@@ -541,7 +692,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
       {/* FOOTER */}
       <footer className="text-center py-8 text-gray-400 bg-gray-900 border-t border-gray-800">
         <div className="container mx-auto px-6">
