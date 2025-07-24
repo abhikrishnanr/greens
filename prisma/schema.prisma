@@ -182,3 +182,19 @@ model BookingItem {
   staffId   String  @db.VarChar(191)
   start     String  @db.VarChar(5)
 }
+
+model Billing {
+  id             String   @id @default(uuid())
+  customerId     String?  @db.VarChar(191)
+  phone          String?  @db.VarChar(191)
+  billingName    String?  @db.VarChar(191)
+  billingAddress String?  @db.VarChar(191)
+  category       String   @db.VarChar(191)
+  service        String   @db.VarChar(191)
+  variant        String   @db.VarChar(191)
+  amountBefore   Float
+  amountAfter    Float
+  voucherCode    String?  @db.VarChar(191)
+  scheduledAt    DateTime @db.Timestamp(3)
+  createdAt      DateTime @default(now()) @db.Timestamp(3)
+}

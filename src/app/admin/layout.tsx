@@ -14,6 +14,7 @@ import {
   MdHistory,
   MdLogout,
   MdEvent,
+  MdReceipt,
   MdMenu,
 } from 'react-icons/md'
 import type { IconType } from 'react-icons'
@@ -39,6 +40,8 @@ const sections: {
       { href: '/admin/services', label: 'Services', icon: MdDesignServices },
       { href: '/admin/variant-price-history', label: 'Variant Price History', icon: MdHistory },
       { href: '/admin/walk-in', label: 'Walk-in', icon: MdEvent },
+      { href: '/admin/billing', label: 'Billing', icon: MdReceipt },
+      { href: '/admin/billing-history', label: 'Billing History', icon: MdHistory },
     ],
   },
 ]
