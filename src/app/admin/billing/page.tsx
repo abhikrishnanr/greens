@@ -86,6 +86,7 @@ export default function BillingPage() {
     const svcData = selected
       .map(id => services.find(s => s.id === id)!)
       .map(s => ({
+        phone: s.phone,
         category: s.category,
         service: s.service,
         variant: s.variant,
@@ -93,13 +94,16 @@ export default function BillingPage() {
         amountAfter: s.price * (finalTotal / totalBefore || 1),
         scheduledAt: s.scheduledAt,
       }))
+    const phones = Array.from(
+      new Set(svcData.map(s => s.phone).filter(Boolean))
+    ) as string[]
     await fetch('/api/billing', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         billingName: billingName || null,
         billingAddress: billingAddress || null,
-        phone: services.find(s => s.id === selected[0])?.phone || null,
+        phones,
         voucherCode: coupon?.code || null,
         services: svcData,
       }),
