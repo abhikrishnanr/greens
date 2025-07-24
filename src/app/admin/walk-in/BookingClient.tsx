@@ -149,7 +149,7 @@ export default function BookingClient() {
 
   const loadBookings = async () => {
     try {
-      const res = await fetch('/api/admin/bookings/' + date)
+      const res = await fetch('/api/bookings?date=' + date)
       if (!res.ok) throw new Error('Failed to fetch bookings')
       const data: Booking[] = await res.json()
       setBookings(data)
@@ -240,7 +240,7 @@ export default function BookingClient() {
 
   const cancelBooking = async () => {
     if (!edit) return
-    const res = await fetch(`/api/bookings/${edit.id}`, { method: 'DELETE' })
+    const res = await fetch(`/api/bookings?id=${edit.id}`, { method: 'DELETE' })
     const data = await res.json()
     setResult(data)
     if (data.success) {
@@ -251,10 +251,10 @@ export default function BookingClient() {
 
   const updateBooking = async () => {
     if (!edit) return
-    const res = await fetch(`/api/bookings/${edit.id}`, {
-      method: 'PATCH',
+    const res = await fetch('/api/bookings', {
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ staffId: editStaffId, start: editStart }),
+      body: JSON.stringify({ id: edit.id, staffId: editStaffId, start: editStart }),
     })
     const data = await res.json()
     setResult(data)
