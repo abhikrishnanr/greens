@@ -2,13 +2,27 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(req: Request, { params }: { params: { categoryId: string } }) {
-  const { categoryId } = await params
+  const { categoryId } = params
   const services = await prisma.serviceNew.findMany({
     where: { categoryId },
     include: { tiers: true },
     orderBy: { name: 'asc' },
   })
-  return NextResponse.json(services)
+
+  const response = services.map((svc) => ({
+    id: svc.id,
+    name: svc.name,
+    caption: svc.caption,
+    description: svc.description,
+    imageUrl: svc.imageUrl,
+    variants: svc.tiers.map((t) => ({
+      id: t.id,
+      name: t.name,
+      duration: t.duration,
+    })),
+  }))
+
+  return NextResponse.json(response)
 }
 
 export async function POST(req: Request, { params }: { params: { categoryId: string } }) {
