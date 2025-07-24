@@ -72,3 +72,9 @@ input[type="number"] {
   transform: translateY(-5px);
 }
 
+/* Highlight busy time slots in native selects */
+select option[data-busy="true"] {
+  background-color: #fef08a;
+  color: #000;
+}
+

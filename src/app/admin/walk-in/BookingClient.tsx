@@ -755,7 +755,13 @@ export default function AdminBooking() {
                                     <SelectItem
                                       key={t}
                                       value={t}
-                                      style={isBusy ? { backgroundColor: '#fef08a' } : undefined}
+                                      data-busy={isBusy ? 'true' : undefined}
+                                      className={isBusy ? 'bg-yellow-100 text-black' : undefined}
+                                      style={
+                                        isBusy
+                                          ? { background: '#fef08a', backgroundColor: '#fef08a', color: '#000' }
+                                          : undefined
+                                      }
                                     >
                                       {t}
                                     </SelectItem>
@@ -999,7 +1005,13 @@ export default function AdminBooking() {
                         <SelectItem
                           key={t}
                           value={t}
-                          style={isBusy ? { backgroundColor: '#fef08a' } : undefined}
+                          data-busy={isBusy ? 'true' : undefined}
+                          className={isBusy ? 'bg-yellow-100 text-black' : undefined}
+                          style={
+                            isBusy
+                              ? { background: '#fef08a', backgroundColor: '#fef08a', color: '#000' }
+                              : undefined
+                          }
                         >
                           {t}
                         </SelectItem>
