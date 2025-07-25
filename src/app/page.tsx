@@ -30,133 +30,6 @@ const TIER_LABELS = {
   },
 }
 
-const HERO_CATEGORIES = [
-  {
-    id: "home",
-    name: "Home",
-    iconUrl: "/icons/home-green-gray.png",
-    backgroundImage: "/salon_bg_poster.jpg",
-    videoSrc: "/home-bg-video.mp4",
-    heroTitle: "Welcome to Greens Beauty Salon",
-    heroDescription: "Here Beauty Begins with Peace of Mind", // Re-added description
-    buttonLink: "#services",
-    heroTitleColor: "text-white",
-    heroDescriptionColor: "text-white",
-    buttonBgColor: "bg-white",
-    buttonTextColor: "text-[#522B8C]",
-  },
-  {
-    id: "family-salon",
-    name: "Family Salon",
-    iconUrl: "/icons/users-green-gray.png",
-    backgroundImage: "/family-salon-interior.png",
-    heroTitle: "Family Salon",
-    heroDescription:
-      "Complete care for the whole family, offering a wide range of services for all ages and preferences.",
-    buttonLink: "#services",
-    heroTitleColor: "text-white",
-    heroDescriptionColor: "text-white",
-    buttonBgColor: "bg-white",
-    buttonTextColor: "text-[#522B8C]",
-  },
-  {
-    id: "beauty-studio",
-    name: "Beauty Studio",
-    iconUrl: "/icons/sparkles-green-gray.png",
-    backgroundImage: "/beauty-studio-glam.png",
-    heroTitle: "Beauty Studio",
-    heroDescription:
-      "Premium beauty treatments including facials, makeup, and skincare for a radiant and refreshed look.",
-    buttonLink: "#services",
-    heroTitleColor: "text-white",
-    heroDescriptionColor: "text-white",
-    buttonBgColor: "bg-white",
-    buttonTextColor: "text-[#522B8C]",
-  },
-  {
-    id: "celebrity-salon",
-    name: "Celebrity Salon",
-    iconUrl: "/icons/crown-green-gray.png",
-    backgroundImage: "/celebrity-hair-styling.png",
-    heroTitle: "Celebrity Salon",
-    heroDescription:
-      "Experience luxury styling and exclusive services fit for a celebrity, with top-tier products and experts.",
-    buttonLink: "#services",
-    heroTitleColor: "text-white",
-    heroDescriptionColor: "text-white",
-    buttonBgColor: "bg-white",
-    buttonTextColor: "text-[#522B8C]",
-  },
-  {
-    id: "makeover-studio",
-    name: "Makeover Studio",
-    iconUrl: "/icons/paintbrush-green-gray.png",
-    backgroundImage: "/makeover-studio-transformation.png",
-    heroTitle: "Makeover Studio",
-    heroDescription: "Complete transformation services, from hair to makeup, for any occasion or personal desire.",
-    buttonLink: "#services",
-    heroTitleColor: "text-white",
-    heroDescriptionColor: "text-white",
-    buttonBgColor: "bg-white",
-    buttonTextColor: "text-[#522B8C]",
-  },
-  {
-    id: "bridal-lounge",
-    name: "Bridal Lounge",
-    iconUrl: "/icons/heart-green-gray.png",
-    backgroundImage: "/bridal-makeup-lounge.png",
-    heroTitle: "Bridal Lounge",
-    heroDescription:
-      "Specialized bridal services to make your big day unforgettable, ensuring you look your absolute best.",
-    buttonLink: "#services",
-    heroTitleColor: "text-white",
-    heroDescriptionColor: "text-white",
-    buttonBgColor: "bg-white",
-    buttonTextColor: "text-[#522B8C]",
-  },
-  {
-    id: "floral-studio",
-    name: "Floral Studio",
-    iconUrl: "/icons/flower-green-gray.png",
-    backgroundImage: "/floral-arrangement-studio.png",
-    heroTitle: "Floral Studio",
-    heroDescription:
-      "Artistic floral designs for all your events and special moments, crafted with passion and precision.",
-    buttonLink: "#services",
-    heroTitleColor: "text-white",
-    heroDescriptionColor: "text-white",
-    buttonBgColor: "bg-white",
-    buttonTextColor: "text-[#522B8C]",
-  },
-  {
-    id: "floral-decor",
-    name: "Floral Decor",
-    iconUrl: "/icons/leaf-green-gray.png",
-    backgroundImage: "/elegant-floral-event.png",
-    heroTitle: "Floral Decor",
-    heroDescription:
-      "Comprehensive event decoration services with stunning floral arrangements to elevate any celebration.",
-    buttonLink: "#services",
-    heroTitleColor: "text-white",
-    heroDescriptionColor: "text-white",
-    buttonBgColor: "bg-white",
-    buttonTextColor: "text-[#522B8C]",
-  },
-  {
-    id: "event-portfolio",
-    name: "Event Portfolio",
-    iconUrl: "/icons/gallery-green-gray.png",
-    backgroundImage: "/event.jpg",
-    heroTitle: "Event Portfolio",
-    heroDescription:
-      "Complete event solutions, from meticulous planning to flawless execution, for seamless celebrations.",
-    buttonLink: "#services",
-    heroTitleColor: "text-white",
-    heroDescriptionColor: "text-white",
-    buttonBgColor: "bg-white",
-    buttonTextColor: "text-[#522B8C]",
-  },
-]
 
 const WOMEN_SERVICES = [
   "Shahnaz Husain Facials",
@@ -186,7 +59,8 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [expandedCat, setExpandedCat] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [selectedHeroCategory, setSelectedHeroCategory] = useState<string>("home") // Default to 'home'
+  const [selectedHeroCategory, setSelectedHeroCategory] = useState<string>("") // default empty until load
+  const [heroTabs, setHeroTabs] = useState<any[]>([])
   const [selectedGenderTab, setSelectedGenderTab] = useState<"WOMEN" | "MEN">("WOMEN")
 
   useEffect(() => {
@@ -206,6 +80,17 @@ export default function HomePage() {
       })
   }, [])
 
+  useEffect(() => {
+    fetch('/api/hero-tabs')
+      .then(res => res.json())
+      .then((data) => {
+        setHeroTabs(Array.isArray(data) ? data : [])
+        if (Array.isArray(data) && data.length > 0) {
+          setSelectedHeroCategory(data[0].id)
+        }
+      })
+  }, [])
+
   const subServices = useMemo(() => {
     if (!expandedCat) return []
     const cat = categories.find((c) => c.id === expandedCat)
@@ -217,8 +102,9 @@ export default function HomePage() {
   }
 
   const currentHeroContent = useMemo(() => {
-    return HERO_CATEGORIES.find((cat) => cat.id === selectedHeroCategory) || HERO_CATEGORIES[0]
-  }, [selectedHeroCategory])
+    if (heroTabs.length === 0) return {} as any
+    return heroTabs.find((cat) => cat.id === selectedHeroCategory) || heroTabs[0]
+  }, [selectedHeroCategory, heroTabs])
 
   const currentGenderServices = useMemo(() => {
     return selectedGenderTab === "WOMEN" ? WOMEN_SERVICES : MEN_SERVICES
@@ -234,7 +120,7 @@ export default function HomePage() {
         {/* Categories Section (Light Grey Bar) */}
         <div className="w-full overflow-x-auto py-2 scrollbar-hide bg-gray-100 shadow-lg">
           <div className="flex gap-0 justify-start px-4 md:justify-center">
-            {HERO_CATEGORIES.filter((cat) => cat.id !== "home").map((cat, idx) => (
+            {heroTabs.filter((cat) => cat.id !== "home").map((cat, idx) => (
               <motion.button
                 key={cat.id}
                 className={`flex flex-col items-center justify-center p-3 min-w-[100px] text-center transition-all duration-300 relative
@@ -244,7 +130,7 @@ export default function HomePage() {
                       : "bg-transparent text-gray-600 hover:bg-gray-200"
                   }
                   ${idx === 0 ? "rounded-tl-lg" : ""}
-                  ${idx === HERO_CATEGORIES.length - 1 ? "rounded-tr-lg" : ""}
+                  ${idx === heroTabs.length - 1 ? "rounded-tr-lg" : ""}
                 `}
                 onClick={() => setSelectedHeroCategory(cat.id)}
                 whileHover={{ scale: 1.05, y: -5 }}
@@ -283,13 +169,13 @@ export default function HomePage() {
                 muted
                 playsInline
                 className="absolute inset-0 w-full h-full object-cover"
-                poster={currentHeroContent.backgroundImage}
+                poster={currentHeroContent.backgroundUrl}
               >
                 <source src={currentHeroContent.videoSrc} type="video/mp4" />
               </video>
             ) : (
               <Image
-                src={currentHeroContent.backgroundImage || "/placeholder.svg"}
+                src={currentHeroContent.backgroundUrl || "/placeholder.svg"}
                 alt={currentHeroContent.name || "Background"}
                 layout="fill"
                 objectFit="cover"
@@ -301,20 +187,20 @@ export default function HomePage() {
             <div className="absolute inset-x-0 bottom-0 h-[50%] bg-gradient-to-t from-gray-900 to-transparent z-10" />{" "}
             {/* Increased height and intensity */}
             <div className="relative z-20 text-white max-w-3xl space-y-2">
-              <h1 className={`text-2xl md:text-3xl font-bold tracking-wide ${currentHeroContent.heroTitleColor}`}>
+              <h1 className="text-2xl md:text-3xl font-bold tracking-wide text-white">
                 {currentHeroContent.heroTitle}
               </h1>
               {selectedHeroCategory === "home" ? (
-                <p className={`text-base md:text-lg leading-relaxed ${currentHeroContent.heroDescriptionColor}`}>
+                <p className="text-base md:text-lg leading-relaxed text-white">
                   {currentHeroContent.heroDescription}
                 </p>
               ) : (
                 <Link
-                  href={currentHeroContent.buttonLink || "#"}
+                  href={currentHeroContent.buttonLink || `/hero/${currentHeroContent.id}`}
                   className="inline-flex px-8 py-2 font-semibold text-md shadow-lg transition-all duration-300 bg-transparent border-white text-[#ffffff] hover:scale-105"
                   style={{ border: "2px solid #fff" }}
                 >
-                  {"24 items | Rs. 300 onwards >"}
+                  {currentHeroContent.buttonLabel || 'Explore Now >'}
                 </Link>
               )}
             </div>
