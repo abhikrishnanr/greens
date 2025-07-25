@@ -1,8 +1,11 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const { id } = params
+  const host = req.headers.get('host')
+  const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https'
+  const base = process.env.NEXT_PUBLIC_BASE_URL || `${protocol}://${host}`
   const tab = await prisma.heroTab.findUnique({
     where: { id },
     include: {
@@ -37,12 +40,15 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
       }
     })
   )
+  const iconUrl = tab.iconUrl && tab.iconUrl.startsWith('/') ? `${base}${tab.iconUrl}` : tab.iconUrl
+  const backgroundUrl = tab.backgroundUrl && tab.backgroundUrl.startsWith('/') ? `${base}${tab.backgroundUrl}` : tab.backgroundUrl
+  const videoSrc = tab.videoSrc && tab.videoSrc.startsWith('/') ? `${base}${tab.videoSrc}` : tab.videoSrc
   return NextResponse.json({
     id: tab.id,
     name: tab.name,
-    iconUrl: tab.iconUrl,
-    backgroundUrl: tab.backgroundUrl,
-    videoSrc: tab.videoSrc,
+    iconUrl,
+    backgroundUrl,
+    videoSrc,
     heroTitle: tab.heroTitle,
     heroDescription: tab.heroDescription,
     buttonLabel: tab.buttonLabel,
