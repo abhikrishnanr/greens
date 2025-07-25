@@ -756,7 +756,7 @@ export default function AdminBooking() {
                                       key={t}
                                       value={t}
                                       data-busy={isBusy ? 'true' : undefined}
-                                      className={isBusy ? 'bg-yellow-100 text-black' : undefined}
+                                      className={isBusy ? '!bg-yellow-200 !text-black' : undefined}
                                       style={
                                         isBusy
                                           ? { background: '#fef08a', backgroundColor: '#fef08a', color: '#000' }
@@ -1006,7 +1006,7 @@ export default function AdminBooking() {
                           key={t}
                           value={t}
                           data-busy={isBusy ? 'true' : undefined}
-                          className={isBusy ? 'bg-yellow-100 text-black' : undefined}
+                          className={isBusy ? '!bg-yellow-200 !text-black' : undefined}
                           style={
                             isBusy
                               ? { background: '#fef08a', backgroundColor: '#fef08a', color: '#000' }
