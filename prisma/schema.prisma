@@ -30,8 +30,7 @@ model User {
   createdAt   DateTime  @default(now()) @db.Timestamp(3)
   updatedAt   DateTime  @default(now()) @updatedAt @db.Timestamp(3)
 
-  bookings    Booking[]
-
+  bookings Booking[]
 }
 
 model Branch {
@@ -62,7 +61,6 @@ model Coupon {
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now()) @db.Timestamp(3)
   updatedAt      DateTime @default(now()) @updatedAt @db.Timestamp(3)
-
 }
 
 model ServiceCategory {
@@ -125,7 +123,7 @@ model ServiceNew {
   category    ServiceCategory @relation(fields: [categoryId], references: [id])
   name        String
   caption     String?
-  description String?  @db.LongText
+  description String?         @db.LongText
   imageUrl    String?
   images      ServiceImage[]
   tiers       ServiceTier[]
@@ -140,6 +138,7 @@ model ServiceTier {
   offerPrice   Float?
   duration     Int?
   priceHistory ServiceTierPriceHistory[]
+  heroTabs     HeroTabVariant[]
 }
 
 model ServiceTierPriceHistory {
@@ -156,17 +155,17 @@ model ServiceTierPriceHistory {
 }
 
 model Booking {
-  id        String   @id @default(uuid())
-  customer  String?  @db.VarChar(191)
-  phone     String?  @db.VarChar(191)
-  gender    String   @db.VarChar(191)
+  id        String        @id @default(uuid())
+  customer  String?       @db.VarChar(191)
+  phone     String?       @db.VarChar(191)
+  gender    String        @db.VarChar(191)
   age       Int?
-  staffId   String   @db.VarChar(191)
-  staff     User     @relation(fields: [staffId], references: [id])
-  date      String   @db.VarChar(10)
-  start     String   @db.VarChar(5)
-  color     String   @db.VarChar(191)
-  createdAt DateTime @default(now()) @db.Timestamp(3)
+  staffId   String        @db.VarChar(191)
+  staff     User          @relation(fields: [staffId], references: [id])
+  date      String        @db.VarChar(10)
+  start     String        @db.VarChar(5)
+  color     String        @db.VarChar(191)
+  createdAt DateTime      @default(now()) @db.Timestamp(3)
   items     BookingItem[]
 }
 
@@ -184,20 +183,44 @@ model BookingItem {
 }
 
 model Billing {
-  id             String   @id @default(uuid())
-  billId         String   @db.VarChar(191)
-  customerId     String?  @db.VarChar(191)
-  phone          String?  @db.VarChar(191)
-  billingName    String?  @db.VarChar(191)
-  billingAddress String?  @db.VarChar(191)
-  category       String   @db.VarChar(191)
-  service        String   @db.VarChar(191)
-  variant        String   @db.VarChar(191)
+  id             String    @id @default(uuid())
+  billId         String    @db.VarChar(191)
+  customerId     String?   @db.VarChar(191)
+  phone          String?   @db.VarChar(191)
+  billingName    String?   @db.VarChar(191)
+  billingAddress String?   @db.VarChar(191)
+  category       String    @db.VarChar(191)
+  service        String    @db.VarChar(191)
+  variant        String    @db.VarChar(191)
   amountBefore   Float
   amountAfter    Float
-  voucherCode    String?  @db.VarChar(191)
-  paymentMethod  String   @default("cash") @db.VarChar(191)
+  voucherCode    String?   @db.VarChar(191)
+  paymentMethod  String    @default("cash") @db.VarChar(191)
   paidAt         DateTime? @db.Timestamp(3)
-  scheduledAt    DateTime @db.Timestamp(3)
-  createdAt      DateTime @default(now()) @db.Timestamp(3)
+  scheduledAt    DateTime  @db.Timestamp(3)
+  createdAt      DateTime  @default(now()) @db.Timestamp(3)
+}
+
+model HeroTab {
+  id              String  @id @default(uuid())
+  name            String
+  iconUrl         String?
+  backgroundUrl   String?
+  videoSrc        String?
+  heroTitle       String
+  heroDescription String?
+  buttonLabel     String?
+  buttonLink      String?
+  order           Int     @default(0)
+
+  variants HeroTabVariant[]
+}
+
+model HeroTabVariant {
+  heroTabId     String
+  heroTab       HeroTab     @relation(fields: [heroTabId], references: [id])
+  serviceTierId String
+  serviceTier   ServiceTier @relation(fields: [serviceTierId], references: [id])
+
+  @@id([heroTabId, serviceTierId])
 }
