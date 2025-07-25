@@ -3,9 +3,6 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const { id } = params
-  const host = req.headers.get('host')
-  const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https'
-  const base = process.env.NEXT_PUBLIC_BASE_URL || `${protocol}://${host}`
   const tab = await prisma.heroTab.findUnique({
     where: { id },
     include: {
@@ -40,9 +37,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       }
     })
   )
-  const iconUrl = tab.iconUrl && tab.iconUrl.startsWith('/') ? `${base}${tab.iconUrl}` : tab.iconUrl
-  const backgroundUrl = tab.backgroundUrl && tab.backgroundUrl.startsWith('/') ? `${base}${tab.backgroundUrl}` : tab.backgroundUrl
-  const videoSrc = tab.videoSrc && tab.videoSrc.startsWith('/') ? `${base}${tab.videoSrc}` : tab.videoSrc
+  const iconUrl = tab.iconUrl ?? null
+  const backgroundUrl = tab.backgroundUrl ?? null
+  const videoSrc = tab.videoSrc ?? null
   return NextResponse.json({
     id: tab.id,
     name: tab.name,

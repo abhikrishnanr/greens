@@ -2,9 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(req: NextRequest) {
-  const host = req.headers.get('host')
-  const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https'
-  const base = process.env.NEXT_PUBLIC_BASE_URL || `${protocol}://${host}`
   const tabs = await prisma.heroTab.findMany({
     orderBy: { order: 'asc' },
     include: {
@@ -42,9 +39,9 @@ export async function GET(req: NextRequest) {
           }
         })
       )
-      const iconUrl = t.iconUrl && t.iconUrl.startsWith('/') ? `${base}${t.iconUrl}` : t.iconUrl
-      const backgroundUrl = t.backgroundUrl && t.backgroundUrl.startsWith('/') ? `${base}${t.backgroundUrl}` : t.backgroundUrl
-      const videoSrc = t.videoSrc && t.videoSrc.startsWith('/') ? `${base}${t.videoSrc}` : t.videoSrc
+      const iconUrl = t.iconUrl ?? null
+      const backgroundUrl = t.backgroundUrl ?? null
+      const videoSrc = t.videoSrc ?? null
       return {
         id: t.id,
         name: t.name,
