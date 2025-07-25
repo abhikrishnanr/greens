@@ -65,7 +65,10 @@ export default function HeroTabsPage() {
     if (!file) return
     const fd = new FormData()
     fd.append('file', file)
-    const res = await fetch('/api/upload', { method: 'POST', body: fd })
+    const endpoint = file.type.startsWith('image/')
+      ? '/api/upload-local'
+      : '/api/upload'
+    const res = await fetch(endpoint, { method: 'POST', body: fd })
     const data = await res.json()
     setForm({ ...form, [field]: data.url })
   }
