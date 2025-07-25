@@ -60,12 +60,15 @@ export default function HeroTabsPage() {
     loadVariants()
   }, [])
 
-  const handleImage = async (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
+  const handleImage = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: string,
+  ) => {
     const file = e.target.files?.[0]
     if (!file) return
     const fd = new FormData()
     fd.append('file', file)
-    const res = await fetch('/api/upload', { method: 'POST', body: fd })
+    const res = await fetch('/api/upload-local', { method: 'POST', body: fd })
     const data = await res.json()
     setForm({ ...form, [field]: data.url })
   }
