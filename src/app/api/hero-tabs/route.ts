@@ -1,7 +1,10 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const host = req.headers.get('host')
+  const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https'
+  const base = process.env.NEXT_PUBLIC_BASE_URL || `${protocol}://${host}`
   const tabs = await prisma.heroTab.findMany({
     orderBy: { order: 'asc' },
     include: {
@@ -39,12 +42,15 @@ export async function GET() {
           }
         })
       )
+      const iconUrl = t.iconUrl && t.iconUrl.startsWith('/') ? `${base}${t.iconUrl}` : t.iconUrl
+      const backgroundUrl = t.backgroundUrl && t.backgroundUrl.startsWith('/') ? `${base}${t.backgroundUrl}` : t.backgroundUrl
+      const videoSrc = t.videoSrc && t.videoSrc.startsWith('/') ? `${base}${t.videoSrc}` : t.videoSrc
       return {
         id: t.id,
         name: t.name,
-        iconUrl: t.iconUrl,
-        backgroundUrl: t.backgroundUrl,
-        videoSrc: t.videoSrc,
+        iconUrl,
+        backgroundUrl,
+        videoSrc,
         heroTitle: t.heroTitle,
         heroDescription: t.heroDescription,
         buttonLabel: t.buttonLabel,

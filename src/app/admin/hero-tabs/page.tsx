@@ -60,7 +60,10 @@ export default function HeroTabsPage() {
     loadVariants()
   }, [])
 
-  const handleImage = async (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
+  const handleImage = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: string,
+  ) => {
     const file = e.target.files?.[0]
     if (!file) return
     const fd = new FormData()
