@@ -745,28 +745,23 @@ export default function AdminBooking() {
                                 <SelectValue placeholder={item.staffId ? "Select time" : "Select staff first"} />
                               </SelectTrigger>
                               <SelectContent>
-                                {timeOptionsFor(item.duration).map((t) => {
-                                  const busy = item.staffId
-                                    ? busySlots(item.staffId, idx)
-                                    : null
-                                  const isBusy =
-                                    busy && hasBusyRange(busy, t, item.duration)
-                                  return (
-                                    <SelectItem
-                                      key={t}
-                                      value={t}
-                                      data-busy={isBusy ? 'true' : undefined}
-                                      className={isBusy ? '!bg-yellow-200 !text-black' : undefined}
-                                      style={
-                                        isBusy
-                                          ? { background: '#fef08a', backgroundColor: '#fef08a', color: '#000' }
-                                          : undefined
-                                      }
-                                    >
-                                      {t}
-                                    </SelectItem>
-                                  )
-                                })}
+                                {(() => {
+                                  const busy = item.staffId ? busySlots(item.staffId, idx) : null
+                                  return timeOptionsFor(item.duration).map((t) => {
+                                    const isBusy = busy && hasBusyRange(busy, t, item.duration)
+                                    return (
+                                      <SelectItem
+                                        key={t}
+                                        value={t}
+                                        data-busy={isBusy ? 'true' : undefined}
+                                        className={isBusy ? 'option-busy' : undefined}
+                                        style={isBusy ? { backgroundColor: '#fef08a', color: '#000' } : undefined}
+                                      >
+                                        {t}
+                                      </SelectItem>
+                                    )
+                                  })
+                                })()}
                               </SelectContent>
                             </Select>
                           </div>
@@ -996,27 +991,25 @@ export default function AdminBooking() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {allTimes.map((t) => {
+                    {(() => {
                       const busy = editItemStaffId
                         ? busySlots(editItemStaffId, undefined, editItem.id)
                         : null
-                      const isBusy = busy && hasBusyRange(busy, t, editItem.duration)
-                      return (
-                        <SelectItem
-                          key={t}
-                          value={t}
-                          data-busy={isBusy ? 'true' : undefined}
-                          className={isBusy ? '!bg-yellow-200 !text-black' : undefined}
-                          style={
-                            isBusy
-                              ? { background: '#fef08a', backgroundColor: '#fef08a', color: '#000' }
-                              : undefined
-                          }
-                        >
-                          {t}
-                        </SelectItem>
-                      )
-                    })}
+                      return allTimes.map((t) => {
+                        const isBusy = busy && hasBusyRange(busy, t, editItem.duration)
+                        return (
+                          <SelectItem
+                            key={t}
+                            value={t}
+                            data-busy={isBusy ? 'true' : undefined}
+                            className={isBusy ? 'option-busy' : undefined}
+                            style={isBusy ? { backgroundColor: '#fef08a', color: '#000' } : undefined}
+                          >
+                            {t}
+                          </SelectItem>
+                        )
+                      })
+                    })()}
                   </SelectContent>
                 </Select>
               </div>
