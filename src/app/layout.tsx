@@ -62,8 +62,8 @@ export default function RootLayout({
         <style>{`
           body {
             margin: 0;
-            background-color: #052b1e;
-            color: #90EE90;
+            background-color: #ffffff;
+            color: #000000;
             font-family: 'Poppins', sans-serif;
           }
         `}</style>
