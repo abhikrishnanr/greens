@@ -26,7 +26,8 @@ export default async function HeroTabPage({ params }: { params: { slug: string }
 
   return (
     <section className="max-w-6xl mx-auto my-12 px-4 space-y-8 text-gray-900">
-      <div className="relative overflow-hidden rounded-2xl h-60 md:h-80">
+      {/* Cover photo */}
+      <div className="relative h-60 md:h-80 rounded-2xl overflow-hidden">
         {tab.videoSrc ? (
           <video
             autoPlay
@@ -45,24 +46,38 @@ export default async function HeroTabPage({ params }: { params: { slug: string }
             className="absolute inset-0 w-full h-full object-cover"
           />
         )}
-        <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-center p-4 space-y-2">
-          {tab.iconUrl && (
-            <img src={tab.iconUrl} alt={tab.name} className="w-16 h-16 mb-2 rounded-full" />
-          )}
-          <h1 className="text-3xl font-bold text-white">{tab.heroTitle}</h1>
+      </div>
+
+      {/* Profile header */}
+      <div className="relative flex items-end gap-4 -mt-12 px-4">
+        {tab.iconUrl && (
+          <img
+            src={tab.iconUrl}
+            alt={tab.name}
+            className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md"
+          />
+        )}
+        <div className="pb-2">
+          <h1 className="text-3xl font-bold">{tab.heroTitle}</h1>
           {tab.heroDescription && (
-            <div
-              className="prose prose-sm text-white max-w-xl"
-              dangerouslySetInnerHTML={{ __html: tab.heroDescription }}
-            />
+            <p className="text-gray-600 mt-1">&quot;{tab.heroDescription.replace(/<[^>]*>?/gm, '')}&quot;</p>
           )}
         </div>
       </div>
 
+      {tab.heroDescription && (
+        <div className="bg-white rounded-2xl shadow p-6">
+          <div
+            className="prose max-w-none"
+            dangerouslySetInnerHTML={{ __html: tab.heroDescription }}
+          />
+        </div>
+      )}
+
       {tab.variants && tab.variants.length > 0 && (
         <div className="space-y-6">
           {tab.variants.map((v: any) => (
-            <ServiceCard key={v.id} variant={v} />
+            <ServiceCard key={v.id} variant={v} hideDetails />
           ))}
         </div>
       )}
