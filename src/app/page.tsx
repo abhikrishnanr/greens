@@ -61,6 +61,7 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null)
   const [selectedHeroCategory, setSelectedHeroCategory] = useState<string>("") // default empty until load
   const [heroTabs, setHeroTabs] = useState<any[]>([])
+  const [heroLoading, setHeroLoading] = useState(true)
   const [selectedGenderTab, setSelectedGenderTab] = useState<"WOMEN" | "MEN">("WOMEN")
 
   useEffect(() => {
@@ -89,6 +90,7 @@ export default function HomePage() {
           setSelectedHeroCategory(data[0].id)
         }
       })
+      .finally(() => setHeroLoading(false))
   }, [])
 
   const subServices = useMemo(() => {
@@ -118,6 +120,12 @@ export default function HomePage() {
       {/* HERO SECTION */}
       {heroTabs.length > 0 && (
       <section className="relative flex flex-col overflow-hidden min-h-[70vh] md:min-h-[70vh]">
+        {heroLoading || heroTabs.length === 0 ? (
+          <div className="flex flex-1 items-center justify-center text-gray-400">
+            Loading hero content...
+          </div>
+        ) : (
+        <>
         {/* Categories Section (Light Grey Bar) */}
         <div className="w-full overflow-x-auto py-2 scrollbar-hide bg-gray-100 shadow-lg">
           <div className="flex gap-0 justify-start px-4 md:justify-center">
@@ -204,6 +212,8 @@ export default function HomePage() {
             </div>
           </motion.div>
         </AnimatePresence>
+        </>
+        )}
       </section>
       )}
 
