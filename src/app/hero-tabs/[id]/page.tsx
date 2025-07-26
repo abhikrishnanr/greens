@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { headers } from 'next/headers'
 
 function stripHtml(html: string) {
   return html.replace(/<[^>]*>?/gm, '')
@@ -7,7 +8,8 @@ function stripHtml(html: string) {
 
 export default async function HeroTabPage({ params }: { params: { id: string } }) {
   const { id } = params
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || ''
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL || `http://${headers().get('host')}`
   const res = await fetch(`${baseUrl}/api/hero-tabs/${id}`, { cache: 'no-store' })
   if (!res.ok) {
     // Display a friendly message instead of the default 404 page
