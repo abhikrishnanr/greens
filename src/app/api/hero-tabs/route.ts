@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-
-function slugify(title: string) {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-')
-}
+import slugify from '@/lib/slugify'
 
 export async function GET(req: NextRequest) {
   const host = req.headers.get('host')

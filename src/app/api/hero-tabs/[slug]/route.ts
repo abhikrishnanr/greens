@@ -1,16 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-
-function slugify(title: string) {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-')
-}
+import slugify from '@/lib/slugify'
 
 export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
-  const { slug } = params
+  const slug = decodeURIComponent(params.slug)
   const host = req.headers.get('host')
   const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https'
   const base = process.env.NEXT_PUBLIC_BASE_URL || `${protocol}://${host}`
@@ -88,6 +81,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
   return NextResponse.json({
     id: tab.id,
     name: tab.name,
+    slug: slugify(tab.heroTitle),
     iconUrl,
     backgroundUrl,
     videoSrc,

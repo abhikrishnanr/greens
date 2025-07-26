@@ -9,7 +9,10 @@ export default async function HeroTabPage({ params }: { params: { slug: string }
   const { slug } = params
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL || `http://${headers().get('host')}`
-  const res = await fetch(`${baseUrl}/api/hero-tabs/${slug}`, { cache: 'no-store' })
+  const res = await fetch(
+    `${baseUrl}/api/hero-tabs/${encodeURIComponent(slug)}`,
+    { cache: 'no-store' }
+  )
   if (!res.ok) {
     // Display a friendly message instead of the default 404 page
     return (
