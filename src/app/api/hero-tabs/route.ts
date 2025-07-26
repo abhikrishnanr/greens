@@ -39,9 +39,13 @@ export async function GET(req: NextRequest) {
         v.serviceTier.actualPrice
       return {
         id: v.serviceTier.id,
+        serviceId: v.serviceTier.service.id,
         name: v.serviceTier.name,
         serviceName: v.serviceTier.service.name,
         categoryName: v.serviceTier.service.category.name,
+        caption: v.serviceTier.service.caption ?? null,
+        description: v.serviceTier.service.description ?? null,
+        imageUrl: v.serviceTier.service.imageUrl ?? null,
         price,
       }
     })
