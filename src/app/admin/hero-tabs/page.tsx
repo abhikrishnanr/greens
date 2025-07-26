@@ -68,10 +68,7 @@ export default function HeroTabsPage() {
     if (!file) return
     const fd = new FormData()
     fd.append('file', file)
-    const endpoint = file.type.startsWith('image/')
-      ? '/api/upload-local'
-      : '/api/upload'
-    const res = await fetch(endpoint, { method: 'POST', body: fd })
+    const res = await fetch('/api/upload', { method: 'POST', body: fd })
     const data = await res.json()
     setForm({ ...form, [field]: data.url })
   }
@@ -164,6 +161,7 @@ export default function HeroTabsPage() {
         <thead className="bg-gray-50">
           <tr>
             <th className="px-3 py-2">Name</th>
+            <th className="px-3 py-2">Icon</th>
             <th className="px-3 py-2">Order</th>
             <th className="px-3 py-2">Actions</th>
           </tr>
@@ -172,6 +170,7 @@ export default function HeroTabsPage() {
           {tabs.map(t => (
             <tr key={t.id} className="border-t">
               <td className="px-3 py-2">{t.name}</td>
+              <td className="px-3 py-2">{t.iconUrl ? <img src={t.iconUrl} className="h-10"/> : '—'}</td>
               <td className="px-3 py-2">{t.order ?? 0}</td>
               <td className="flex gap-2 px-3 py-2">
                 <button className="flex items-center gap-1 px-2 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded" onClick={() => edit(t)}>
