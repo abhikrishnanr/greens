@@ -11,18 +11,46 @@ export default async function HeroTabPage({ params }: { params: { id: string } }
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `http://${headers().get('host')}`
   const res = await fetch(`${baseUrl}/api/hero-tabs/${id}`, { cache: 'no-store' })
   if (!res.ok) {
-    // When tab is not found show friendly message instead of 404 page
-    return notFound()
+    // Display a friendly message instead of the default 404 page
+    return (
+      <section className="flex flex-col items-center justify-center py-24 space-y-4">
+        <h1 className="text-2xl font-semibold">Tab not found</h1>
+        <Link href="/" className="text-green-400 underline">Back to Home</Link>
+      </section>
+    )
   }
   const tab = await res.json()
 
   return (
     <section className="max-w-6xl mx-auto my-12 px-4 space-y-8 text-gray-900">
-      <div className="bg-white rounded-2xl p-8 shadow">
-        <h1 className="text-3xl font-bold mb-4" style={{ color: '#41eb70' }}>{tab.heroTitle}</h1>
-        {tab.heroDescription && (
-          <div className="prose mb-6" dangerouslySetInnerHTML={{ __html: tab.heroDescription }} />
+      <div className="relative overflow-hidden rounded-2xl h-60 md:h-80">
+        {tab.videoSrc ? (
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+            poster={tab.backgroundUrl}
+          >
+            <source src={tab.videoSrc} type="video/mp4" />
+          </video>
+        ) : (
+          <img
+            src={tab.backgroundUrl || '/placeholder.svg'}
+            alt={tab.name}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
         )}
+        <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-center p-4 space-y-2">
+          <h1 className="text-3xl font-bold text-white">{tab.heroTitle}</h1>
+          {tab.heroDescription && (
+            <div
+              className="prose prose-sm text-white max-w-xl"
+              dangerouslySetInnerHTML={{ __html: tab.heroDescription }}
+            />
+          )}
+        </div>
       </div>
 
       {tab.variants && tab.variants.length > 0 && (
