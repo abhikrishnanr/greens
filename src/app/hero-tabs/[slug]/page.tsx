@@ -1,14 +1,17 @@
 import Link from 'next/link'
 import { headers } from 'next/headers'
 
+export const dynamic = 'force-dynamic'
+
 function stripHtml(html: string) {
   return html.replace(/<[^>]*>?/gm, '')
 }
 
 export default async function HeroTabPage({ params }: { params: { slug: string } }) {
   const { slug } = params
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL || `http://${headers().get('host')}`
+  const host = headers().get('host') || 'localhost:3000'
+  const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https'
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `${protocol}://${host}`
   const res = await fetch(
     `${baseUrl}/api/hero-tabs/${encodeURIComponent(slug)}`,
     { cache: 'no-store' }
