@@ -1,14 +1,18 @@
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { headers } from 'next/headers'
+import ServiceCard from '@/components/ServiceCard'
 
-function stripHtml(html: string) {
-  return html.replace(/<[^>]*>?/gm, '')
-}
+export const dynamic = 'force-dynamic'
 
-export default async function HeroTabPage({ params }: { params: { id: string } }) {
-  const { id } = params
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || ''
-  const res = await fetch(`${baseUrl}/api/hero-tabs/${id}`, { cache: 'no-store' })
+export default async function HeroTabPage({ params }: { params: { slug: string } }) {
+  const { slug } = params
+  const host = headers().get('host') || 'localhost:3000'
+  const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https'
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `${protocol}://${host}`
+  const res = await fetch(
+    `${baseUrl}/api/hero-tabs/${encodeURIComponent(slug)}`,
+    { cache: 'no-store' }
+  )
   if (!res.ok) {
     // Display a friendly message instead of the default 404 page
     return (
@@ -56,35 +60,9 @@ export default async function HeroTabPage({ params }: { params: { id: string } }
       </div>
 
       {tab.variants && tab.variants.length > 0 && (
-        <div className="grid sm:grid-cols-2 gap-6">
+        <div className="space-y-6">
           {tab.variants.map((v: any) => (
-            <div key={v.id} className="bg-white rounded-2xl shadow overflow-hidden flex flex-col">
-              {v.imageUrl && (
-                <img
-                  src={v.imageUrl}
-                  alt={v.serviceName}
-                  className="w-full h-48 object-cover"
-                />
-              )}
-              <div className="p-6 flex flex-col flex-1">
-                <h3 className="text-xl font-semibold mb-1" style={{ color: '#41eb70' }}>
-                  {v.serviceName} - {v.name}
-                </h3>
-                {v.caption && <p className="text-gray-600 mb-1 text-sm">{v.caption}</p>}
-                {v.description && (
-                  <p className="text-gray-500 text-sm mb-2">
-                    {stripHtml(v.description).slice(0, 160)}
-                    {v.description.length > 160 ? '...' : ''}
-                  </p>
-                )}
-                <div className="mt-auto flex items-center justify-between pt-2">
-                  <span className="font-bold text-lg" style={{ color: '#41eb70' }}>₹{v.price}</span>
-                  <Link href={`/services/${v.serviceId}`} className="text-green-500 underline text-sm">
-                    View Details
-                  </Link>
-                </div>
-              </div>
-            </div>
+            <ServiceCard key={v.id} variant={v} />
           ))}
         </div>
       )}
