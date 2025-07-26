@@ -202,7 +202,7 @@ export default function HomePage() {
                 </p>
               ) : (
                 <Link
-                  href={`/hero-tabs/${currentHeroContent.id}`}
+                  href={`/hero-tabs/${currentHeroContent.slug || currentHeroContent.id}`}
                   className="inline-flex px-8 py-2 font-semibold text-md shadow-lg transition-all duration-300 bg-transparent border-white text-[#ffffff] hover:scale-105"
                   style={{ border: "2px solid #fff" }}
                 >

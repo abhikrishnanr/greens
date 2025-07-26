@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  const { id } = params
+export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
+  const { slug } = params
   const host = req.headers.get('host')
   const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https'
   const base = process.env.NEXT_PUBLIC_BASE_URL || `${protocol}://${host}`
   const now = new Date()
-  const tab = await prisma.heroTab.findUnique({
-    where: { id },
+  let tab = await prisma.heroTab.findUnique({
+    where: { id: slug },
     include: {
       variants: {
         include: {
@@ -29,6 +29,31 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       },
     },
   })
+  if (!tab) {
+    const name = slug.toLowerCase().replace(/-/g, ' ')
+    tab = await prisma.heroTab.findFirst({
+      where: { heroTitle: { equals: name, mode: 'insensitive' } },
+      include: {
+        variants: {
+          include: {
+            serviceTier: {
+              include: {
+                service: { include: { category: true } },
+                priceHistory: {
+                  where: {
+                    startDate: { lte: now },
+                    OR: [{ endDate: null }, { endDate: { gt: now } }],
+                  },
+                  orderBy: { startDate: 'desc' },
+                  take: 1,
+                },
+              },
+            },
+          },
+        },
+      },
+    })
+  }
   if (!tab) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   const variants = tab.variants.map((v) => {

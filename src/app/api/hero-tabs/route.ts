@@ -58,10 +58,16 @@ export async function GET(req: NextRequest) {
         : t.backgroundUrl
     const videoSrc =
       t.videoSrc && t.videoSrc.startsWith('/') ? `${base}${t.videoSrc}` : t.videoSrc
+    const slug = t.heroTitle
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-')
 
     return {
       id: t.id,
       name: t.name,
+      slug,
       iconUrl,
       backgroundUrl,
       videoSrc,
