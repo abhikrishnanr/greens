@@ -33,11 +33,11 @@ export async function GET(req: NextRequest) {
   const result = tabs.map((t) => {
     const variants = t.variants.map((v) => {
       const priceRec = v.serviceTier.priceHistory[0];
-      const price =
-        priceRec?.offerPrice ??
-        priceRec?.actualPrice ??
-        v.serviceTier.offerPrice ??
-        v.serviceTier.actualPrice;
+      const actualPrice =
+        priceRec?.actualPrice ?? v.serviceTier.actualPrice;
+      const offerPrice =
+        priceRec?.offerPrice ?? v.serviceTier.offerPrice ?? null;
+      const price = offerPrice ?? actualPrice;
       return {
         id: v.serviceTier.id,
         serviceId: v.serviceTier.service.id,
@@ -48,6 +48,8 @@ export async function GET(req: NextRequest) {
         description: v.serviceTier.service.description ?? null,
         imageUrl: v.serviceTier.service.imageUrl ?? null,
         price,
+        actualPrice,
+        offerPrice,
       };
     });
 
