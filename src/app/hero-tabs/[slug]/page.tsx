@@ -59,9 +59,7 @@ export default async function HeroTabPage({ params }: { params: { slug: string }
         )}
         <div className="pb-2">
           <h1 className="text-3xl font-bold">{tab.heroTitle}</h1>
-          {tab.heroDescription && (
-            <p className="text-gray-600 mt-1">&quot;{tab.heroDescription.replace(/<[^>]*>?/gm, '')}&quot;</p>
-          )}
+      
         </div>
       </div>
 
