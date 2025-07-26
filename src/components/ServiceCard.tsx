@@ -22,7 +22,13 @@ function stripHtml(html: string): string {
   return html.replace(/<[^>]*>?/gm, '')
 }
 
-export default function ServiceCard({ variant }: { variant: Variant }) {
+export default function ServiceCard({
+  variant,
+  hideDetails = false,
+}: {
+  variant: Variant
+  hideDetails?: boolean
+}) {
   const [open, setOpen] = useState(false)
   const desc = variant.description ? stripHtml(variant.description) : ''
   const short = desc.slice(0, 160)
@@ -70,12 +76,14 @@ export default function ServiceCard({ variant }: { variant: Variant }) {
                 {open ? 'View Less' : 'View More'}
               </Button>
             )}
-            <Link
-              href={`/services/${variant.serviceId}`}
-              className="text-blue-600 underline text-sm"
-            >
-              Details
-            </Link>
+            {!hideDetails && (
+              <Link
+                href={`/services/${variant.serviceId}`}
+                className="text-blue-600 underline text-sm"
+              >
+                Details
+              </Link>
+            )}
           </div>
         </div>
       </div>
