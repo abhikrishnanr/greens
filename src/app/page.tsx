@@ -116,6 +116,7 @@ export default function HomePage() {
       <Header />
 
       {/* HERO SECTION */}
+      {heroTabs.length > 0 && (
       <section className="relative flex flex-col overflow-hidden min-h-[70vh] md:min-h-[70vh]">
         {/* Categories Section (Light Grey Bar) */}
         <div className="w-full overflow-x-auto py-2 scrollbar-hide bg-gray-100 shadow-lg">
@@ -139,12 +140,12 @@ export default function HomePage() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3, delay: 0.1 + idx * 0.05 }}
               >
-                <Image
+                <img
                   src={cat.iconUrl || "/placeholder.svg"}
                   alt={cat.name}
-                  width={32} // Increased icon size
-                  height={32} // Increased icon size
-                  className="w-8 h-8 mb-1" // Tailwind classes for size
+                  width={32}
+                  height={32}
+                  className="w-8 h-8 mb-1"
                 />
                 <span className="text-xs font-medium whitespace-nowrap">{cat.name}</span>
               </motion.button>
@@ -174,13 +175,10 @@ export default function HomePage() {
                 <source src={currentHeroContent.videoSrc} type="video/mp4" />
               </video>
             ) : (
-              <Image
+              <img
                 src={currentHeroContent.backgroundUrl || "/placeholder.svg"}
                 alt={currentHeroContent.name || "Background"}
-                layout="fill"
-                objectFit="cover"
-                priority
-                className="absolute inset-0 z-0"
+                className="absolute inset-0 z-0 w-full h-full object-cover"
               />
             )}
             {/* Dark gradient overlay for the bottom 50% */}
@@ -207,6 +205,7 @@ export default function HomePage() {
           </motion.div>
         </AnimatePresence>
       </section>
+      )}
 
       {/* DISCOVER OUR RATES SECTION */}
       <section className="bg-gray-100 py-8 text-gray-800">
