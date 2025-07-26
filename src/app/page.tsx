@@ -61,6 +61,7 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null)
   const [selectedHeroCategory, setSelectedHeroCategory] = useState<string>("") // default empty until load
   const [heroTabs, setHeroTabs] = useState<any[]>([])
+  const [heroLoading, setHeroLoading] = useState(true)
   const [selectedGenderTab, setSelectedGenderTab] = useState<"WOMEN" | "MEN">("WOMEN")
 
   useEffect(() => {
@@ -89,6 +90,7 @@ export default function HomePage() {
           setSelectedHeroCategory(data[0].id)
         }
       })
+      .finally(() => setHeroLoading(false))
   }, [])
 
   const subServices = useMemo(() => {
@@ -117,6 +119,12 @@ export default function HomePage() {
 
       {/* HERO SECTION */}
       <section className="relative flex flex-col overflow-hidden min-h-[70vh] md:min-h-[70vh]">
+        {heroLoading || heroTabs.length === 0 ? (
+          <div className="flex flex-1 items-center justify-center text-gray-400">
+            Loading hero content...
+          </div>
+        ) : (
+        <>
         {/* Categories Section (Light Grey Bar) */}
         <div className="w-full overflow-x-auto py-2 scrollbar-hide bg-gray-100 shadow-lg">
           <div className="flex gap-0 justify-start px-4 md:justify-center">
@@ -139,12 +147,12 @@ export default function HomePage() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3, delay: 0.1 + idx * 0.05 }}
               >
-                <Image
+                <img
                   src={cat.iconUrl || "/placeholder.svg"}
                   alt={cat.name}
-                  width={32} // Increased icon size
-                  height={32} // Increased icon size
-                  className="w-8 h-8 mb-1" // Tailwind classes for size
+                  width={32}
+                  height={32}
+                  className="w-8 h-8 mb-1"
                 />
                 <span className="text-xs font-medium whitespace-nowrap">{cat.name}</span>
               </motion.button>
@@ -174,13 +182,10 @@ export default function HomePage() {
                 <source src={currentHeroContent.videoSrc} type="video/mp4" />
               </video>
             ) : (
-              <Image
+              <img
                 src={currentHeroContent.backgroundUrl || "/placeholder.svg"}
                 alt={currentHeroContent.name || "Background"}
-                layout="fill"
-                objectFit="cover"
-                priority
-                className="absolute inset-0 z-0"
+                className="absolute inset-0 z-0 w-full h-full object-cover"
               />
             )}
             {/* Dark gradient overlay for the bottom 50% */}
@@ -206,6 +211,8 @@ export default function HomePage() {
             </div>
           </motion.div>
         </AnimatePresence>
+        </>
+        )}
       </section>
 
       {/* DISCOVER OUR RATES SECTION */}
