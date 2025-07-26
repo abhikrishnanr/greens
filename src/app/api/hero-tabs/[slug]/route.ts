@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+function slugify(title: string) {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+}
+
 export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
   const { slug } = params
   const host = req.headers.get('host')
@@ -30,9 +38,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
     },
   })
   if (!tab) {
-    const name = slug.toLowerCase().replace(/-/g, ' ')
-    tab = await prisma.heroTab.findFirst({
-      where: { heroTitle: { equals: name, mode: 'insensitive' } },
+    const tabs = await prisma.heroTab.findMany({
       include: {
         variants: {
           include: {
@@ -53,6 +59,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
         },
       },
     })
+    tab = tabs.find((t) => slugify(t.heroTitle) === slug) || null
   }
   if (!tab) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
