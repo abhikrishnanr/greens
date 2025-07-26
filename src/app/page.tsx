@@ -113,7 +113,7 @@ export default function HomePage() {
   }, [selectedGenderTab])
 
   return (
-    <main className="bg-gray-900 min-h-screen font-sans text-gray-100">
+    <main className="bg-white min-h-screen font-sans text-gray-900">
       {/* HEADER */}
       <Header />
 
@@ -189,8 +189,8 @@ export default function HomePage() {
                 className="absolute inset-0 z-0 w-full h-full object-cover"
               />
             )}
-            {/* Dark gradient overlay for the bottom 50% */}
-            <div className="absolute inset-x-0 bottom-0 h-[50%] bg-gradient-to-t from-gray-900 to-transparent z-10" />{" "}
+            {/* Light gradient overlay for the bottom 50% */}
+            <div className="absolute inset-x-0 bottom-0 h-[50%] bg-gradient-to-t from-white to-transparent z-10" />{" "}
             {/* Increased height and intensity */}
             <div className="relative z-20 text-white max-w-3xl space-y-2">
               <h1 className="text-2xl md:text-3xl font-bold tracking-wide text-white">
@@ -261,7 +261,7 @@ export default function HomePage() {
       </section>
 
       {/* SERVICE DIVISIONS */}
-      <section className="py-20 bg-gradient-to-b from-gray-800 to-gray-900">
+      <section className="py-20 bg-gradient-to-b from-gray-100 to-gray-200 text-gray-900">
         <div className="container mx-auto px-6">
           <motion.div
             className="text-center mb-16"
@@ -273,7 +273,7 @@ export default function HomePage() {
             <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ color: "#41eb70" }}>
               Our Service Divisions
             </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Experience comprehensive beauty and wellness services in our luxurious environment
             </p>
           </motion.div>
@@ -337,17 +337,17 @@ export default function HomePage() {
                 viewport={{ once: true }}
                 whileHover={{ y: -10 }}
               >
-                <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 text-center shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-700/50 h-full group-hover:border-green-400/30">
+                <div className="bg-white rounded-2xl p-6 text-center shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-200 h-full">
                   <motion.div
                     className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${svc.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}
                     whileHover={{ rotate: 5 }}
                   >
                     <i className={`${svc.icon} text-white text-2xl`}></i>
                   </motion.div>
-                  <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-green-400 transition-colors">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">
                     {svc.title}
                   </h3>
-                  <p className="text-gray-400 text-sm leading-relaxed">{svc.desc}</p>
+                  <p className="text-gray-600 text-sm leading-relaxed">{svc.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -355,7 +355,7 @@ export default function HomePage() {
         </div>
       </section>
       {/* SERVICES SECTION */}
-      <section id="services" className="py-20 bg-gradient-to-b from-gray-900 to-gray-800">
+      <section id="services" className="py-20 bg-gradient-to-b from-gray-200 to-gray-100 text-gray-900">
         <div className="container mx-auto px-6">
           <motion.div
             className="text-center mb-12"
@@ -403,7 +403,7 @@ export default function HomePage() {
                             <h3 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: "#41eb70" }}>
                               {cat.name}
                             </h3>
-                            <p className="text-gray-300 text-lg mb-4">{cat.caption}</p>
+                            <p className="text-gray-600 text-lg mb-4">{cat.caption}</p>
                           </div>
                         </div>
                         <motion.span
@@ -429,7 +429,7 @@ export default function HomePage() {
                             {subServices.map((svc) => (
                               <div
                                 key={svc.id}
-                                className="bg-gray-700/30 backdrop-blur-sm rounded-xl p-6 border border-gray-600/30 flex items-center justify-between"
+                                className="bg-gray-100 rounded-xl p-6 border border-gray-200 flex items-center justify-between"
                               >
                                 <div className="flex items-center gap-6">
                                   <img
@@ -442,7 +442,7 @@ export default function HomePage() {
                                     <h4 className="font-bold text-xl" style={{ color: "#41eb70" }}>
                                       {svc.name}
                                     </h4>
-                                    <p className="text-gray-300 text-sm mb-1">{svc.caption}</p>
+                                    <p className="text-gray-600 text-sm mb-1">{svc.caption}</p>
                                     {svc.minPrice != null && (
                                       <span className="font-bold" style={{ color: "#41eb70" }}>
                                         From ₹{svc.minPrice}
@@ -503,7 +503,7 @@ export default function HomePage() {
         )}
       </AnimatePresence>
       {/* ABOUT SECTION */}
-      <section className="py-20 bg-gray-900">
+      <section className="py-20 bg-gray-100 text-gray-900">
         <div className="container mx-auto px-6">
           <motion.div
             className="text-center mb-16"
@@ -523,7 +523,7 @@ export default function HomePage() {
             {Object.entries(TIER_LABELS).map(([k, { label, icon }], idx) => (
               <motion.div
                 key={k}
-                className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 text-center shadow-xl hover:shadow-2xl hover:shadow-green-400/10 transition-all duration-300 border border-gray-700/50"
+                className="bg-white rounded-2xl p-8 text-center shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-200"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: idx * 0.2 }}
@@ -534,7 +534,7 @@ export default function HomePage() {
                 <h3 className="text-2xl font-bold mb-4" style={{ color: "#41eb70" }}>
                   {label}
                 </h3>
-                <p className="text-gray-300 leading-relaxed">
+                <p className="text-gray-600 leading-relaxed">
                   {k === "deluxe" &&
                     "Luxury brands and exclusive treatments. For those who demand the best in care and results. Shahnaz Husain, L'Oréal and more."}
                   {k === "premium" &&
@@ -546,7 +546,7 @@ export default function HomePage() {
             ))}
           </div>
           <motion.div
-            className="text-center bg-gray-800/30 backdrop-blur-sm rounded-2xl p-8 border border-gray-700/50 max-w-4xl mx-auto"
+            className="text-center bg-white rounded-2xl p-8 border border-gray-200 max-w-4xl mx-auto"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -555,7 +555,7 @@ export default function HomePage() {
             <h3 className="text-2xl font-bold mb-4" style={{ color: "#41eb70" }}>
               Our Promise
             </h3>
-            <p className="text-gray-300 leading-relaxed text-lg">
+            <p className="text-gray-600 leading-relaxed text-lg">
               We believe in comfort, care, and giving you the best advice—always. Ask us anything, and our team will
               guide you for the perfect service and product choice.
             </p>
@@ -579,7 +579,7 @@ export default function HomePage() {
           </motion.div>
           <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
             <motion.div
-              className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-gray-700/50"
+              className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200"
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
@@ -588,12 +588,12 @@ export default function HomePage() {
               <h3 className="text-2xl font-bold mb-6 flex items-center gap-3" style={{ color: "#41eb70" }}>
                 <FiMapPin style={{ color: "#41eb70" }} /> Visit Us
               </h3>
-              <p className="text-gray-300 text-lg leading-relaxed">
+              <p className="text-gray-600 text-lg leading-relaxed">
                 TC 45/215, Kunjalumood Junction, Karamana PO, Trivandrum
               </p>
             </motion.div>
             <motion.div
-              className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-gray-700/50"
+              className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200"
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
@@ -650,7 +650,7 @@ export default function HomePage() {
         </div>
       </section>
       {/* FOOTER */}
-      <footer className="text-center py-8 text-gray-400 bg-gray-900 border-t border-gray-800">
+      <footer className="text-center py-8 text-gray-600 bg-gray-200 border-t border-gray-300">
         <div className="container mx-auto px-6">
           <p className="text-sm">&copy; {new Date().getFullYear()} Greens Beauty Salon. All rights reserved.</p>
         </div>

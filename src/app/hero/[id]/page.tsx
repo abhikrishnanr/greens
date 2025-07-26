@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { headers } from 'next/headers'
+import { notFound } from 'next/navigation'
 
 function stripHtml(html: string) {
   return html.replace(/<[^>]*>?/gm, '')
@@ -9,22 +10,22 @@ export default async function HeroTabPage({ params }: { params: { id: string } }
   const { id } = params
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `http://${headers().get('host')}`
   const res = await fetch(`${baseUrl}/api/hero-tabs/${id}`, { cache: 'no-store' })
-  if (!res.ok) return <div className="p-8 text-red-500">Unable to load tab</div>
+  if (!res.ok) return notFound()
   const tab = await res.json()
 
   return (
-    <section className="max-w-5xl mx-auto my-12 px-4 space-y-8">
-      <div className="bg-gray-900 rounded-2xl p-8 text-gray-100 shadow">
+    <section className="max-w-5xl mx-auto my-12 px-4 space-y-8 text-gray-900">
+      <div className="bg-white rounded-2xl p-8 shadow">
         <h1 className="text-3xl font-bold mb-4" style={{ color: '#41eb70' }}>{tab.heroTitle}</h1>
         {tab.heroDescription && (
-          <div className="prose prose-invert mb-6" dangerouslySetInnerHTML={{ __html: tab.heroDescription }} />
+          <div className="prose mb-6" dangerouslySetInnerHTML={{ __html: tab.heroDescription }} />
         )}
       </div>
 
       {tab.variants && tab.variants.length > 0 && (
         <div className="space-y-6">
           {tab.variants.map((v: any) => (
-            <div key={v.id} className="bg-gray-800 rounded-xl p-4 flex flex-col md:flex-row gap-4 shadow">
+            <div key={v.id} className="bg-white rounded-xl p-4 flex flex-col md:flex-row gap-4 shadow">
               {v.imageUrl && (
                 <img
                   src={v.imageUrl}
@@ -36,9 +37,9 @@ export default async function HeroTabPage({ params }: { params: { id: string } }
                 <h3 className="text-xl font-semibold mb-2" style={{ color: '#41eb70' }}>
                   {v.serviceName} - {v.name}
                 </h3>
-                {v.caption && <p className="text-gray-300 mb-1">{v.caption}</p>}
+                {v.caption && <p className="text-gray-600 mb-1">{v.caption}</p>}
                 {v.description && (
-                  <p className="text-gray-400 text-sm mb-2">
+                  <p className="text-gray-500 text-sm mb-2">
                     {stripHtml(v.description).slice(0, 120)}{v.description.length > 120 ? '...' : ''}
                   </p>
                 )}

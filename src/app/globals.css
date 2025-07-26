@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-.select-dark { background: #031a13 !important; color: #90EE90 !important; }
+.select-dark { background: #ffffff !important; color: #000000 !important; }
 
 .modal-scroll {
   scrollbar-width: thin;

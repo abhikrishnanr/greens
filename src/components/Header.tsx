@@ -41,7 +41,15 @@ export default function Header() {
   )
 
   return (
-    <header className="bg-[#052b1e] text-white py-4 px-6 flex items-center justify-between w-full relative z-50">
+    <header
+      className="text-white py-4 px-6 flex items-center justify-between w-full relative z-50"
+      style={{
+        backgroundColor: '#052b1e',
+        backgroundImage: "url('/grass-texture.jpg')",
+        backgroundSize: 'cover',
+        backgroundRepeat: 'repeat',
+      }}
+    >
       <div className="flex items-center gap-4">
         <Link href="/" className="flex items-center">
           <Image src="/logo.png" alt="Greens Beauty Salon Logo" width={100} height={30} />
@@ -62,7 +70,13 @@ export default function Header() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: "100%" }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="fixed inset-0 bg-[#052b1e] z-40 flex flex-col items-center justify-center gap-8 text-lg md:hidden"
+            className="fixed inset-0 z-40 flex flex-col items-center justify-center gap-8 text-lg md:hidden"
+            style={{
+              backgroundColor: '#052b1e',
+              backgroundImage: "url('/grass-texture.jpg')",
+              backgroundSize: 'cover',
+              backgroundRepeat: 'repeat',
+            }}
           >
             <button className="absolute top-4 right-4 text-white" onClick={() => setIsMobileMenuOpen(false)}>
               <X size={32} />
