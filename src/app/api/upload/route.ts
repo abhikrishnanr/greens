@@ -17,14 +17,16 @@ export async function POST(req: NextRequest) {
     if (!file)
       return NextResponse.json({ error: "No file" }, { status: 400 });
 
-    if (!file.type.startsWith("image/"))
+    const isVideo = file.type.startsWith("video/");
+    const isImage = file.type.startsWith("image/");
+    if (!isImage && !isVideo)
       return NextResponse.json({ error: "Invalid file type" }, { status: 400 });
 
     const buffer = Buffer.from(await file.arrayBuffer());
 
     const uploaded: UploadApiResponse = await new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
-        { resource_type: "image", folder: "services" },
+        { resource_type: isVideo ? "video" : "image", folder: "services" },
         (err, result) => {
           if (err || !result) return reject(err);
           resolve(result);
