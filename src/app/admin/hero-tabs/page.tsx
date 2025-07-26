@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import WysiwygEditor from '@/app/components/WysiwygEditor'
 import { Pencil, Trash2 } from 'lucide-react'
+import Select from 'react-select'
 
 interface HeroTab {
   id: string
@@ -12,7 +13,6 @@ interface HeroTab {
   heroTitle: string
   heroDescription?: string
   buttonLabel?: string
-  buttonLink?: string
   order?: number
   variantIds: string[]
 }
@@ -34,7 +34,6 @@ export default function HeroTabsPage() {
     heroTitle: '',
     heroDescription: '',
     buttonLabel: '',
-    buttonLink: '',
     order: 0,
     variantIds: [],
   }
@@ -76,10 +75,11 @@ export default function HeroTabsPage() {
   const save = async (e: React.FormEvent) => {
     e.preventDefault()
     const method = editing ? 'PUT' : 'POST'
+    const { variantIds, buttonLink, ...rest } = form as any
     await fetch('/api/admin/hero-tabs', {
       method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify({ ...rest, variantIds }),
     })
     setForm(empty)
     setEditing(false)
@@ -137,23 +137,29 @@ export default function HeroTabsPage() {
           <input className="w-full p-2 rounded border" value={form.buttonLabel || ''} onChange={e => setForm({ ...form, buttonLabel: e.target.value })} />
         </div>
         <div>
-          <label className="block font-medium mb-1">Button Link</label>
-          <input className="w-full p-2 rounded border" value={form.buttonLink || ''} onChange={e => setForm({ ...form, buttonLink: e.target.value })} />
-        </div>
-        <div>
           <label className="block font-medium mb-1">Order</label>
           <input type="number" className="w-full p-2 rounded border" value={form.order ?? 0} onChange={e => setForm({ ...form, order: parseInt(e.target.value) })} />
         </div>
         <div>
           <label className="block font-medium mb-1">Service Variants</label>
-          <select multiple className="w-full p-2 border rounded" value={form.variantIds} onChange={e => {
-            const options = Array.from(e.target.selectedOptions).map(o => o.value)
-            setForm({ ...form, variantIds: options })
-          }}>
-            {variants.map(v => (
-              <option key={v.id} value={v.id}>{`${v.categoryName} - ${v.serviceName} (${v.variantName})`}</option>
-            ))}
-          </select>
+          <Select
+            isMulti
+            className="basic-multi-select"
+            classNamePrefix="select"
+            options={variants.map(v => ({
+              value: v.id,
+              label: `${v.categoryName} - ${v.serviceName} (${v.variantName})`,
+            }))}
+            value={variants
+              .filter(v => form.variantIds.includes(v.id))
+              .map(v => ({
+                value: v.id,
+                label: `${v.categoryName} - ${v.serviceName} (${v.variantName})`,
+              }))}
+            onChange={(vals: any) =>
+              setForm({ ...form, variantIds: vals.map((v: any) => v.value) })
+            }
+          />
         </div>
         <button className="bg-green-600 px-4 py-2 rounded text-white" type="submit">{editing ? 'Update' : 'Add'} Tab</button>
       </form>
