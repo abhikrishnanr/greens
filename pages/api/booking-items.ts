@@ -1,19 +1,57 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '@/lib/prisma'
+import { startOfDay, endOfDay } from 'date-fns'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'PUT') {
-    const { id, staffId, start } = req.body
+    const { id, staffId, start, customer, phone, gender, age } = req.body
     try {
+      const existing = await prisma.bookingItem.findUnique({
+        where: { id },
+        include: { booking: true },
+      })
+      if (!existing) return res.status(404).json({ error: 'Booking item not found' })
+
+      const scheduledAt = new Date(`${existing.booking.date}T${existing.start}:00`)
+      const billed = await prisma.billing.findFirst({ where: { scheduledAt } })
+      if (billed) {
+        return res.status(400).json({ error: 'Cannot modify a billed booking' })
+      }
+
       const item = await prisma.bookingItem.update({
         where: { id },
         data: { staffId, start },
       })
-      await prisma.booking.update({
+      const booking = await prisma.booking.update({
         where: { id: item.bookingId },
-        data: { staffId: item.staffId, start: item.start },
+        data: {
+          staffId: item.staffId,
+          start: item.start,
+          customer,
+          phone,
+          gender,
+          age: age !== null && age !== undefined ? Number(age) : null,
+        },
+        include: { items: true },
       })
-      return res.status(200).json(item)
+      const billedEntries = await prisma.billing.findMany({
+        where: {
+          scheduledAt: {
+            gte: startOfDay(new Date(booking.date)),
+            lt: endOfDay(new Date(booking.date)),
+          },
+        },
+        select: { scheduledAt: true },
+      })
+      const billedSet = new Set(billedEntries.map(b => b.scheduledAt.toISOString()))
+      const bookingWithBilled = {
+        ...booking,
+        items: booking.items.map(it => ({
+          ...it,
+          billed: billedSet.has(new Date(`${booking.date}T${it.start}:00`).toISOString()),
+        })),
+      }
+      return res.status(200).json({ item, booking: bookingWithBilled })
     } catch (err) {
       console.error('update booking item error', err)
       return res.status(500).json({ error: 'Failed to update booking item' })
@@ -23,7 +61,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'DELETE') {
     const id = (req.query.id as string) || req.body.id
     try {
-      const item = await prisma.bookingItem.delete({ where: { id } })
+      const item = await prisma.bookingItem.findUnique({
+        where: { id },
+        include: { booking: true },
+      })
+      if (!item) return res.status(404).json({ error: 'Booking item not found' })
+      const scheduledAt = new Date(`${item.booking.date}T${item.start}:00`)
+      const billed = await prisma.billing.findFirst({ where: { scheduledAt } })
+      if (billed) {
+        return res.status(400).json({ error: 'Cannot cancel a billed booking' })
+      }
+
+      await prisma.bookingItem.delete({ where: { id } })
       const remaining = await prisma.bookingItem.findMany({ where: { bookingId: item.bookingId } })
       if (remaining.length === 0) {
         await prisma.booking.delete({ where: { id: item.bookingId } })

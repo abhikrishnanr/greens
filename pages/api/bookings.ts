@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '@/lib/prisma'
+import { startOfDay, endOfDay } from 'date-fns'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
@@ -11,6 +12,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       include: { items: true },
       orderBy: { start: 'asc' },
     })
+
+    if (date) {
+      const billed = await prisma.billing.findMany({
+        where: {
+          scheduledAt: {
+            gte: startOfDay(new Date(date)),
+            lt: endOfDay(new Date(date)),
+          },
+        },
+        select: { scheduledAt: true },
+      })
+      const billedSet = new Set(billed.map(b => b.scheduledAt.toISOString()))
+      bookings.forEach(b => {
+        b.items = b.items.map(it => {
+          const scheduledAt = new Date(`${b.date}T${it.start}:00`).toISOString()
+          return { ...it, billed: billedSet.has(scheduledAt) }
+        }) as any
+      })
+    }
+
     return res.status(200).json(bookings)
   }
   if (req.method === 'POST') {
@@ -52,10 +73,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json(booking)
   }
   if (req.method === 'PUT') {
-    const { id, staffId, start } = req.body
+    const { id, staffId, start, customer, phone, gender, age } = req.body
     const booking = await prisma.booking.update({
       where: { id },
-      data: { staffId, start },
+      data: {
+        staffId,
+        start,
+        customer,
+        phone,
+        gender,
+        age: age !== null && age !== undefined ? Number(age) : null,
+      },
       include: { items: true },
     })
     return res.status(200).json(booking)
