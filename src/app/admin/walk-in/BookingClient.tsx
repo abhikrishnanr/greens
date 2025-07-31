@@ -59,6 +59,11 @@ interface Selected {
   price: number
   staffId: string
   start: string
+  billed?: boolean
+  customer?: string | null
+  phone?: string | null
+  gender?: string
+  age?: number | null
 }
 
 interface Booking {
@@ -100,6 +105,10 @@ export default function AdminBooking() {
   const [editItem, setEditItem] = useState<(Selected & { bookingId: string }) | null>(null)
   const [editItemStaffId, setEditItemStaffId] = useState("")
   const [editItemStart, setEditItemStart] = useState("")
+  const [editCustomer, setEditCustomer] = useState("")
+  const [editPhone, setEditPhone] = useState("")
+  const [editGender, setEditGender] = useState("")
+  const [editAge, setEditAge] = useState("")
   const formRef = useRef<HTMLFormElement>(null)
   const [attemptSubmit, setAttemptSubmit] = useState(false)
 
@@ -191,6 +200,10 @@ export default function AdminBooking() {
     if (editItem) {
       setEditItemStaffId(editItem.staffId)
       setEditItemStart(editItem.start)
+      setEditCustomer(editItem.customer || "")
+      setEditPhone(editItem.phone || "")
+      setEditGender(editItem.gender || "")
+      setEditAge(editItem.age ? String(editItem.age) : "")
     }
   }, [editItem])
 
@@ -433,21 +446,24 @@ export default function AdminBooking() {
       const res = await fetch('/api/booking-items', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: editItem.id, staffId: editItemStaffId, start: editItemStart }),
+        body: JSON.stringify({
+          id: editItem.id,
+          staffId: editItemStaffId,
+          start: editItemStart,
+          customer: editCustomer,
+          phone: editPhone,
+          gender: editGender,
+          age: editAge ? Number(editAge) : null,
+        }),
       })
       if (res.ok) {
-        const updated = await res.json()
-        setBookings(bs =>
-          bs.map(b =>
-            b.id === editItem.bookingId
-              ? { ...b, items: b.items.map(it => (it.id === updated.id ? updated : it)), staffId: updated.staffId, start: updated.start }
-              : b,
-          ),
-        )
+        const { booking, item } = await res.json()
+        setBookings(bs => bs.map(b => (b.id === booking.id ? booking : b)))
         setEditItem(null)
         setResult({ success: true, message: 'Booking updated successfully!' })
       } else {
-        throw new Error('Request failed')
+        const err = await res.json().catch(() => null)
+        throw new Error(err?.error || 'Request failed')
       }
     } catch (err) {
       console.error('Failed updating booking item', err)
@@ -479,6 +495,14 @@ export default function AdminBooking() {
     }
   }
 
+  const handleItemClick = (it: any) => {
+    if ((it as any).billed) {
+      setResult({ success: false, message: 'This booking has already been billed and cannot be edited.' })
+      return
+    }
+    setEditItem(it)
+  }
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setAttemptSubmit(true)
@@ -491,7 +515,16 @@ export default function AdminBooking() {
   }
 
   const bookingItems = bookings.flatMap((b) =>
-    b.items.map((it) => ({ ...it, bookingId: b.id, color: b.color, customer: b.customer, phone: b.phone }))
+    b.items.map((it) => ({
+      ...it,
+      bookingId: b.id,
+      color: b.color,
+      customer: b.customer,
+      phone: b.phone,
+      gender: b.gender,
+      age: b.age,
+      billed: (it as any).billed,
+    }))
   )
 
   const itemsFor = (id: string, time: string) =>
@@ -841,14 +874,14 @@ export default function AdminBooking() {
                             {itemsFor(st.id, time).map((it, i, arr) => (
                               <div
                                 key={it.id}
-                                className="absolute inset-0 text-white flex items-center justify-center text-[10px] cursor-pointer px-1 rounded-sm m-0.5 overflow-hidden whitespace-nowrap text-ellipsis"
+                                className={`absolute inset-0 text-white flex items-center justify-center text-[10px] px-1 rounded-sm m-0.5 overflow-hidden whitespace-nowrap text-ellipsis ${it.billed ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
                                 style={{
                                   background: it.color,
                                   width: `${100 / arr.length}%`,
                                   left: `${(i * 100) / arr.length}%`,
                                 }}
                                 title={`${it.customer} - ${it.name} - ₹${it.price}`}
-                                onClick={() => setEditItem(it)}
+                                onClick={() => handleItemClick(it)}
                               >
                                 {it.name}
                               </div>
@@ -958,16 +991,36 @@ export default function AdminBooking() {
               <CardTitle className="text-lg">Edit Booking</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="text-sm space-y-1">
-                <p>
-                  <span className="font-medium">Customer:</span> {editItem.customer}
-                </p>
-                <p>
-                  <span className="font-medium">Phone:</span> {editItem.phone}
-                </p>
-                <p>
-                  <span className="font-medium">Service:</span> {editItem.name}
-                </p>
+              <div className="grid gap-3 text-sm">
+                <div className="space-y-1">
+                  <Label>Customer</Label>
+                  <Input value={editCustomer} onChange={e => setEditCustomer(e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <Label>Phone</Label>
+                  <Input value={editPhone} onChange={e => setEditPhone(e.target.value.replace(/\D/g, '').slice(0,10))} />
+                </div>
+                <div className="space-y-1">
+                  <Label>Gender</Label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-1 text-sm">
+                      <input type="radio" value="male" name="editgender" checked={editGender === 'male'} onChange={e => setEditGender(e.target.value)} />
+                      Male
+                    </label>
+                    <label className="flex items-center gap-1 text-sm">
+                      <input type="radio" value="female" name="editgender" checked={editGender === 'female'} onChange={e => setEditGender(e.target.value)} />
+                      Female
+                    </label>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <Label>Age</Label>
+                  <Input type="number" value={editAge} onChange={e => setEditAge(e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <Label>Service</Label>
+                  <Input value={editItem.name} disabled />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label className="text-sm">Staff</Label>
