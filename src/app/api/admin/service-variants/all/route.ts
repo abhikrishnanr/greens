@@ -34,9 +34,11 @@ export async function GET() {
     const upcoming = t.priceHistory.find(p => p.startDate > now)
     return {
       id: t.id,
+      serviceId: t.serviceId,
       variantName: t.name,
       serviceName: t.service.name,
       categoryName: t.service.category.name,
+      duration: t.duration,
       current,
       upcoming,
     }

@@ -6,9 +6,12 @@ import Select, { MultiValue } from 'react-select'
 
 interface VariantOption {
   id: string
+  serviceId: string
   variantName: string
   serviceName: string
   categoryName: string
+  duration?: number | null
+  current?: { actualPrice: number; offerPrice?: number | null } | null
 }
 
 interface Enquiry {
@@ -40,6 +43,17 @@ export default function EnquiriesPage() {
   const [modalStatus, setModalStatus] = useState('')
   const [modalRemark, setModalRemark] = useState('')
   const [filter, setFilter] = useState<string | null>(null)
+
+  const bookServices = () => {
+    if (!selected) return
+    const params = new URLSearchParams()
+    if (selected.customer?.name) params.set('name', selected.customer.name)
+    if (selected.customer?.phone) params.set('phone', selected.customer.phone)
+    if (selected.customer?.gender) params.set('gender', selected.customer.gender)
+    if (selected.variantIds?.length) params.set('variants', selected.variantIds.join(','))
+    window.location.href = `/admin/walk-in?${params.toString()}`
+  }
+
 
   const loadEnquiries = async () => {
     const res = await fetch('/api/admin/enquiries')
@@ -105,6 +119,7 @@ export default function EnquiriesPage() {
     setModalStatus(e.status)
     setModalRemark(e.remark || '')
   }
+
 
   const updateStatus = async () => {
     if (!selected) return
@@ -275,8 +290,39 @@ export default function EnquiriesPage() {
 
       {selected && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-4 rounded shadow w-80 space-y-4">
-            <h2 className="font-semibold">Update Enquiry</h2>
+          <div className="bg-white p-4 rounded shadow w-96 space-y-4 text-sm">
+            <h2 className="font-semibold text-base">Update Enquiry</h2>
+            <div className="space-y-2">
+              <div>
+                <span className="font-medium">Name: </span>
+                {selected.customer?.name || '-'}
+              </div>
+              <div>
+                <span className="font-medium">Phone: </span>
+                {selected.customer?.phone || '-'}
+              </div>
+              <div>
+                <span className="font-medium">Enquiry:</span>
+                <div
+                  className="mt-1 border p-2 rounded bg-gray-50"
+                  dangerouslySetInnerHTML={{ __html: selected.enquiry || '' }}
+                />
+              </div>
+              <div>
+                <span className="font-medium">Services:</span>
+                <ul className="list-disc ml-5 mt-1">
+                  {selected.variantIds.map(id => {
+                    const v = variants.find(t => t.id === id)
+                    return (
+                      <li key={id}>
+                        {v ? `${v.categoryName} - ${v.serviceName} (${v.variantName})` : id}
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            </div>
+
             <div>
               <label className="block mb-1 font-medium">Status</label>
               <select
@@ -297,17 +343,27 @@ export default function EnquiriesPage() {
                 onChange={e => setModalRemark(e.target.value)}
               />
             </div>
-            <div className="flex justify-end gap-2">
-              <button className="px-3 py-1" onClick={() => setSelected(null)} type="button">
-                Cancel
-              </button>
+            <div className="flex justify-between items-center">
               <button
-                className="bg-green-600 text-white px-3 py-1 rounded"
-                onClick={updateStatus}
+                className="text-green-700 underline"
+                onClick={bookServices}
                 type="button"
               >
-                Save
+                Book Services
               </button>
+              <div className="flex gap-2">
+                <button className="px-3 py-1" onClick={() => setSelected(null)} type="button">
+                  Cancel
+                </button>
+                <button
+                  className="bg-green-600 text-white px-3 py-1 rounded"
+                  onClick={updateStatus}
+                  type="button"
+                >
+                  Save
+                </button>
+              </div>
+
             </div>
           </div>
         </div>
