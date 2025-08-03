@@ -1,5 +1,16 @@
 'use client'
 import { useEffect, useState } from 'react'
+import {
+  Banknote,
+  Building2,
+  CalendarDays,
+  IndianRupee,
+  PhoneCall,
+  Scissors,
+  Tag,
+  User,
+  Users,
+} from 'lucide-react'
 
 interface DashboardData {
   services: number
@@ -25,6 +36,9 @@ interface DashboardData {
     avgOfferPrice: number | null
     activeOffers: number
   }
+  customers: number
+  enquiries: number
+  revenue: number
 }
 
 export default function DashboardPage() {
@@ -34,62 +48,60 @@ export default function DashboardPage() {
       .then(res => res.json())
       .then(setData)
   }, [])
+  if (!data) return <p className="p-4">Loading...</p>
 
-  if (!data) return <p>Loading...</p>
+  const stats = [
+    { label: 'Services', value: data.services, icon: Scissors, color: 'bg-rose-500' },
+    { label: 'Branches', value: data.branches, icon: Building2, color: 'bg-indigo-500' },
+    { label: 'Staff', value: data.staff.total, icon: Users, color: 'bg-green-500' },
+    { label: 'Customers', value: data.customers, icon: User, color: 'bg-orange-500' },
+    { label: "Today's Bookings", value: data.bookings.today, icon: CalendarDays, color: 'bg-yellow-500' },
+    { label: 'Enquiries', value: data.enquiries, icon: PhoneCall, color: 'bg-purple-500' },
+    { label: 'Revenue', value: `₹${data.revenue.toFixed(0)}`, icon: IndianRupee, color: 'bg-teal-500' },
+    { label: 'Avg Service Price', value: `₹${data.pricing.avgActualPrice.toFixed(0)}`, icon: Banknote, color: 'bg-blue-500' },
+    { label: 'Active Offers', value: data.pricing.activeOffers, icon: Tag, color: 'bg-pink-500' },
+  ]
 
   return (
-    <div className="space-y-8 p-4">
-      <h1 className="text-3xl font-bold text-green-700 mb-4">Admin Dashboard</h1>
-
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded shadow border">
-          <div className="text-sm text-gray-500">Services</div>
-          <div className="text-2xl font-bold">{data.services}</div>
-        </div>
-        <div className="bg-white p-4 rounded shadow border">
-          <div className="text-sm text-gray-500">Branches</div>
-          <div className="text-2xl font-bold">{data.branches}</div>
-        </div>
-        <div className="bg-white p-4 rounded shadow border">
-          <div className="text-sm text-gray-500">Total Staff</div>
-          <div className="text-2xl font-bold">{data.staff.total}</div>
-        </div>
-        <div className="bg-white p-4 rounded shadow border">
-          <div className="text-sm text-gray-500">Today's Bookings</div>
-          <div className="text-2xl font-bold">{data.bookings.today}</div>
-        </div>
+    <div className="space-y-10 p-6">
+      <section className="bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg p-8 shadow">
+        <h1 className="text-4xl font-bold mb-2">Salon Dashboard</h1>
+        <p className="text-green-100">Overview of your salon performance</p>
       </section>
 
-      <section className="bg-white p-4 rounded shadow space-y-2">
-        <h2 className="text-xl font-semibold">Upcoming Appointments</h2>
-        <ul className="divide-y">
-          {data.bookings.upcoming.map(b => (
-            <li key={b.id} className="py-2 flex justify-between">
-              <span>{b.date} {b.start}</span>
-              <span>{b.customer} with {b.staff.name}</span>
-            </li>
-          ))}
-          {data.bookings.upcoming.length === 0 && (
-            <li className="py-2">No upcoming appointments</li>
-          )}
-        </ul>
+      <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {stats.map(s => (
+          <div key={s.label} className="bg-white p-6 rounded-lg shadow flex items-center">
+            <div className={`${s.color} p-3 rounded-full text-white`}>
+              <s.icon className="h-6 w-6" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm text-gray-500">{s.label}</p>
+              <p className="text-2xl font-bold">{s.value}</p>
+            </div>
+          </div>
+        ))}
       </section>
 
-      <section className="grid md:grid-cols-2 gap-4">
-        <div className="bg-white p-4 rounded shadow space-y-1">
-          <h2 className="text-xl font-semibold mb-2">Staff Statistics</h2>
-          <p>Total Staff: {data.staff.total}</p>
-          <p>Active: {data.staff.active}</p>
-          <p>Removed: {data.staff.removed}</p>
-        </div>
-        <div className="bg-white p-4 rounded shadow space-y-1">
-          <h2 className="text-xl font-semibold mb-2">Pricing &amp; Offers</h2>
-          <p>Average Price: ₹{data.pricing.avgActualPrice.toFixed(2)}</p>
-          {data.pricing.avgOfferPrice !== null && (
-            <p>Average Offer: ₹{data.pricing.avgOfferPrice.toFixed(2)}</p>
-          )}
-          <p>Active Offers: {data.pricing.activeOffers}</p>
-        </div>
+      <section className="bg-white p-6 rounded-lg shadow">
+        <h2 className="text-xl font-semibold mb-4 flex items-center">
+          <CalendarDays className="h-5 w-5 text-green-600 mr-2" /> Upcoming Appointments
+        </h2>
+        {data.bookings.upcoming.length > 0 ? (
+          <ul className="divide-y">
+            {data.bookings.upcoming.map(b => (
+              <li key={b.id} className="py-3 flex justify-between">
+                <div>
+                  <p className="font-medium">{b.customer || 'Walk-in'}</p>
+                  <p className="text-sm text-gray-500">{b.date} at {b.start}</p>
+                </div>
+                <span className="text-sm text-gray-600">with {b.staff.name}</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-gray-500">No upcoming appointments</p>
+        )}
       </section>
     </div>
   )
