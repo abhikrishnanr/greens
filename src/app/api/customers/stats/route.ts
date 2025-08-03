@@ -5,8 +5,11 @@ export async function GET() {
     const topByServices = await prisma.billing.groupBy({
       by: ['customerId'],
       where: { customerId: { not: null } },
-      _count: { _all: true },
-      orderBy: { _count: { _all: 'desc' } },
+      _count: { id: true },
+      // Order by the number of billing records per customer.
+      // Prisma cannot order by `_all`, so count a specific column (id)
+      // and use that for ordering instead.
+      orderBy: [{ _count: { id: 'desc' } }],
       take: 10,
     })
 
@@ -31,7 +34,7 @@ export async function GET() {
 
     const topServices = topByServices.map(t => {
       const u = userMap.get(t.customerId!)!
-      return { id: u.id, name: u.name, phone: u.phone, count: t._count._all }
+      return { id: u.id, name: u.name, phone: u.phone, count: t._count.id }
     })
 
     const topBills = topByBills.map(t => {
