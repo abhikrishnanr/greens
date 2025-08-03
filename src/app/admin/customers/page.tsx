@@ -30,6 +30,9 @@ export default function CustomersPage() {
   const [branches, setBranches] = useState<Branch[]>([])
   const [topServices, setTopServices] = useState<TopCustomer[]>([])
   const [topBills, setTopBills] = useState<TopCustomer[]>([])
+  const [totalCustomers, setTotalCustomers] = useState(0)
+  const [returningCustomers, setReturningCustomers] = useState(0)
+  const [returningPercent, setReturningPercent] = useState(0)
 
   const load = async () => {
     const url = branchFilter ? `/api/customers?branchId=${branchFilter}` : '/api/customers'
@@ -50,6 +53,9 @@ export default function CustomersPage() {
     if (data.success) {
       setTopServices(data.topServices)
       setTopBills(data.topBills)
+      setTotalCustomers(data.totalCustomers)
+      setReturningCustomers(data.returningCustomers)
+      setReturningPercent(data.returningPercent)
     }
   }
 
@@ -73,10 +79,6 @@ export default function CustomersPage() {
       )
     })
 
-  const total = customers.length
-  const active = customers.filter(c => !c.removed).length
-  const removed = customers.filter(c => c.removed).length
-
   return (
     <div className="min-h-screen bg-gray-50 p-6 text-gray-900">
       <header className="flex justify-between items-center mb-6">
@@ -85,16 +87,16 @@ export default function CustomersPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="bg-white p-4 rounded shadow text-center">
-          <div className="text-sm text-gray-500">Total</div>
-          <div className="text-2xl font-bold">{total}</div>
+          <div className="text-sm text-gray-500">Total Customers</div>
+          <div className="text-2xl font-bold">{totalCustomers}</div>
         </div>
         <div className="bg-white p-4 rounded shadow text-center">
-          <div className="text-sm text-gray-500">Active</div>
-          <div className="text-2xl font-bold">{active}</div>
+          <div className="text-sm text-gray-500">Returning Customers</div>
+          <div className="text-2xl font-bold">{returningCustomers}</div>
         </div>
         <div className="bg-white p-4 rounded shadow text-center">
-          <div className="text-sm text-gray-500">Removed</div>
-          <div className="text-2xl font-bold">{removed}</div>
+          <div className="text-sm text-gray-500">Returning %</div>
+          <div className="text-2xl font-bold">{returningPercent.toFixed(2)}%</div>
         </div>
       </div>
 

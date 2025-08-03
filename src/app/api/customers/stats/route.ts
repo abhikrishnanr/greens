@@ -2,49 +2,80 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
-    const topByServices = await prisma.billing.groupBy({
-      by: ['customerId'],
-      where: { customerId: { not: null } },
+    // Group all billing records by phone number since billing primarily
+    // references customers via their mobile number.
+    const groups = await prisma.billing.groupBy({
+      by: ['phone'],
+      where: { phone: { not: null } },
       _count: { id: true },
-      // Order by the number of billing records per customer.
-      // Prisma cannot order by `_all`, so count a specific column (id)
-      // and use that for ordering instead.
-      orderBy: [{ _count: { id: 'desc' } }],
-      take: 10,
-    })
-
-    const topByBills = await prisma.billing.groupBy({
-      by: ['customerId'],
-      where: { customerId: { not: null } },
       _sum: { amountAfter: true },
-      orderBy: { _sum: { amountAfter: 'desc' } },
-      take: 10,
+      _min: { paidAt: true, scheduledAt: true, createdAt: true },
+      _max: { paidAt: true, scheduledAt: true, createdAt: true },
     })
 
-    const ids = Array.from(new Set([
-      ...topByServices.map(t => t.customerId!),
-      ...topByBills.map(t => t.customerId!),
-    ]))
+    const totalCustomers = groups.length
 
+    const returningCustomers = groups.filter(g => {
+      const minDate = g._min.paidAt || g._min.scheduledAt || g._min.createdAt
+      const maxDate = g._max.paidAt || g._max.scheduledAt || g._max.createdAt
+      if (!minDate || !maxDate) return false
+      return minDate.toDateString() !== maxDate.toDateString()
+    }).length
+
+    const returningPercent = totalCustomers
+      ? (returningCustomers / totalCustomers) * 100
+      : 0
+
+    const topByServices = [...groups]
+      .sort((a, b) => b._count.id - a._count.id)
+      .slice(0, 10)
+
+    const topByBills = [...groups]
+      .sort((a, b) => (b._sum.amountAfter || 0) - (a._sum.amountAfter || 0))
+      .slice(0, 10)
+
+    const phones = Array.from(
+      new Set([...topByServices, ...topByBills].map(g => g.phone!))
+    )
     const users = await prisma.user.findMany({
-      where: { id: { in: ids } },
+      where: { phone: { in: phones } },
       select: { id: true, name: true, phone: true },
     })
-    const userMap = new Map(users.map(u => [u.id, u]))
+    const userMap = new Map(users.map(u => [u.phone!, u]))
 
-    const topServices = topByServices.map(t => {
-      const u = userMap.get(t.customerId!)!
-      return { id: u.id, name: u.name, phone: u.phone, count: t._count.id }
+    const topServices = topByServices.map(g => {
+      const u = userMap.get(g.phone!)
+      return {
+        id: u?.id ?? g.phone!,
+        name: u?.name ?? null,
+        phone: g.phone,
+        count: g._count.id,
+      }
     })
 
-    const topBills = topByBills.map(t => {
-      const u = userMap.get(t.customerId!)!
-      return { id: u.id, name: u.name, phone: u.phone, total: t._sum.amountAfter || 0 }
+    const topBills = topByBills.map(g => {
+      const u = userMap.get(g.phone!)
+      return {
+        id: u?.id ?? g.phone!,
+        name: u?.name ?? null,
+        phone: g.phone,
+        total: g._sum.amountAfter || 0,
+      }
     })
 
-    return Response.json({ success: true, topServices, topBills })
+    return Response.json({
+      success: true,
+      topServices,
+      topBills,
+      totalCustomers,
+      returningCustomers,
+      returningPercent,
+    })
   } catch (err) {
     console.error('Error in /api/customers/stats:', err)
-    return Response.json({ success: false, error: 'Failed to load stats' }, { status: 500 })
+    return Response.json(
+      { success: false, error: 'Failed to load stats' },
+      { status: 500 }
+    )
   }
 }
