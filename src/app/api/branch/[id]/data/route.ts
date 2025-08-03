@@ -5,7 +5,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   const branchId = (await params).id;
   try {
     const staff = await prisma.user.findMany({
-      where: { role: 'staff', branchId },
+      where: { role: { in: ['staff', 'customer_staff'] }, branchId },
       select: { id: true, name: true },
       orderBy: { name: 'asc' },
     });

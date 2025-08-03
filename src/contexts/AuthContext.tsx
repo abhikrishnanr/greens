@@ -3,7 +3,7 @@ import React, {createContext, useContext, useState, ReactNode, useEffect} from '
 
 interface User {
   name: string
-  role: 'customer' | 'staff' | 'admin'
+  role: 'customer' | 'staff' | 'admin' | 'customer_staff' | 'manager'
 }
 
 interface AuthValue {

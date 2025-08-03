@@ -150,6 +150,11 @@ const handleExport = () => {
     let res: Response;
     if (existingCustomer) {
       fd.append('id', existingCustomer.id);
+      const role = fd.get('role');
+      if (role === 'staff') {
+        fd.set('role', 'customer_staff');
+      }
+
       res = await fetch('/api/staff/update',{ method:'POST', body: fd });
     } else {
       res = await fetch('/api/staff/add',{ method:'POST', body: fd });
@@ -473,9 +478,10 @@ const handleExport = () => {
                     required
                     className="w-full p-2 rounded bg-gray-200"
                   >
-                    <option>customer</option>
-                    <option>staff</option>
-                    <option>manager</option>
+                    <option value="staff">staff</option>
+                    <option value="customer_staff">staff & customer</option>
+                    <option value="manager">manager</option>
+
                   </select>
                 </div>
                 {/* Branch */}
@@ -648,9 +654,9 @@ const handleExport = () => {
                   required
                   className="w-full p-2 rounded bg-gray-100"
                 >
-                  <option>customer</option>
-                  <option>staff</option>
-                  <option>manager</option>
+                  <option value="staff">staff</option>
+                  <option value="customer_staff">staff & customer</option>
+                  <option value="manager">manager</option>
                 </select>
               </div>
 

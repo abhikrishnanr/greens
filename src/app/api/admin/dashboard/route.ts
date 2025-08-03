@@ -17,8 +17,8 @@ export async function GET() {
     ] = await prisma.$transaction([
       prisma.service.count(),
       prisma.branch.count(),
-      prisma.user.count({ where: { role: 'STAFF', removed: false } }),
-      prisma.user.count({ where: { role: 'STAFF', removed: true } }),
+      prisma.user.count({ where: { role: { in: ['staff', 'customer_staff'] }, removed: false } }),
+      prisma.user.count({ where: { role: { in: ['staff', 'customer_staff'] }, removed: true } }),
       prisma.booking.count(),
       prisma.booking.count({ where: { date: today } }),
       prisma.booking.findMany({
