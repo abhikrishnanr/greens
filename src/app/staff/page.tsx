@@ -154,6 +154,7 @@ const handleExport = () => {
       if (role === 'staff') {
         fd.set('role', 'customer_staff');
       }
+
       res = await fetch('/api/staff/update',{ method:'POST', body: fd });
     } else {
       res = await fetch('/api/staff/add',{ method:'POST', body: fd });
@@ -480,6 +481,7 @@ const handleExport = () => {
                     <option value="staff">staff</option>
                     <option value="customer_staff">staff & customer</option>
                     <option value="manager">manager</option>
+
                   </select>
                 </div>
                 {/* Branch */}

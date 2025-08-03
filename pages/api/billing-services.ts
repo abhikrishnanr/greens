@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '@/lib/prisma'
-import { startOfDay, endOfDay } from 'date-fns'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -26,11 +25,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     tiers.forEach(t => {
       tierMap[t.id] = t
     })
+    const tz = "+05:30"
     const billed = await prisma.billing.findMany({
       where: {
         scheduledAt: {
-          gte: startOfDay(new Date(`${date}T00:00:00Z`)),
-          lt: endOfDay(new Date(`${date}T00:00:00Z`)),
+          gte: new Date(`${date}T00:00:00${tz}`),
+          lt: new Date(`${date}T23:59:59${tz}`),
         },
       },
       select: { scheduledAt: true },
@@ -49,7 +49,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }[] = []
     bookings.forEach(b => {
       b.items.forEach(it => {
-        const scheduledAt = new Date(`${b.date}T${it.start}:00Z`)
+        const scheduledAt = new Date(`${b.date}T${it.start}:00${tz}`)
         if (billedSet.has(scheduledAt.toISOString())) return
         const tier = tierMap[it.tierId]
         services.push({
