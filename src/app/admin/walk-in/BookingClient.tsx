@@ -124,6 +124,7 @@ export default function AdminBooking() {
     if (g) setGender(g)
   }, [searchParams])
 
+
   const loadCategories = async () => {
     try {
       const res = await fetch("/api/admin/service-categories")
