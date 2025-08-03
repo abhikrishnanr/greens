@@ -1,7 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const phone = req.nextUrl.searchParams.get('phone')
+
+  if (phone) {
+    const customer = await prisma.user.findUnique({ where: { phone } })
+    const enquiries = await prisma.enquiry.findMany({
+      where: { customer: { phone } },
+      orderBy: { createdAt: 'desc' },
+    })
+    const result = enquiries.map(e => ({
+      ...e,
+      variantIds: e.variantIds ? JSON.parse(e.variantIds) : [],
+    }))
+    return NextResponse.json({ customer, enquiries: result })
+  }
+
   const data = await prisma.enquiry.findMany({
     orderBy: { createdAt: 'desc' },
     include: { customer: true },
@@ -32,6 +47,7 @@ export async function POST(req: NextRequest) {
         customerId: customer.id,
         enquiry: enquiry || null,
         variantIds: Array.isArray(variantIds) ? JSON.stringify(variantIds) : null,
+        status: 'new',
       },
     })
 
