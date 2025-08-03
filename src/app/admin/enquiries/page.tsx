@@ -20,6 +20,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 
+
 interface VariantOption {
   id: string
   serviceId: string
@@ -38,6 +39,7 @@ interface Enquiry {
   status: string
   remark?: string | null
   customer?: { id: string; name: string | null; phone: string | null; gender: string | null }
+
 }
 
 interface Stats {
@@ -75,6 +77,7 @@ export default function EnquiriesPage() {
     if (selected.variantIds?.length) params.set('variants', selected.variantIds.join(','))
     window.location.href = `/admin/walk-in?${params.toString()}`
   }
+
 
   const loadEnquiries = async () => {
     const res = await fetch('/api/admin/enquiries')
@@ -140,6 +143,7 @@ export default function EnquiriesPage() {
     setModalStatus(e.status)
     setModalRemark(e.remark || '')
   }
+
 
   const updateStatus = async () => {
     if (!selected) return
@@ -214,6 +218,7 @@ export default function EnquiriesPage() {
             <div className="text-2xl font-bold">{stats.closed}</div>
           </div>
           <CheckCircle2 className="h-6 w-6" />
+
         </div>
       </div>
 
@@ -221,6 +226,7 @@ export default function EnquiriesPage() {
         <div className="flex gap-2">
           <input
             className="border p-2 flex-1 rounded"
+
             placeholder="Mobile number"
             value={phone}
             onChange={e => setPhone(e.target.value)}
@@ -232,6 +238,7 @@ export default function EnquiriesPage() {
           >
             <Search className="h-4 w-4 mr-1" /> Go
           </Button>
+
         </div>
 
         {form.phone && (
@@ -291,6 +298,7 @@ export default function EnquiriesPage() {
             >
               <Save className="h-4 w-4 mr-2" /> Save Enquiry
             </Button>
+
           </form>
         )}
 
@@ -317,6 +325,7 @@ export default function EnquiriesPage() {
                         {p.status}
                       </Badge>
                     </td>
+
                     <td className="px-3 py-2">{p.remark || '-'}</td>
                   </tr>
                 ))}
@@ -371,6 +380,7 @@ export default function EnquiriesPage() {
                 >
                   <Edit3 className="h-4 w-4" />
                 </Button>
+
               </td>
             </tr>
           ))}
@@ -411,6 +421,7 @@ export default function EnquiriesPage() {
                 </ul>
               </div>
             </div>
+
             <div>
               <label className="block mb-1 font-medium">Status</label>
               <select
@@ -462,6 +473,7 @@ export default function EnquiriesPage() {
                   <Save className="h-4 w-4 mr-1" /> Save
                 </Button>
               </div>
+
             </div>
           </div>
         </div>
