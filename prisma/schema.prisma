@@ -232,5 +232,8 @@ model Enquiry {
   customer   User     @relation(fields: [customerId], references: [id])
   enquiry    String?  @db.LongText
   variantIds String?  @db.Text
+  status     String   @default("new") @db.VarChar(191)
+  remark     String?  @db.Text
   createdAt  DateTime @default(now()) @db.Timestamp(3)
+  updatedAt  DateTime @default(now()) @updatedAt @db.Timestamp(3)
 }

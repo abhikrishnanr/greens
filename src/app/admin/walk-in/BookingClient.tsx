@@ -52,6 +52,16 @@ interface StaffApi extends Staff {
   removed: boolean
 }
 
+interface VariantFull {
+  id: string
+  serviceId: string
+  variantName: string
+  serviceName: string
+  categoryName: string
+  duration?: number | null
+  current?: { actualPrice: number; offerPrice?: number | null } | null
+}
+
 interface Selected {
   serviceId: string
   variantId: string
@@ -119,9 +129,30 @@ export default function AdminBooking() {
     const n = searchParams.get('name')
     const p = searchParams.get('phone')
     const g = searchParams.get('gender')
+    const v = searchParams.get('variants')
     if (n) setCustomer(n)
     if (p) setPhone(p)
     if (g) setGender(g)
+    if (v) {
+      const ids = v.split(',')
+      fetch('/api/admin/service-variants/all')
+        .then(res => res.json())
+        .then((all: VariantFull[]) => {
+          const pre = all
+            .filter(t => ids.includes(t.id))
+            .map(t => ({
+              serviceId: t.serviceId,
+              variantId: t.id,
+              name: `${t.serviceName} - ${t.variantName}`,
+              duration: t.duration || 0,
+              price: t.current?.offerPrice ?? t.current?.actualPrice ?? 0,
+              staffId: '',
+              start: '',
+            }))
+          setItems(pre)
+        })
+        .catch(err => console.error('prefill variants failed', err))
+    }
   }, [searchParams])
 
 
