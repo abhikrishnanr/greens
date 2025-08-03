@@ -3,54 +3,68 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
-    const today = new Date().toISOString().split('T')[0]
+    const now = new Date()
+    const today = now.toISOString().split('T')[0]
+    const start = new Date(now)
+    start.setHours(0, 0, 0, 0)
+    const end = new Date(start)
+    end.setDate(end.getDate() + 1)
+
+    // run all queries in parallel and only fetch required fields for speed
     const [
       servicesCount,
-      branchesCount,
-      activeStaff,
-      removedStaff,
-      totalBookings,
-      todayBookings,
+      appointmentsToday,
+      billedToday,
+      enquiriesToday,
+      openEnquiries,
+      pendingBilling,
       upcoming,
-      priceAvg,
-      activeOffers,
-    ] = await prisma.$transaction([
-      prisma.service.count(),
-      prisma.branch.count(),
-      prisma.user.count({ where: { role: { in: ['staff', 'customer_staff'] }, removed: false } }),
-      prisma.user.count({ where: { role: { in: ['staff', 'customer_staff'] }, removed: true } }),
-      prisma.booking.count(),
+    ] = await Promise.all([
+      prisma.serviceTierPriceHistory.count({
+        where: { endDate: null },
+        distinct: ['tierId'],
+      }),
       prisma.booking.count({ where: { date: today } }),
+      prisma.billing.count({
+        where: { paidAt: { gte: start, lt: end } },
+      }),
+      prisma.enquiry.count({
+        where: { createdAt: { gte: start, lt: end } },
+      }),
+      prisma.enquiry.count({ where: { status: { in: ['open', 'processing'] } } }),
+      prisma.billing.count({
+        where: { scheduledAt: { gte: start, lt: end }, paidAt: null },
+      }),
       prisma.booking.findMany({
         where: { date: { gte: today } },
-        include: { staff: { select: { name: true } }, items: true },
+        select: {
+          id: true,
+          customer: true,
+          date: true,
+          start: true,
+          staff: { select: { name: true } },
+        },
         orderBy: [{ date: 'asc' }, { start: 'asc' }],
         take: 5,
       }),
-      prisma.serviceTier.aggregate({ _avg: { actualPrice: true, offerPrice: true } }),
-      prisma.serviceTier.count({ where: { offerPrice: { not: null } } }),
     ])
 
     return NextResponse.json({
       services: servicesCount,
-      branches: branchesCount,
-      staff: {
-        total: activeStaff + removedStaff,
-        active: activeStaff,
-        removed: removedStaff,
-      },
       bookings: {
-        total: totalBookings,
-        today: todayBookings,
+        today: appointmentsToday,
         upcoming,
       },
-      pricing: {
-        avgActualPrice: priceAvg._avg.actualPrice ?? 0,
-        avgOfferPrice: priceAvg._avg.offerPrice,
-        activeOffers,
+      billing: {
+        billedToday,
+        pending: pendingBilling,
+      },
+      enquiries: {
+        today: enquiriesToday,
+        open: openEnquiries,
       },
     })
-  } catch (err: any) {
+  } catch (err) {
     console.error('dashboard api error', err)
     return NextResponse.json({ error: 'failed' }, { status: 500 })
   }
