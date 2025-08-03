@@ -34,20 +34,40 @@ interface DashboardData {
 
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null)
+  const [error, setError] = useState(false)
+
   useEffect(() => {
-    fetch('/api/admin/dashboard')
-      .then(res => res.json())
-      .then(setData)
+    const load = async () => {
+      try {
+        const res = await fetch('/api/admin/dashboard')
+        if (!res.ok) throw new Error('failed to fetch')
+        const json: DashboardData = await res.json()
+        setData(json)
+      } catch (err) {
+        console.error('dashboard fetch error', err)
+        setError(true)
+      }
+    }
+    load()
   }, [])
+
+  if (error) return <p className="p-4">Failed to load dashboard data</p>
   if (!data) return <p className="p-4">Loading...</p>
 
+  const {
+    services,
+    bookings = { today: 0, upcoming: [] },
+    billing = { billedToday: 0, pending: 0 },
+    enquiries = { today: 0, open: 0 },
+  } = data
+
   const stats = [
-    { label: 'Active Services', value: data?.services ?? 0, icon: Scissors, color: 'bg-rose-500' },
-    { label: 'Appointments Today', value: data.bookings?.today ?? 0, icon: CalendarDays, color: 'bg-indigo-500' },
-    { label: 'Billed Today', value: data.billing?.billedToday ?? 0, icon: IndianRupee, color: 'bg-green-500' },
-    { label: 'Enquiries Today', value: data.enquiries?.today ?? 0, icon: PhoneCall, color: 'bg-purple-500' },
-    { label: 'Open Enquiries', value: data.enquiries?.open ?? 0, icon: MessageSquare, color: 'bg-orange-500' },
-    { label: 'Pending Billing', value: data.billing?.pending ?? 0, icon: Banknote, color: 'bg-yellow-500' },
+    { label: 'Active Services', value: services, icon: Scissors, color: 'bg-rose-500' },
+    { label: 'Appointments Today', value: bookings.today, icon: CalendarDays, color: 'bg-indigo-500' },
+    { label: 'Billed Today', value: billing.billedToday, icon: IndianRupee, color: 'bg-green-500' },
+    { label: 'Enquiries Today', value: enquiries.today, icon: PhoneCall, color: 'bg-purple-500' },
+    { label: 'Open Enquiries', value: enquiries.open, icon: MessageSquare, color: 'bg-orange-500' },
+    { label: 'Pending Billing', value: billing.pending, icon: Banknote, color: 'bg-yellow-500' },
 
   ]
 
@@ -76,9 +96,9 @@ export default function DashboardPage() {
         <h2 className="text-xl font-semibold mb-4 flex items-center">
           <CalendarDays className="h-5 w-5 text-green-600 mr-2" /> Upcoming Appointments
         </h2>
-        {data.bookings?.upcoming && data.bookings.upcoming.length > 0 ? (
+        {bookings.upcoming.length > 0 ? (
           <ul className="divide-y">
-            {data.bookings.upcoming.map(b => (
+            {bookings.upcoming.map(b => (
               <li key={b.id} className="py-3 flex justify-between">
                 <div>
                   <p className="font-medium">{b.customer || 'Walk-in'}</p>
