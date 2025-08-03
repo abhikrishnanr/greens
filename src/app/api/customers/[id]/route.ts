@@ -11,11 +11,19 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     if (!user) {
       return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 })
     }
+    // Fetch billing history using phone number when available since
+    // billing entries are primarily identified by the customer's mobile
+    // number. Fallback to customerId for older records that might use it.
+    const billingWhere: { customerId?: string; phone?: string } = {}
+    if (user.phone) billingWhere.phone = user.phone
+    else billingWhere.customerId = id
+
     const billingHistory = await prisma.billing.findMany({
-      where: { customerId: id },
+      where: billingWhere,
       orderBy: { scheduledAt: 'desc' },
     })
 
+    // Booking history already relies on phone number or name
     const bookingWhere: { phone?: string; customer?: string | null } = {}
     if (user.phone) bookingWhere.phone = user.phone
     else if (user.name) bookingWhere.customer = user.name
