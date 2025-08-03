@@ -9,7 +9,7 @@ export async function GET() {
       // Order by the number of billing records per customer.
       // Prisma cannot order by `_all`, so count a specific column (id)
       // and use that for ordering instead.
-      orderBy: { _count: { id: 'desc' } },
+      orderBy: [{ _count: { id: 'desc' } }],
       take: 10,
     })
 
