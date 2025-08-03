@@ -6,7 +6,11 @@ export async function GET() {
       by: ['customerId'],
       where: { customerId: { not: null } },
       _count: { _all: true },
-      orderBy: { _count: { _all: 'desc' } },
+      // Order by the number of billing records per customer
+      // Prisma does not support using `_all` in `orderBy`,
+      // so we sort by counting a specific column (id),
+      // which effectively orders by the total records in each group
+      orderBy: { _count: { id: 'desc' } },
       take: 10,
     })
 
