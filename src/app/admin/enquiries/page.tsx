@@ -1,8 +1,25 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import WysiwygEditor from '@/app/components/WysiwygEditor'
 import Select, { MultiValue } from 'react-select'
+import {
+  Phone,
+  Calendar,
+  Sparkles,
+  Clock,
+  CheckCircle2,
+  Edit3,
+  Search,
+  Save,
+  User,
+  ArrowUpRight,
+  BookOpen,
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+
 
 interface VariantOption {
   id: string
@@ -21,7 +38,8 @@ interface Enquiry {
   createdAt: string
   status: string
   remark?: string | null
-  customer?: { name: string | null; phone: string | null; gender: string | null }
+  customer?: { id: string; name: string | null; phone: string | null; gender: string | null }
+
 }
 
 interface Stats {
@@ -43,6 +61,12 @@ export default function EnquiriesPage() {
   const [modalStatus, setModalStatus] = useState('')
   const [modalRemark, setModalRemark] = useState('')
   const [filter, setFilter] = useState<string | null>(null)
+
+  const statusColors: Record<string, string> = {
+    new: 'bg-blue-100 text-blue-800',
+    processing: 'bg-yellow-100 text-yellow-800',
+    closed: 'bg-green-100 text-green-800',
+  }
 
   const bookServices = () => {
     if (!selected) return
@@ -145,38 +169,76 @@ export default function EnquiriesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-green-700">Enquiries</h1>
+      <div className="flex items-center gap-2">
+        <Phone className="h-6 w-6 text-green-700" />
+        <h1 className="text-2xl font-bold text-green-700">Enquiries</h1>
+      </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-4 bg-white rounded shadow cursor-pointer" onClick={() => setFilter('today')}>
-          <div className="text-sm">Today</div>
-          <div className="text-2xl font-bold">{stats.today}</div>
+        <div
+          className="p-4 rounded-lg shadow cursor-pointer text-white flex items-center justify-between"
+          style={{ backgroundColor: '#3b82f6' }}
+          onClick={() => setFilter('today')}
+        >
+          <div>
+            <div className="text-sm">Today</div>
+            <div className="text-2xl font-bold">{stats.today}</div>
+          </div>
+          <Calendar className="h-6 w-6" />
         </div>
-        <div className="p-4 bg-white rounded shadow cursor-pointer" onClick={() => setFilter('new')}>
-          <div className="text-sm">New</div>
-          <div className="text-2xl font-bold">{stats.new}</div>
+        <div
+          className="p-4 rounded-lg shadow cursor-pointer text-white flex items-center justify-between"
+          style={{ backgroundColor: '#10b981' }}
+          onClick={() => setFilter('new')}
+        >
+          <div>
+            <div className="text-sm">New</div>
+            <div className="text-2xl font-bold">{stats.new}</div>
+          </div>
+          <Sparkles className="h-6 w-6" />
         </div>
-        <div className="p-4 bg-white rounded shadow cursor-pointer" onClick={() => setFilter('processing')}>
-          <div className="text-sm">Under Processing</div>
-          <div className="text-2xl font-bold">{stats.processing}</div>
+        <div
+          className="p-4 rounded-lg shadow cursor-pointer text-white flex items-center justify-between"
+          style={{ backgroundColor: '#f59e0b' }}
+          onClick={() => setFilter('processing')}
+        >
+          <div>
+            <div className="text-sm">Under Processing</div>
+            <div className="text-2xl font-bold">{stats.processing}</div>
+          </div>
+          <Clock className="h-6 w-6" />
         </div>
-        <div className="p-4 bg-white rounded shadow cursor-pointer" onClick={() => setFilter('closed')}>
-          <div className="text-sm">Closed</div>
-          <div className="text-2xl font-bold">{stats.closed}</div>
+        <div
+          className="p-4 rounded-lg shadow cursor-pointer text-white flex items-center justify-between"
+          style={{ backgroundColor: '#6b7280' }}
+          onClick={() => setFilter('closed')}
+        >
+          <div>
+            <div className="text-sm">Closed</div>
+            <div className="text-2xl font-bold">{stats.closed}</div>
+          </div>
+          <CheckCircle2 className="h-6 w-6" />
+
         </div>
       </div>
 
       <div className="bg-white p-4 rounded shadow space-y-4">
         <div className="flex gap-2">
           <input
-            className="border p-2 flex-1"
+            className="border p-2 flex-1 rounded"
+
             placeholder="Mobile number"
             value={phone}
             onChange={e => setPhone(e.target.value)}
           />
-          <button className="bg-green-600 text-white px-4 py-2 rounded" onClick={search} type="button">
-            Go
-          </button>
+          <Button
+            onClick={search}
+            type="button"
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            <Search className="h-4 w-4 mr-1" /> Go
+          </Button>
+
         </div>
 
         {form.phone && (
@@ -230,9 +292,13 @@ export default function EnquiriesPage() {
                 }
               />
             </div>
-            <button className="bg-green-600 px-4 py-2 rounded text-white" type="submit">
-              Save Enquiry
-            </button>
+            <Button
+              type="submit"
+              className="bg-green-600 hover:bg-green-700 text-white w-fit"
+            >
+              <Save className="h-4 w-4 mr-2" /> Save Enquiry
+            </Button>
+
           </form>
         )}
 
@@ -251,7 +317,15 @@ export default function EnquiriesPage() {
                 {prevEnquiries.map(p => (
                   <tr key={p.id} className="border-t">
                     <td className="px-3 py-2">{new Date(p.createdAt).toLocaleDateString()}</td>
-                    <td className="px-3 py-2 capitalize">{p.status}</td>
+                    <td className="px-3 py-2">
+                      <Badge
+                        variant="secondary"
+                        className={`${statusColors[p.status] || ''} capitalize`}
+                      >
+                        {p.status}
+                      </Badge>
+                    </td>
+
                     <td className="px-3 py-2">{p.remark || '-'}</td>
                   </tr>
                 ))}
@@ -274,14 +348,39 @@ export default function EnquiriesPage() {
         <tbody>
           {filteredEnquiries.map(e => (
             <tr key={e.id} className="border-t">
-              <td className="px-3 py-2">{e.customer?.name || '-'}</td>
+              <td className="px-3 py-2">
+                {e.customer ? (
+                  <Link
+                    href={`/admin/customers/${e.customer.id}`}
+                    className="text-green-700 hover:underline inline-flex items-center"
+                  >
+                    {e.customer.name || 'Unnamed'}
+                    <ArrowUpRight className="h-4 w-4 ml-1" />
+                  </Link>
+                ) : (
+                  '-'
+                )}
+              </td>
               <td className="px-3 py-2">{e.customer?.phone || '-'}</td>
-              <td className="px-3 py-2 capitalize">{e.status}</td>
+              <td className="px-3 py-2">
+                <Badge
+                  variant="secondary"
+                  className={`${statusColors[e.status] || ''} capitalize`}
+                >
+                  {e.status}
+                </Badge>
+              </td>
               <td className="px-3 py-2">{new Date(e.createdAt).toLocaleDateString()}</td>
               <td className="px-3 py-2">
-                <button className="text-green-700 underline" onClick={() => openModal(e)}>
-                  Update
-                </button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => openModal(e)}
+                  className="text-green-700 hover:text-green-800"
+                >
+                  <Edit3 className="h-4 w-4" />
+                </Button>
+
               </td>
             </tr>
           ))}
@@ -344,24 +443,35 @@ export default function EnquiriesPage() {
               />
             </div>
             <div className="flex justify-between items-center">
-              <button
-                className="text-green-700 underline"
-                onClick={bookServices}
-                type="button"
-              >
-                Book Services
-              </button>
               <div className="flex gap-2">
-                <button className="px-3 py-1" onClick={() => setSelected(null)} type="button">
-                  Cancel
-                </button>
-                <button
-                  className="bg-green-600 text-white px-3 py-1 rounded"
-                  onClick={updateStatus}
-                  type="button"
+                {selected.customer && (
+                  <Link
+                    href={`/admin/customers/${selected.customer.id}`}
+                    className="inline-flex items-center px-3 py-1 text-sm text-green-700 border border-green-600 rounded hover:bg-green-50"
+                  >
+                    <User className="h-4 w-4 mr-1" /> Profile
+                  </Link>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={bookServices}
+                  className="border-green-600 text-green-700 hover:bg-green-50"
                 >
-                  Save
-                </button>
+                  <BookOpen className="h-4 w-4 mr-1" /> Book Services
+                </Button>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" onClick={() => setSelected(null)}>
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  onClick={updateStatus}
+                >
+                  <Save className="h-4 w-4 mr-1" /> Save
+                </Button>
               </div>
 
             </div>
