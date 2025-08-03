@@ -17,6 +17,7 @@ import {
   Clock,
   IndianRupee,
   ListChecks,
+  Check,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -24,6 +25,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 
 interface Variant {
   id: string
@@ -92,6 +95,8 @@ const COLORS = ["#f87171", "#60a5fa", "#34d399", "#fbbf24", "#c084fc", "#f472b6"
 export default function AdminBooking() {
   const [services, setServices] = useState<ServiceOption[]>([])
   const [selectedSvc, setSelectedSvc] = useState("")
+  const [svcOpen, setSvcOpen] = useState(false)
+  const [svcSearch, setSvcSearch] = useState("")
 
   const [variants, setVariants] = useState<Variant[]>([])
 
@@ -692,18 +697,54 @@ export default function AdminBooking() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label className="text-sm">Service</Label>
-                <Select value={selectedSvc} onValueChange={setSelectedSvc}>
-                  <SelectTrigger className="h-9">
-                    <SelectValue placeholder="Select service" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {services.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>
-                        {s.categoryName} - {s.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Popover open={svcOpen} onOpenChange={setSvcOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className="h-9 w-full justify-between"
+                    >
+                      {selectedSvc
+                        ? `${services.find((s) => s.id === selectedSvc)?.categoryName} - ${
+                            services.find((s) => s.id === selectedSvc)?.name
+                          }`
+                        : "Select service"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[250px] p-0">
+                    <Command>
+                      <CommandInput
+                        placeholder="Search service..."
+                        value={svcSearch}
+                        onChange={(e) => setSvcSearch(e.target.value)}
+                      />
+                      <CommandList>
+                        <CommandEmpty>No service found.</CommandEmpty>
+                        {services
+                          .filter((s) =>
+                            `${s.categoryName} - ${s.name}`
+                              .toLowerCase()
+                              .includes(svcSearch.toLowerCase())
+                          )
+                          .map((s) => (
+                            <CommandItem
+                              key={s.id}
+                              onClick={() => {
+                                setSelectedSvc(s.id)
+                                setSvcOpen(false)
+                                setSvcSearch("")
+                              }}
+                            >
+                              {s.categoryName} - {s.name}
+                              {selectedSvc === s.id && (
+                                <Check className="ml-auto h-4 w-4" />
+                              )}
+                            </CommandItem>
+                          ))}
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               {variants.length > 0 && (
