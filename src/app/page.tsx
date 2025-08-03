@@ -2,8 +2,7 @@
 import { useState, useEffect, useMemo } from "react"
 import { useCart } from "@/contexts/CartContext"
 import Link from "next/link"
-import Image from "next/image"
-import { FiShoppingCart, FiPhone, FiMapPin, FiMail, FiInstagram } from "react-icons/fi"
+import { FiShoppingCart, FiPhone, FiMapPin, FiMail, FiInstagram, FiArrowRight } from "react-icons/fi"
 import { MdStar, MdDiamond, MdEco } from "react-icons/md"
 import { motion, AnimatePresence } from "framer-motion"
 import Header from "@/components/Header"
@@ -30,27 +29,23 @@ const TIER_LABELS = {
   },
 }
 
-
-const WOMEN_SERVICES = [
-  "Shahnaz Husain Facials",
-  "Loreal Hair Coloring",
-  "Loreal Hair Styling",
-  "Premium Facials",
-  "Basic Facials",
-  "Threading",
-  "Waxing",
-  "Hair Cutting",
+const POPULAR_SERVICES = [
+  {
+    name: "Shahnaz Husain Facials",
+    category: "Facial",
+    price: "₹2,500",
+    image: "/placeholder.svg?height=200&width=300",
+  },
+  { name: "Loreal Hair Coloring", category: "Hair", price: "₹3,200", image: "/placeholder.svg?height=200&width=300" },
+  { name: "Bridal Makeup", category: "Bridal", price: "₹8,000", image: "/placeholder.svg?height=200&width=300" },
+  { name: "Men's Grooming", category: "Men", price: "₹1,200", image: "/placeholder.svg?height=200&width=300" },
 ]
 
-const MEN_SERVICES = [
-  "Men's Haircut & Styling",
-  "Beard Trim & Shave",
-  "Men's Facials",
-  "Hair Coloring for Men",
-  "Manicure & Pedicure for Men",
-  "Body Grooming",
-  "Head Massage",
-  "Hair Treatment",
+const QUICK_STATS = [
+  { number: "15+", label: "Years Experience", icon: "ri-time-line" },
+  { number: "10K+", label: "Happy Clients", icon: "ri-user-heart-line" },
+  { number: "50+", label: "Services", icon: "ri-service-line" },
+  { number: "4.9", label: "Rating", icon: "ri-star-line" },
 ]
 
 export default function HomePage() {
@@ -82,8 +77,8 @@ export default function HomePage() {
   }, [])
 
   useEffect(() => {
-    fetch('/api/hero-tabs')
-      .then(res => res.json())
+    fetch("/api/hero-tabs")
+      .then((res) => res.json())
       .then((data) => {
         setHeroTabs(Array.isArray(data) ? data : [])
         if (Array.isArray(data) && data.length > 0) {
@@ -108,10 +103,6 @@ export default function HomePage() {
     return heroTabs.find((cat) => cat.id === selectedHeroCategory) || heroTabs[0]
   }, [selectedHeroCategory, heroTabs])
 
-  const currentGenderServices = useMemo(() => {
-    return selectedGenderTab === "WOMEN" ? WOMEN_SERVICES : MEN_SERVICES
-  }, [selectedGenderTab])
-
   return (
     <main className="bg-white min-h-screen font-sans text-gray-900">
       {/* HEADER */}
@@ -119,20 +110,20 @@ export default function HomePage() {
 
       {/* HERO SECTION */}
       {heroTabs.length > 0 && (
-      <section className="relative flex flex-col overflow-hidden min-h-[70vh] md:min-h-[70vh]">
-        {heroLoading || heroTabs.length === 0 ? (
-          <div className="flex flex-1 items-center justify-center text-gray-400">
-            Loading hero content...
-          </div>
-        ) : (
-        <>
-        {/* Categories Section (Light Grey Bar) */}
-        <div className="w-full overflow-x-auto py-2 scrollbar-hide bg-gray-100 shadow-lg">
-          <div className="flex gap-0 justify-start px-4 md:justify-center">
-            {heroTabs.filter((cat) => cat.id !== "home").map((cat, idx) => (
-              <motion.button
-                key={cat.id}
-                className={`flex flex-col items-center justify-center p-3 min-w-[100px] text-center transition-all duration-300 relative
+        <section className="relative flex flex-col overflow-hidden min-h-[70vh] md:min-h-[70vh]">
+          {heroLoading || heroTabs.length === 0 ? (
+            <div className="flex flex-1 items-center justify-center text-gray-400">Loading hero content...</div>
+          ) : (
+            <>
+              {/* Categories Section (Light Grey Bar) */}
+              <div className="w-full overflow-x-auto py-2 scrollbar-hide bg-gray-100 shadow-lg">
+                <div className="flex gap-0 justify-start px-4 md:justify-center">
+                  {heroTabs
+                    .filter((cat) => cat.id !== "home")
+                    .map((cat, idx) => (
+                      <motion.button
+                        key={cat.id}
+                        className={`flex flex-col items-center justify-center p-3 min-w-[100px] text-center transition-all duration-300 relative
                   ${
                     selectedHeroCategory === cat.id
                       ? `bg-white text-black shadow-md rounded-t-lg`
@@ -141,221 +132,106 @@ export default function HomePage() {
                   ${idx === 0 ? "rounded-tl-lg" : ""}
                   ${idx === heroTabs.length - 1 ? "rounded-tr-lg" : ""}
                 `}
-                onClick={() => setSelectedHeroCategory(cat.id)}
-                whileHover={{ scale: 1.05, y: -5 }}
-                whileTap={{ scale: 0.95 }}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3, delay: 0.1 + idx * 0.05 }}
-              >
-                <img
-                  src={cat.iconUrl || "/placeholder.svg"}
-                  alt={cat.name}
-                  width={32}
-                  height={32}
-                  className="w-8 h-8 mb-1"
-                />
-                <span className="text-xs font-medium whitespace-nowrap">{cat.name}</span>
-              </motion.button>
-            ))}
-          </div>
-        </div>
+                        onClick={() => setSelectedHeroCategory(cat.id)}
+                        whileHover={{ scale: 1.05, y: -5 }}
+                        whileTap={{ scale: 0.95 }}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3, delay: 0.1 + idx * 0.05 }}
+                      >
+                        <img
+                          src={cat.iconUrl || "/placeholder.svg"}
+                          alt={cat.name}
+                          width={32}
+                          height={32}
+                          className="w-8 h-8 mb-1"
+                        />
+                        <span className="text-xs font-medium whitespace-nowrap">{cat.name}</span>
+                      </motion.button>
+                    ))}
+                </div>
+              </div>
 
-        {/* Dynamic Hero Content Area */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentHeroContent.id}
-            className="relative flex-1 w-full flex items-end justify-center p-8 text-center overflow-hidden pb-7" // Adjusted padding-bottom to pb-28
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -50 }}
-            transition={{ duration: 0.8 }}
-          >
-            {currentHeroContent.videoSrc && selectedHeroCategory === "home" ? (
-              <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="absolute inset-0 w-full h-full object-cover"
-                poster={currentHeroContent.backgroundUrl}
-              >
-                <source src={currentHeroContent.videoSrc} type="video/mp4" />
-              </video>
-            ) : (
-              <img
-                src={currentHeroContent.backgroundUrl || "/placeholder.svg"}
-                alt={currentHeroContent.name || "Background"}
-                className="absolute inset-0 z-0 w-full h-full object-cover"
-              />
-            )}
-            {/* Light gradient overlay for the bottom 50% */}
-            <div className="absolute inset-x-0 bottom-0 h-[50%] bg-gradient-to-t from-white to-transparent z-10" />{" "}
-            {/* Increased height and intensity */}
-            <div className="relative z-20 text-white max-w-3xl space-y-2">
-              <h1 className="text-2xl md:text-3xl font-bold tracking-wide text-white">
-                {currentHeroContent.heroTitle}
-              </h1>
-              {selectedHeroCategory === "home" ? (
-                <p className="text-base md:text-lg leading-relaxed text-white">
-                  {currentHeroContent.heroDescription}
-                </p>
-              ) : (
-                <Link
-                  href={`/hero-tabs/${currentHeroContent.slug || currentHeroContent.id}`}
-                  className="inline-flex px-8 py-2 font-semibold text-md shadow-lg transition-all duration-300 bg-transparent border-white text-[#ffffff] hover:scale-105"
-                  style={{ border: "2px solid #fff" }}
+              {/* Dynamic Hero Content Area */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentHeroContent.id}
+                  className="relative flex-1 w-full flex items-end justify-center p-8 text-center overflow-hidden pb-7"
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -50 }}
+                  transition={{ duration: 0.8 }}
                 >
-                  {currentHeroContent.buttonLabel || 'Explore Now >'}
-                </Link>
-              )}
-            </div>
-          </motion.div>
-        </AnimatePresence>
-        </>
-        )}
-      </section>
+                  {currentHeroContent.videoSrc && selectedHeroCategory === "home" ? (
+                    <video
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="absolute inset-0 w-full h-full object-cover"
+                      poster={currentHeroContent.backgroundUrl}
+                    >
+                      <source src={currentHeroContent.videoSrc} type="video/mp4" />
+                    </video>
+                  ) : (
+                    <img
+                      src={currentHeroContent.backgroundUrl || "/placeholder.svg"}
+                      alt={currentHeroContent.name || "Background"}
+                      className="absolute inset-0 z-0 w-full h-full object-cover"
+                    />
+                  )}
+                  <div className="absolute inset-x-0 bottom-0 h-[50%] bg-gradient-to-t from-white to-transparent z-10" />
+                  <div className="relative z-20 text-white max-w-3xl space-y-2">
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-wide text-white">
+                      {currentHeroContent.heroTitle}
+                    </h1>
+                    {selectedHeroCategory === "home" ? (
+                      <p className="text-base md:text-lg leading-relaxed text-white">
+                        {currentHeroContent.heroDescription}
+                      </p>
+                    ) : (
+                      <Link
+                        href={`/hero-tabs/${currentHeroContent.slug || currentHeroContent.id}`}
+                        className="inline-flex px-8 py-2 font-semibold text-md shadow-lg transition-all duration-300 bg-transparent border-white text-[#ffffff] hover:scale-105"
+                        style={{ border: "2px solid #fff" }}
+                      >
+                        {currentHeroContent.buttonLabel || "Explore Now >"}
+                      </Link>
+                    )}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </>
+          )}
+        </section>
       )}
 
-      {/* DISCOVER OUR RATES SECTION */}
-      <section className="bg-gray-100 py-8 text-gray-800">
-        <div className="container mx-auto px-6 text-center">
-          <h2 className="text-xl font-semibold mb-4">Discover Our Rates</h2>
-          <div className="flex justify-center gap-4 mb-6">
-            <button
-              className={`px-6 py-3 rounded-md font-bold transition-colors duration-300 ${
-                selectedGenderTab === "WOMEN"
-                  ? "bg-pink-500 text-white"
-                  : "bg-transparent text-pink-500 border border-pink-500"
-              }`}
-              onClick={() => setSelectedGenderTab("WOMEN")}
-            >
-              For WOMEN
-            </button>
-            <button
-              className={`px-6 py-3 rounded-md font-bold transition-colors duration-300 ${
-                selectedGenderTab === "MEN"
-                  ? "bg-blue-500 text-white"
-                  : "bg-transparent text-blue-500 border border-blue-500"
-              }`}
-              onClick={() => setSelectedGenderTab("MEN")}
-            >
-              For MEN
-            </button>
-          </div>
-          <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-lg">
-            {currentGenderServices.map((service, idx) => (
-              <Link
-                key={idx}
-                href="#" // You might want to replace '#' with actual service links
-                className={`whitespace-nowrap ${
-                  selectedGenderTab === "WOMEN" ? "text-pink-500" : "text-blue-500"
-                } hover:underline`}
-              >
-                {service}
-                {idx < currentGenderServices.length - 1 && <span className="mx-2 text-gray-400">•</span>}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* SERVICE DIVISIONS */}
-      <section className="py-20 bg-gradient-to-b from-gray-100 to-gray-200 text-gray-900">
+      {/* QUICK STATS SECTION */}
+      <section className="py-12 bg-gradient-to-r from-green-50 to-emerald-50">
         <div className="container mx-auto px-6">
-          <motion.div
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ color: "#41eb70" }}>
-              Our Service Divisions
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Experience comprehensive beauty and wellness services in our luxurious environment
-            </p>
-          </motion.div>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-6 max-w-7xl mx-auto">
-            {[
-              {
-                icon: "ri-group-line",
-                title: "Family Salon",
-                desc: "Complete care for the whole family",
-                gradient: "from-blue-500 to-blue-600",
-              },
-              {
-                icon: "ri-magic-line",
-                title: "Beauty Studio",
-                desc: "Premium beauty treatments",
-                gradient: "from-purple-500 to-purple-600",
-              },
-              {
-                icon: "ri-vip-crown-line",
-                title: "Celebrity Salon",
-                desc: "Luxury styling experience",
-                gradient: "from-amber-500 to-amber-600",
-              },
-              {
-                icon: "ri-brush-line",
-                title: "Makeover Studio",
-                desc: "Complete transformation",
-                gradient: "from-pink-500 to-pink-600",
-              },
-              {
-                icon: "ri-hearts-line",
-                title: "Bridal Lounge",
-                desc: "Special bridal services",
-                gradient: "from-rose-500 to-rose-600",
-              },
-              {
-                icon: "ri-flower-line",
-                title: "Floral Studio",
-                desc: "Artistic floral designs",
-                gradient: "from-green-500 to-green-600",
-              },
-              {
-                icon: "ri-plant-line",
-                title: "Floral Decor",
-                desc: "Event decoration services",
-                gradient: "from-emerald-500 to-emerald-600",
-              },
-              {
-                icon: "ri-gallery-line",
-                title: "Event Portfolio",
-                desc: "Complete event solutions",
-                gradient: "from-indigo-500 to-indigo-600",
-              },
-            ].map((svc, idx) => (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {QUICK_STATS.map((stat, idx) => (
               <motion.div
                 key={idx}
-                className="group"
-                initial={{ opacity: 0, y: 30 }}
+                className="text-center"
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: idx * 0.1 }}
+                transition={{ duration: 0.5, delay: idx * 0.1 }}
                 viewport={{ once: true }}
-                whileHover={{ y: -10 }}
               >
-                <div className="bg-white rounded-2xl p-6 text-center shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-200 h-full">
-                  <motion.div
-                    className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${svc.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}
-                    whileHover={{ rotate: 5 }}
-                  >
-                    <i className={`${svc.icon} text-white text-2xl`}></i>
-                  </motion.div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">
-                    {svc.title}
-                  </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{svc.desc}</p>
+                <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
+                  <i className={`${stat.icon} text-white text-2xl`}></i>
                 </div>
+                <div className="text-3xl font-bold text-green-600 mb-1">{stat.number}</div>
+                <div className="text-gray-600 text-sm font-medium">{stat.label}</div>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
-      {/* SERVICES SECTION */}
-      <section id="services" className="py-20 bg-gradient-to-b from-gray-200 to-gray-100 text-gray-900">
+
+      {/* POPULAR SERVICES FROM ACTUAL DATA */}
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-6">
           <motion.div
             className="text-center mb-12"
@@ -364,12 +240,142 @@ export default function HomePage() {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: "#41eb70" }}>
-              Our Services
+            <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: "#41eb70" }}>
+              Popular Services
             </h2>
+            <p className="text-gray-600 text-lg">Most loved treatments by our clients</p>
           </motion.div>
-          <div className="space-y-8">
-            <AnimatePresence>
+
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-gray-200 rounded-2xl h-64 animate-pulse"></div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {categories.slice(0, 4).map((category, idx) => {
+                const firstService = category.services?.[0]
+                return (
+                  <motion.div
+                    key={category.id}
+                    className="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: idx * 0.1 }}
+                    viewport={{ once: true }}
+                    whileHover={{ y: -5 }}
+                  >
+                    <div className="relative overflow-hidden">
+                      <img
+                        src={category.imageUrl || "/placeholder.svg?height=200&width=300"}
+                        alt={category.name}
+                        className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                      <div className="absolute top-3 right-3 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                        {category.services?.length || 0} Services
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-bold text-lg mb-2 text-gray-900">{category.name}</h3>
+                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">{category.caption}</p>
+                      <div className="flex items-center justify-between">
+                        {firstService?.minPrice && (
+                          <span className="text-green-600 font-bold text-lg">From ₹{firstService.minPrice}</span>
+                        )}
+                        <Link
+                          href={`/services/${category.id}`}
+                          className="bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors"
+                        >
+                          View Services
+                        </Link>
+                      </div>
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
+          )}
+
+          <div className="text-center">
+            <button
+              onClick={() => document.getElementById("services")?.scrollIntoView({ behavior: "smooth" })}
+              className="inline-flex items-center gap-2 bg-green-500 text-white px-8 py-3 rounded-full font-semibold hover:bg-green-600 transition-colors shadow-lg"
+            >
+              View All Services
+              <FiArrowRight />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* SERVICE TIERS SECTION */}
+      <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
+        <div className="container mx-auto px-6">
+          <motion.div
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: "#41eb70" }}>
+              Choose Your Experience
+            </h2>
+            <p className="text-gray-600 text-lg">Three tiers of service to match your needs and budget</p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {Object.entries(TIER_LABELS).map(([k, { label, icon }], idx) => (
+              <motion.div
+                key={k}
+                className="bg-white rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 relative overflow-hidden"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: idx * 0.2 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -5 }}
+              >
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 to-emerald-500"></div>
+                <div className="text-3xl mb-4 flex justify-center">{icon}</div>
+                <h3 className="text-xl font-bold mb-3" style={{ color: "#41eb70" }}>
+                  {label}
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  {k === "deluxe" && "Premium brands like Shahnaz Husain & L'Oréal for luxury experience"}
+                  {k === "premium" && "Quality brands like Biotique & Matrix for excellent results"}
+                  {k === "basic" && "Essential care with proven techniques at affordable prices"}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* COMPACT SERVICES SECTION */}
+      <section id="services" className="py-16 bg-gray-50">
+        <div className="container mx-auto px-6">
+          <motion.div
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: "#41eb70" }}>
+              All Services
+            </h2>
+            <p className="text-gray-600 text-lg">Explore our complete range of beauty and wellness services</p>
+          </motion.div>
+
+          {loading ? (
+            <div className="space-y-4 max-w-4xl mx-auto">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-gray-200 rounded-xl h-20 animate-pulse"></div>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-4 max-w-4xl mx-auto">
               {categories.map((cat, idx) => {
                 const isOpen = expandedCat === cat.id
                 return (
@@ -377,45 +383,42 @@ export default function HomePage() {
                     key={cat.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.5, delay: idx * 0.1 }}
-                    className="bg-gradient-to-br from-gray-800/60 to-gray-700/60 backdrop-blur-md rounded-3xl shadow-lg border border-gray-700/50 overflow-hidden hover:shadow-green-400/20 hover:border-green-400/40 transform hover:scale-[1.02] transition-all duration-300"
+                    className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-200"
                   >
                     <motion.button
                       onClick={() => setExpandedCat(isOpen ? null : cat.id)}
-                      className="w-full p-8 focus:outline-none"
-                      whileHover={{ backgroundColor: "rgba(65, 235, 112, 0.05)" }}
+                      className="w-full p-6 focus:outline-none"
+                      whileHover={{ backgroundColor: "rgba(65, 235, 112, 0.02)" }}
                     >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-6">
-                          <div className="relative">
-                            <img
-                              src={cat.imageUrl || "/placeholder.svg?height=240&width=320"}
-                              alt={cat.name}
-                              className="w-24 h-18 rounded-2xl object-cover shadow-xl border border-gray-600/50"
-                              style={{ aspectRatio: "4/3" }}
-                            />
-                            <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
-                              <MdStar className="text-white text-sm" />
-                            </div>
-                          </div>
+                        <div className="flex items-center gap-4">
+                          <img
+                            src={cat.imageUrl || "/placeholder.svg?height=60&width=60"}
+                            alt={cat.name}
+                            className="w-16 h-16 rounded-lg object-cover shadow-sm"
+                          />
                           <div className="text-left">
-                            <h3 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: "#41eb70" }}>
+                            <h3 className="text-xl font-bold mb-1" style={{ color: "#41eb70" }}>
                               {cat.name}
                             </h3>
-                            <p className="text-gray-600 text-lg mb-4">{cat.caption}</p>
+                            <p className="text-gray-600 text-sm">{cat.caption}</p>
+                            <p className="text-gray-500 text-xs mt-1">{cat.services?.length || 0} services available</p>
                           </div>
                         </div>
-                        <motion.span
-                          className="text-3xl"
-                          style={{ color: "#41eb70" }}
+                        <motion.div
+                          className="flex items-center gap-2"
                           animate={{ rotate: isOpen ? 90 : 0 }}
                           transition={{ duration: 0.3 }}
                         >
-                          ▶
-                        </motion.span>
+                          <span className="text-sm text-gray-500 hidden md:block">
+                            {isOpen ? "Hide" : "View"} Services
+                          </span>
+                          <FiArrowRight className="text-green-500 text-xl" />
+                        </motion.div>
                       </div>
                     </motion.button>
+
                     <AnimatePresence>
                       {isOpen && (
                         <motion.div
@@ -423,37 +426,29 @@ export default function HomePage() {
                           animate={{ opacity: 1, height: "auto" }}
                           exit={{ opacity: 0, height: 0 }}
                           transition={{ duration: 0.4 }}
-                          className="px-8 pb-8"
+                          className="px-6 pb-6 border-t border-gray-100"
                         >
-                          <div className="space-y-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
                             {subServices.map((svc) => (
                               <div
                                 key={svc.id}
-                                className="bg-gray-100 rounded-xl p-6 border border-gray-200 flex items-center justify-between"
+                                className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                               >
-                                <div className="flex items-center gap-6">
-                                  <img
-                                    src={svc.imageUrl || "/placeholder.svg?height=240&width=320"}
-                                    alt={svc.name}
-                                    className="w-24 h-18 object-cover rounded-xl shadow-lg border border-gray-600/50"
-                                    style={{ aspectRatio: "4/3" }}
-                                  />
-                                  <div>
-                                    <h4 className="font-bold text-xl" style={{ color: "#41eb70" }}>
-                                      {svc.name}
-                                    </h4>
-                                    <p className="text-gray-600 text-sm mb-1">{svc.caption}</p>
-                                    {svc.minPrice != null && (
-                                      <span className="font-bold" style={{ color: "#41eb70" }}>
-                                        From ₹{svc.minPrice}
-                                      </span>
-                                    )}
-                                  </div>
+                                <img
+                                  src={svc.imageUrl || "/placeholder.svg?height=40&width=40"}
+                                  alt={svc.name}
+                                  className="w-12 h-12 object-cover rounded-lg"
+                                />
+                                <div className="flex-1">
+                                  <h4 className="font-semibold text-gray-900">{svc.name}</h4>
+                                  <p className="text-gray-600 text-xs line-clamp-1">{svc.caption}</p>
+                                  {svc.minPrice != null && (
+                                    <span className="text-green-600 font-bold text-sm">From ₹{svc.minPrice}</span>
+                                  )}
                                 </div>
                                 <Link
                                   href={`/services/${svc.id}`}
-                                  prefetch={false}
-                                  className="text-green-400 underline text-sm font-semibold hover:text-green-300"
+                                  className="text-green-500 hover:text-green-600 font-medium text-sm whitespace-nowrap"
                                 >
                                   View Details
                                 </Link>
@@ -466,10 +461,90 @@ export default function HomePage() {
                   </motion.div>
                 )
               })}
-            </AnimatePresence>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* CONTACT & FOOTER COMBINED */}
+      <section className="py-16 bg-gradient-to-b from-gray-800 to-gray-900 text-white">
+        <div className="container mx-auto px-6">
+          <motion.div
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: "#41eb70" }}>
+              Ready to Book?
+            </h2>
+            <p className="text-gray-300 text-lg">Get in touch with us today</p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
+            <motion.div
+              className="text-center md:text-left"
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            >
+              <h3 className="text-xl font-bold mb-4 flex items-center justify-center md:justify-start gap-2">
+                <FiMapPin style={{ color: "#41eb70" }} />
+                Visit Our Salon
+              </h3>
+              <p className="text-gray-300 leading-relaxed">
+                TC 45/215, Kunjalumood Junction
+                <br />
+                Karamana PO, Trivandrum
+              </p>
+            </motion.div>
+
+            <motion.div
+              className="space-y-3"
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            >
+              <motion.a
+                href="tel:+918891467678"
+                className="flex items-center gap-3 p-3 bg-green-500/20 rounded-lg hover:bg-green-500/30 transition-all group"
+                whileHover={{ scale: 1.02 }}
+              >
+                <FiPhone className="text-green-400 text-lg" />
+                <span>+91 8891 467678</span>
+              </motion.a>
+
+              <motion.a
+                href="mailto:greensalon@gmail.com"
+                className="flex items-center gap-3 p-3 bg-blue-500/20 rounded-lg hover:bg-blue-500/30 transition-all group"
+                whileHover={{ scale: 1.02 }}
+              >
+                <FiMail className="text-blue-400 text-lg" />
+                <span>greensalon@gmail.com</span>
+              </motion.a>
+
+              <motion.a
+                href="https://instagram.com/greensbeautysalon"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 bg-pink-500/20 rounded-lg hover:bg-pink-500/30 transition-all group"
+                whileHover={{ scale: 1.02 }}
+              >
+                <FiInstagram className="text-pink-400 text-lg" />
+                <span>@greensbeautysalon</span>
+              </motion.a>
+            </motion.div>
+          </div>
+
+          <div className="text-center pt-8 border-t border-gray-700">
+            <p className="text-gray-400">&copy; {new Date().getFullYear()} Greens Beauty Salon. All rights reserved.</p>
           </div>
         </div>
       </section>
+
       {/* CART BAR */}
       <AnimatePresence>
         {items.length > 0 && (
@@ -502,159 +577,6 @@ export default function HomePage() {
           </motion.div>
         )}
       </AnimatePresence>
-      {/* ABOUT SECTION */}
-      <section className="py-20 bg-gray-100 text-gray-900">
-        <div className="container mx-auto px-6">
-          <motion.div
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ color: "#41eb70" }}>
-              💫 Why Choose Greens Beauty?
-            </h2>
-            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-              Experience the difference with our premium service variants and professional expertise
-            </p>
-          </motion.div>
-          <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            {Object.entries(TIER_LABELS).map(([k, { label, icon }], idx) => (
-              <motion.div
-                key={k}
-                className="bg-white rounded-2xl p-8 text-center shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-200"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: idx * 0.2 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -5 }}
-              >
-                <div className="text-4xl mb-6 flex justify-center">{icon}</div>
-                <h3 className="text-2xl font-bold mb-4" style={{ color: "#41eb70" }}>
-                  {label}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {k === "deluxe" &&
-                    "Luxury brands and exclusive treatments. For those who demand the best in care and results. Shahnaz Husain, L'Oréal and more."}
-                  {k === "premium" &&
-                    "Leading brands, superior results, great value. We use Biotique, Matrix, Nature's Way, Oxyglow, and more."}
-                  {k === "basic" &&
-                    "Effective, everyday self-care using classic techniques and creams. Fast and budget-friendly."}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-          <motion.div
-            className="text-center bg-white rounded-2xl p-8 border border-gray-200 max-w-4xl mx-auto"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
-            <h3 className="text-2xl font-bold mb-4" style={{ color: "#41eb70" }}>
-              Our Promise
-            </h3>
-            <p className="text-gray-600 leading-relaxed text-lg">
-              We believe in comfort, care, and giving you the best advice—always. Ask us anything, and our team will
-              guide you for the perfect service and product choice.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-      {/* CONTACT SECTION */}
-      <section className="py-20 bg-gradient-to-b from-gray-800 to-gray-900">
-        <div className="container mx-auto px-6">
-          <motion.div
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ color: "#41eb70" }}>
-              Get In Touch
-            </h2>
-            <p className="text-xl text-gray-400">Ready to book your appointment? We're here to help!</p>
-          </motion.div>
-          <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-            <motion.div
-              className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200"
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-            >
-              <h3 className="text-2xl font-bold mb-6 flex items-center gap-3" style={{ color: "#41eb70" }}>
-                <FiMapPin style={{ color: "#41eb70" }} /> Visit Us
-              </h3>
-              <p className="text-gray-600 text-lg leading-relaxed">
-                TC 45/215, Kunjalumood Junction, Karamana PO, Trivandrum
-              </p>
-            </motion.div>
-            <motion.div
-              className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200"
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-            >
-              <h3 className="text-2xl font-bold mb-6" style={{ color: "#41eb70" }}>
-                Get In Touch
-              </h3>
-              <div className="space-y-4">
-                <motion.a
-                  href="tel:+918891467678"
-                  className="flex items-center gap-4 bg-green-500/10 border border-green-500/30 rounded-xl px-4 py-3 hover:bg-green-500/20 transition-all group"
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <FiPhone
-                    className="text-xl group-hover:scale-110 transition-transform"
-                    style={{ color: "#41eb70" }}
-                  />
-                  <span className="text-gray-200 font-medium">+91 8891 467678</span>
-                  <span
-                    className="ml-auto text-xs px-2 py-1 rounded-full font-bold"
-                    style={{ backgroundColor: "rgba(65, 235, 112, 0.2)", color: "#41eb70" }}
-                  >
-                    Call
-                  </span>
-                </motion.a>
-                <motion.a
-                  href="mailto:greensalon@gmail.com"
-                  className="flex items-center gap-4 bg-blue-500/10 border border-blue-500/30 rounded-xl px-4 py-3 hover:bg-blue-500/20 transition-all group"
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <FiMail className="text-blue-400 text-xl group-hover:scale-110 transition-transform" />
-                  <span className="text-gray-200 font-medium">greensalon@gmail.com</span>
-                  <span className="ml-auto text-xs bg-blue-400/20 text-blue-400 px-2 py-1 rounded-full font-bold">
-                    Email
-                  </span>
-                </motion.a>
-                <motion.a
-                  href="https://instagram.com/greensbeautysalon"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-4 bg-pink-500/10 border border-pink-500/30 rounded-xl px-4 py-3 hover:bg-pink-500/20 transition-all group"
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <FiInstagram className="text-pink-400 text-xl group-hover:scale-110 transition-transform" />
-                  <span className="text-gray-200 font-medium">@greensbeautysalon</span>
-                  <span className="ml-auto text-xs bg-pink-400/20 text-pink-400 px-2 py-1 rounded-full font-bold">
-                    Instagram
-                  </span>
-                </motion.a>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-      {/* FOOTER */}
-      <footer className="text-center py-8 text-gray-600 bg-gray-200 border-t border-gray-300">
-        <div className="container mx-auto px-6">
-          <p className="text-sm">&copy; {new Date().getFullYear()} Greens Beauty Salon. All rights reserved.</p>
-        </div>
-      </footer>
     </main>
   )
 }
