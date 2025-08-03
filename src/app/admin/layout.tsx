@@ -20,6 +20,7 @@ import {
   MdReceipt,
   MdMenu,
   MdViewCarousel,
+  MdQuestionAnswer,
 } from 'react-icons/md'
 import type { IconType } from 'react-icons'
 
@@ -45,6 +46,7 @@ const sections: {
     items: [
       { href: '/admin/staff', label: 'Staff', icon: MdPeople },
       { href: '/admin/customers', label: 'Customers', icon: MdPeople },
+      { href: '/admin/enquiries', label: 'Enquiries', icon: MdQuestionAnswer },
     ],
   },
   {
