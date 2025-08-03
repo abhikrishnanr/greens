@@ -54,6 +54,7 @@ export default function EnquiriesPage() {
     window.location.href = `/admin/walk-in?${params.toString()}`
   }
 
+
   const loadEnquiries = async () => {
     const res = await fetch('/api/admin/enquiries')
     if (res.ok) {
@@ -118,6 +119,7 @@ export default function EnquiriesPage() {
     setModalStatus(e.status)
     setModalRemark(e.remark || '')
   }
+
 
   const updateStatus = async () => {
     if (!selected) return
@@ -320,6 +322,7 @@ export default function EnquiriesPage() {
                 </ul>
               </div>
             </div>
+
             <div>
               <label className="block mb-1 font-medium">Status</label>
               <select
@@ -360,6 +363,7 @@ export default function EnquiriesPage() {
                   Save
                 </button>
               </div>
+
             </div>
           </div>
         </div>
