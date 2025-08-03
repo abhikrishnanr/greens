@@ -2,26 +2,17 @@
 import { useEffect, useState } from 'react'
 import {
   Banknote,
-  Building2,
   CalendarDays,
   IndianRupee,
+  MessageSquare,
   PhoneCall,
   Scissors,
-  Tag,
-  User,
-  Users,
+
 } from 'lucide-react'
 
 interface DashboardData {
   services: number
-  branches: number
-  staff: {
-    total: number
-    active: number
-    removed: number
-  }
   bookings: {
-    total: number
     today: number
     upcoming: {
       id: string
@@ -31,10 +22,13 @@ interface DashboardData {
       staff: { name: string }
     }[]
   }
-  pricing: {
-    avgActualPrice: number
-    avgOfferPrice: number | null
-    activeOffers: number
+  billing: {
+    billedToday: number
+    pending: number
+  }
+  enquiries: {
+    today: number
+    open: number
   }
   customers: number
   enquiries: number
@@ -51,15 +45,13 @@ export default function DashboardPage() {
   if (!data) return <p className="p-4">Loading...</p>
 
   const stats = [
-    { label: 'Services', value: data.services, icon: Scissors, color: 'bg-rose-500' },
-    { label: 'Branches', value: data.branches, icon: Building2, color: 'bg-indigo-500' },
-    { label: 'Staff', value: data.staff.total, icon: Users, color: 'bg-green-500' },
-    { label: 'Customers', value: data.customers, icon: User, color: 'bg-orange-500' },
-    { label: "Today's Bookings", value: data.bookings.today, icon: CalendarDays, color: 'bg-yellow-500' },
-    { label: 'Enquiries', value: data.enquiries, icon: PhoneCall, color: 'bg-purple-500' },
-    { label: 'Revenue', value: `₹${data.revenue.toFixed(0)}`, icon: IndianRupee, color: 'bg-teal-500' },
-    { label: 'Avg Service Price', value: `₹${data.pricing.avgActualPrice.toFixed(0)}`, icon: Banknote, color: 'bg-blue-500' },
-    { label: 'Active Offers', value: data.pricing.activeOffers, icon: Tag, color: 'bg-pink-500' },
+    { label: 'Active Services', value: data.services, icon: Scissors, color: 'bg-rose-500' },
+    { label: 'Appointments Today', value: data.bookings.today, icon: CalendarDays, color: 'bg-indigo-500' },
+    { label: 'Billed Today', value: data.billing.billedToday, icon: IndianRupee, color: 'bg-green-500' },
+    { label: 'Enquiries Today', value: data.enquiries.today, icon: PhoneCall, color: 'bg-purple-500' },
+    { label: 'Open Enquiries', value: data.enquiries.open, icon: MessageSquare, color: 'bg-orange-500' },
+    { label: 'Pending Billing', value: data.billing.pending, icon: Banknote, color: 'bg-yellow-500' },
+
   ]
 
   return (
