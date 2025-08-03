@@ -14,7 +14,8 @@ export async function GET() {
     const [
       servicesCount,
       appointmentsToday,
-      billedToday,
+      billedTodayCount,
+      billedAmount,
       enquiriesToday,
       openEnquiries,
       pendingBilling,
@@ -28,6 +29,10 @@ export async function GET() {
       prisma.booking.count({ where: { date: today } }),
       prisma.billing.count({
         where: { paidAt: { gte: start, lt: end } },
+      }),
+      prisma.billing.aggregate({
+        where: { paidAt: { gte: start, lt: end } },
+        _sum: { amountAfter: true },
       }),
       prisma.enquiry.count({
         where: { createdAt: { gte: start, lt: end } },
@@ -58,13 +63,13 @@ export async function GET() {
         upcoming,
       },
       billing: {
-        billedToday,
+        billedToday: billedTodayCount,
+        amountToday: billedAmount._sum.amountAfter || 0,
         pending: pendingBilling,
       },
       enquiries: {
         today: enquiriesToday,
         open: openEnquiries,
-
       },
     })
   } catch (err) {
