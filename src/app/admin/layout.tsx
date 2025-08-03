@@ -35,6 +35,7 @@ const sections: {
   {
     heading: 'Appointments & Billing',
     items: [
+         { href: '/admin/enquiries', label: 'Enquiries', icon: MdQuestionAnswer },
       { href: '/admin/walk-in', label: 'Walk-In Booking', icon: MdEvent },
       { href: '/admin/billing', label: 'New Billing', icon: MdReceipt },
       { href: '/admin/billing-history', label: 'Billing History', icon: MdHistory },
@@ -46,7 +47,7 @@ const sections: {
     items: [
       { href: '/admin/staff', label: 'Staff', icon: MdPeople },
       { href: '/admin/customers', label: 'Customers', icon: MdPeople },
-      { href: '/admin/enquiries', label: 'Enquiries', icon: MdQuestionAnswer },
+   
     ],
   },
   {
