@@ -30,9 +30,6 @@ interface DashboardData {
     today: number
     open: number
   }
-  customers: number
-  enquiries: number
-  revenue: number
 }
 
 export default function DashboardPage() {
@@ -45,12 +42,12 @@ export default function DashboardPage() {
   if (!data) return <p className="p-4">Loading...</p>
 
   const stats = [
-    { label: 'Active Services', value: data.services, icon: Scissors, color: 'bg-rose-500' },
-    { label: 'Appointments Today', value: data.bookings.today, icon: CalendarDays, color: 'bg-indigo-500' },
-    { label: 'Billed Today', value: data.billing.billedToday, icon: IndianRupee, color: 'bg-green-500' },
-    { label: 'Enquiries Today', value: data.enquiries.today, icon: PhoneCall, color: 'bg-purple-500' },
-    { label: 'Open Enquiries', value: data.enquiries.open, icon: MessageSquare, color: 'bg-orange-500' },
-    { label: 'Pending Billing', value: data.billing.pending, icon: Banknote, color: 'bg-yellow-500' },
+    { label: 'Active Services', value: data?.services ?? 0, icon: Scissors, color: 'bg-rose-500' },
+    { label: 'Appointments Today', value: data.bookings?.today ?? 0, icon: CalendarDays, color: 'bg-indigo-500' },
+    { label: 'Billed Today', value: data.billing?.billedToday ?? 0, icon: IndianRupee, color: 'bg-green-500' },
+    { label: 'Enquiries Today', value: data.enquiries?.today ?? 0, icon: PhoneCall, color: 'bg-purple-500' },
+    { label: 'Open Enquiries', value: data.enquiries?.open ?? 0, icon: MessageSquare, color: 'bg-orange-500' },
+    { label: 'Pending Billing', value: data.billing?.pending ?? 0, icon: Banknote, color: 'bg-yellow-500' },
 
   ]
 
@@ -79,7 +76,7 @@ export default function DashboardPage() {
         <h2 className="text-xl font-semibold mb-4 flex items-center">
           <CalendarDays className="h-5 w-5 text-green-600 mr-2" /> Upcoming Appointments
         </h2>
-        {data.bookings.upcoming.length > 0 ? (
+        {data.bookings?.upcoming && data.bookings.upcoming.length > 0 ? (
           <ul className="divide-y">
             {data.bookings.upcoming.map(b => (
               <li key={b.id} className="py-3 flex justify-between">
