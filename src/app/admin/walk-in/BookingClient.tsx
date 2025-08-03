@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
+import { useSearchParams } from "next/navigation"
 import { format } from "date-fns"
 
 import {
@@ -111,6 +112,17 @@ export default function AdminBooking() {
   const [editAge, setEditAge] = useState("")
   const formRef = useRef<HTMLFormElement>(null)
   const [attemptSubmit, setAttemptSubmit] = useState(false)
+  const [customerStats, setCustomerStats] = useState<{ totalAmount: number; billCount: number } | null>(null)
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const n = searchParams.get('name')
+    const p = searchParams.get('phone')
+    const g = searchParams.get('gender')
+    if (n) setCustomer(n)
+    if (p) setPhone(p)
+    if (g) setGender(g)
+  }, [searchParams])
 
   const loadCategories = async () => {
     try {
@@ -207,6 +219,12 @@ export default function AdminBooking() {
     }
   }, [editItem])
 
+  useEffect(() => {
+    setCustomerStats(null)
+    setCustomer("")
+    setGender("")
+  }, [phone])
+
   const addItem = () => {
     const variant = variants.find((t) => t.id === selectedTier)
     if (!variant) {
@@ -268,35 +286,6 @@ export default function AdminBooking() {
     return h * 60 + m
   }
 
-  const hasConflict = (
-    staffId: string,
-    start: string,
-    duration: number,
-    idx?: number,
-    itemId?: string,
-  ) => {
-    if (!staffId) return false
-    const st = toMin(start)
-    const en = st + duration
-    for (const b of bookings) {
-      for (const it of b.items) {
-        if (itemId && it.id === itemId) continue
-        if (it.staffId !== staffId) continue
-        const bst = toMin(it.start)
-        const ben = bst + it.duration
-        if (st < ben && en > bst) return true
-      }
-    }
-    for (let i = 0; i < items.length; i++) {
-      if (idx !== undefined && i === idx) continue
-      const it = items[i]
-      if (it.staffId !== staffId || !it.start) continue
-      const ist = toMin(it.start)
-      const ien = ist + it.duration
-      if (st < ien && en > ist) return true
-    }
-    return false
-  }
 
   const busySlots = (staffId: string, idx?: number, itemId?: string) => {
     const slots = new Set<string>()
@@ -340,6 +329,30 @@ export default function AdminBooking() {
       minutes += 15
     }
     return false
+  }
+
+  const lookupCustomer = async () => {
+    if (phone.length !== 10) {
+      setResult({ success: false, message: "Phone number must be exactly 10 digits." })
+      return
+    }
+    try {
+      const res = await fetch(`/api/customer?phone=${phone}`)
+      if (res.ok) {
+        const data = await res.json()
+        if (data.customer) {
+          setCustomer(data.customer.name || "")
+          setGender(data.customer.gender || "")
+          setCustomerStats({ totalAmount: data.totalAmount, billCount: data.billCount })
+        } else {
+          setCustomer("")
+          setGender("")
+          setCustomerStats(null)
+        }
+      }
+    } catch (err) {
+      console.error("customer lookup failed", err)
+    }
   }
 
   const saveBooking = async () => {
@@ -394,6 +407,7 @@ export default function AdminBooking() {
       setGender("")
       setAge("")
       setItems([])
+      setCustomerStats(null)
     }
   }
 
@@ -457,7 +471,7 @@ export default function AdminBooking() {
         }),
       })
       if (res.ok) {
-        const { booking, item } = await res.json()
+        const { booking } = await res.json()
         setBookings(bs => bs.map(b => (b.id === booking.id ? booking : b)))
         setEditItem(null)
         setResult({ success: true, message: 'Booking updated successfully!' })
@@ -495,13 +509,14 @@ export default function AdminBooking() {
     }
   }
 
-  const handleItemClick = (it: any) => {
-    if ((it as any).billed) {
-      setResult({ success: false, message: 'This booking has already been billed and cannot be edited.' })
-      return
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleItemClick = (it: any) => {
+      if (it.billed) {
+        setResult({ success: false, message: 'This booking has already been billed and cannot be edited.' })
+        return
+      }
+      setEditItem(it)
     }
-    setEditItem(it)
-  }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -523,6 +538,7 @@ export default function AdminBooking() {
       phone: b.phone,
       gender: b.gender,
       age: b.age,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       billed: (it as any).billed,
     }))
   )
@@ -574,10 +590,36 @@ export default function AdminBooking() {
                 <User className="h-5 w-5 text-blue-600" /> Customer Details
               </CardTitle>
               <CardDescription className="text-sm text-gray-500">
-                Enter the customer's name and contact information.
+                Enter the customer&apos;s name and contact information.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="phone" className="text-sm">Phone Number</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="phone"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                    placeholder="e.g., 5551234567"
+                    className={`h-9 flex-1 ${isPhoneInvalid ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                    maxLength={10}
+                  />
+                  <Button type="button" onClick={lookupCustomer} className="h-9 px-4">
+                    Go
+                  </Button>
+                </div>
+                {isPhoneInvalid && <p className="text-xs text-red-500">Phone number must be exactly 10 digits.</p>}
+              </div>
+
+              {customerStats && (
+                <div className="flex items-center gap-4 p-2 bg-green-50 border rounded">
+                  <span className="text-sm font-medium">Existing customer</span>
+                  <span className="flex items-center gap-1 text-sm"><DollarSign className="h-4 w-4 text-green-600" />₹{customerStats.totalAmount}</span>
+                  <span className="flex items-center gap-1 text-sm"><ListChecks className="h-4 w-4 text-green-600" />{customerStats.billCount} bills</span>
+                </div>
+              )}
+
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="customer" className="text-sm">
@@ -590,20 +632,6 @@ export default function AdminBooking() {
                     placeholder="e.g., Jane Doe"
                     className="h-9"
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-sm">
-                    Phone Number
-                  </Label>
-                  <Input
-                    id="phone"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                    placeholder="e.g., 5551234567"
-                    className={`h-9 ${isPhoneInvalid ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-                    maxLength={10}
-                  />
-                  {isPhoneInvalid && <p className="text-xs text-red-500">Phone number must be exactly 10 digits.</p>}
                 </div>
                 <div className="space-y-2">
                   <Label className="text-sm">Gender</Label>
@@ -633,17 +661,17 @@ export default function AdminBooking() {
                     </label>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="age" className="text-sm">Approx Age</Label>
-                  <Input
-                    id="age"
-                    type="number"
-                    value={age}
-                    onChange={(e) => setAge(e.target.value)}
-                    placeholder="in years"
-                    className="h-9"
-                  />
-                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="age" className="text-sm">Approx Age</Label>
+                <Input
+                  id="age"
+                  type="number"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  placeholder="in years"
+                  className="h-9"
+                />
               </div>
             </CardContent>
           </Card>
@@ -706,7 +734,7 @@ export default function AdminBooking() {
                       <SelectContent>
                         {variants.map((t) => (
                           <SelectItem key={t.id} value={t.id}>
-                            {t.name} ({t.duration}m) - ₹{t.currentPrice?.actualPrice}
+                          {t.name} ({t.duration}m) - ₹{t.currentPrice?.offerPrice ?? t.currentPrice?.actualPrice}
                           </SelectItem>
                         ))}
                       </SelectContent>
