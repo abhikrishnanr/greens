@@ -31,6 +31,7 @@ model User {
   updatedAt   DateTime  @default(now()) @updatedAt @db.Timestamp(3)
 
   bookings Booking[]
+  enquiries Enquiry[]
 }
 
 model Branch {
@@ -223,4 +224,13 @@ model HeroTabVariant {
   serviceTier   ServiceTier @relation(fields: [serviceTierId], references: [id])
 
   @@id([heroTabId, serviceTierId])
+}
+
+model Enquiry {
+  id         String   @id @default(uuid()) @db.VarChar(191)
+  customerId String   @db.VarChar(191)
+  customer   User     @relation(fields: [customerId], references: [id])
+  enquiry    String?  @db.LongText
+  variantIds String?  @db.Text
+  createdAt  DateTime @default(now()) @db.Timestamp(3)
 }
