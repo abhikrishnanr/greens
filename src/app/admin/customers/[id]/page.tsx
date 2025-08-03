@@ -4,10 +4,15 @@ interface BookingHistory { id: string; date: string; start: string; items: { nam
 interface BillingHistory { id: string; service: string; variant: string; scheduledAt: string; amountAfter: number }
 interface User { id: string; name: string | null; phone: string | null; email?: string | null; gender?: string | null }
 
-export default async function CustomerProfile({ params }: { params: { id: string } }) {
-  const { id } = params
-  const base = process.env.NEXT_PUBLIC_BASE_URL || ''
-  const res = await fetch(`${base}/api/customers/${id}`, { cache: 'no-store' })
+export default async function CustomerProfile({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+  const base = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+  const apiUrl = new URL(`/api/customers/${id}`, base)
+  const res = await fetch(apiUrl, { cache: 'no-store' })
   if (res.status === 404) {
     return <div className="p-6 text-red-500">Customer not found</div>
   }
