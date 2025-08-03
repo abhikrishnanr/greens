@@ -17,8 +17,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const billed = await prisma.billing.findMany({
         where: {
           scheduledAt: {
-            gte: startOfDay(new Date(date)),
-            lt: endOfDay(new Date(date)),
+            gte: startOfDay(new Date(`${date}T00:00:00Z`)),
+            lt: endOfDay(new Date(`${date}T00:00:00Z`)),
           },
         },
         select: { scheduledAt: true },
@@ -26,7 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const billedSet = new Set(billed.map(b => b.scheduledAt.toISOString()))
       bookings.forEach(b => {
         b.items = b.items.map(it => {
-          const scheduledAt = new Date(`${b.date}T${it.start}:00`).toISOString()
+          const scheduledAt = new Date(`${b.date}T${it.start}:00Z`).toISOString()
           return { ...it, billed: billedSet.has(scheduledAt) }
         }) as typeof b.items
       })
