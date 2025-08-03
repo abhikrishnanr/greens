@@ -1,14 +1,24 @@
 import Link from 'next/link'
-import { headers } from 'next/headers'
+
+interface BookingHistory { id: string; date: string; start: string; items: { name: string }[] }
+interface BillingHistory { id: string; service: string; variant: string; scheduledAt: string; amountAfter: number }
+interface User { id: string; name: string | null; phone: string | null; email?: string | null; gender?: string | null }
 
 export default async function CustomerProfile({ params }: { params: { id: string } }) {
   const { id } = params
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `http://${headers().get('host')}`
-  const res = await fetch(`${baseUrl}/api/customers/${id}`, { cache: 'no-store' })
+  const base = process.env.NEXT_PUBLIC_BASE_URL || ''
+  const res = await fetch(`${base}/api/customers/${id}`, { cache: 'no-store' })
+  if (res.status === 404) {
+    return <div className="p-6 text-red-500">Customer not found</div>
+  }
   if (!res.ok) {
     return <div className="p-6 text-red-500">Failed to load customer</div>
   }
-  const { user, history } = await res.json()
+  const { user, billingHistory, scheduleHistory } = (await res.json()) as {
+    user: User | null
+    billingHistory: BillingHistory[]
+    scheduleHistory: BookingHistory[]
+  }
   if (!user) {
     return <div className="p-6 text-red-500">Customer not found</div>
   }
@@ -24,15 +34,24 @@ export default async function CustomerProfile({ params }: { params: { id: string
       >
         Book Service
       </Link>
-      <h2 className="text-2xl font-semibold mb-2">Service History</h2>
-      <ul className="space-y-2">
-        {history.map((h: any) => (
-          <li key={h.id} className="border-b pb-2">
-            <span className="font-medium">{h.service}</span> - {h.variant} on{' '}
-            {new Date(h.scheduledAt).toLocaleDateString()}
+      <h2 className="text-2xl font-semibold mb-2">Schedule History</h2>
+      <ul className="space-y-2 mb-6">
+        {scheduleHistory.map(b => (
+          <li key={b.id} className="border-b pb-2">
+            {b.date} at {b.start} - {b.items.map(i => i.name).join(', ')}
           </li>
         ))}
-        {history.length === 0 && <li>No history found.</li>}
+        {scheduleHistory.length === 0 && <li>No schedule history found.</li>}
+      </ul>
+      <h2 className="text-2xl font-semibold mb-2">Billing History</h2>
+      <ul className="space-y-2">
+        {billingHistory.map(h => (
+          <li key={h.id} className="border-b pb-2">
+            <span className="font-medium">{h.service}</span> - {h.variant} on{' '}
+            {new Date(h.scheduledAt).toLocaleDateString()} for ₹{h.amountAfter}
+          </li>
+        ))}
+        {billingHistory.length === 0 && <li>No billing history found.</li>}
       </ul>
     </div>
   )

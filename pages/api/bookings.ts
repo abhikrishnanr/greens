@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         b.items = b.items.map(it => {
           const scheduledAt = new Date(`${b.date}T${it.start}:00`).toISOString()
           return { ...it, billed: billedSet.has(scheduledAt) }
-        }) as any
+        }) as typeof b.items
       })
     }
 
@@ -37,6 +37,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'POST') {
     const data = req.body
     const firstItem = data.items?.[0]
+
+    if (data.phone && data.customer) {
+      try {
+        await prisma.user.upsert({
+          where: { phone: data.phone },
+          update: { name: data.customer, gender: data.gender },
+          create: { name: data.customer, phone: data.phone, gender: data.gender, role: 'customer' },
+        })
+      } catch (err) {
+        console.error('customer upsert failed', err)
+      }
+    }
     const booking = await prisma.booking.create({
       data: {
         customer: data.customer,
