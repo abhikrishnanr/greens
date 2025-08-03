@@ -15,7 +15,7 @@ import {
   User,
   Scissors,
   Clock,
-  DollarSign,
+  IndianRupee,
   ListChecks,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -24,11 +24,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-
-interface Category {
-  id: string
-  name: string
-}
+import ReactSelect from "react-select"
 
 interface Variant {
   id: string
@@ -37,10 +33,17 @@ interface Variant {
   currentPrice?: { actualPrice: number; offerPrice?: number | null } | null
 }
 
-interface Service {
+interface ServiceOption {
   id: string
   name: string
+  categoryId: string
+  categoryName: string
   variants: Variant[]
+}
+
+interface ServiceSelectOption {
+  value: string
+  label: string
 }
 
 interface Staff {
@@ -93,9 +96,7 @@ interface Booking {
 const COLORS = ["#f87171", "#60a5fa", "#34d399", "#fbbf24", "#c084fc", "#f472b6"]
 
 export default function AdminBooking() {
-  const [categories, setCategories] = useState<Category[]>([])
-  const [category, setCategory] = useState("")
-  const [services, setServices] = useState<Service[]>([])
+  const [services, setServices] = useState<ServiceOption[]>([])
   const [selectedSvc, setSelectedSvc] = useState("")
 
   const [variants, setVariants] = useState<Variant[]>([])
@@ -155,34 +156,15 @@ export default function AdminBooking() {
     }
   }, [searchParams])
 
-
-  const loadCategories = async () => {
-    try {
-      const res = await fetch("/api/admin/service-categories")
-      if (!res.ok) throw new Error("Failed to fetch categories")
-      const data = await res.json()
-      setCategories(data)
-    } catch (error) {
-      console.error("Error loading categories:", error)
-      setResult({ success: false, message: "Failed to load service categories." })
-    }
-  }
-
   const loadServices = async () => {
-    if (!category) {
-      setServices([])
-      setVariants([])
-      setSelectedSvc("")
-      return
-    }
     try {
-      const res = await fetch(`/api/admin/services-walkin/${category}`)
+      const res = await fetch("/api/admin/services-walkin")
       if (!res.ok) throw new Error("Failed to fetch services")
-      const data: Service[] = await res.json()
+      const data: ServiceOption[] = await res.json()
       setServices(data.filter((s) => s.variants.some((v) => v.currentPrice)))
     } catch (error) {
       console.error("Error loading services:", error)
-      setResult({ success: false, message: "Failed to load services for this category." })
+      setResult({ success: false, message: "Failed to load services." })
     }
   }
 
@@ -215,22 +197,17 @@ export default function AdminBooking() {
   }
 
   useEffect(() => {
-    loadCategories()
+    loadServices()
     loadStaff()
   }, [])
   useEffect(() => {
     loadBookings()
   }, [date])
   useEffect(() => {
-    loadServices()
-    setSelectedSvc("")
-    setVariants([])
-  }, [category])
-  useEffect(() => {
     if (!selectedSvc) return
     const svc = services.find((s) => s.id === selectedSvc)
     setVariants(svc?.variants || [])
-  }, [selectedSvc])
+  }, [selectedSvc, services])
   useEffect(() => {
     localStorage.setItem("walkin-bookings", JSON.stringify(bookings))
   }, [bookings])
@@ -647,7 +624,7 @@ export default function AdminBooking() {
               {customerStats && (
                 <div className="flex items-center gap-4 p-2 bg-green-50 border rounded">
                   <span className="text-sm font-medium">Existing customer</span>
-                  <span className="flex items-center gap-1 text-sm"><DollarSign className="h-4 w-4 text-green-600" />₹{customerStats.totalAmount}</span>
+                  <span className="flex items-center gap-1 text-sm"><IndianRupee className="h-4 w-4 text-green-600" />₹{customerStats.totalAmount}</span>
                   <span className="flex items-center gap-1 text-sm"><ListChecks className="h-4 w-4 text-green-600" />{customerStats.billCount} bills</span>
                 </div>
               )}
@@ -719,40 +696,30 @@ export default function AdminBooking() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm">Category</Label>
-                  <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          {c.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {services.length > 0 && (
-                  <div className="space-y-2">
-                    <Label className="text-sm">Service</Label>
-                    <Select value={selectedSvc} onValueChange={setSelectedSvc}>
-                      <SelectTrigger className="h-9">
-                        <SelectValue placeholder="Select service" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {services.map((s) => (
-                          <SelectItem key={s.id} value={s.id}>
-                            {s.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
+              <div className="space-y-2">
+                <Label className="text-sm">Service</Label>
+                <ReactSelect<ServiceSelectOption>
+                  className="w-full text-sm"
+                  styles={{
+                    control: (base) => ({ ...base, minHeight: '36px', height: '36px' }),
+                  }}
+                  options={services.map((s) => ({
+                    value: s.id,
+                    label: `${s.categoryName} - ${s.name}`,
+                  }))}
+                  value=
+                    {selectedSvc
+                      ? {
+                          value: selectedSvc,
+                          label: `${
+                            services.find((s) => s.id === selectedSvc)?.categoryName
+                          } - ${services.find((s) => s.id === selectedSvc)?.name}`,
+                        }
+                      : null}
+                  onChange={(opt: ServiceSelectOption | null) => setSelectedSvc(opt?.value || "")}
+                  placeholder="Select service"
+                  isSearchable
+                />
               </div>
 
               {variants.length > 0 && (
@@ -870,7 +837,7 @@ export default function AdminBooking() {
                   <Separator />
                   <div className="flex justify-between items-center pt-2">
                     <span className="text-base font-semibold text-gray-800 flex items-center gap-1">
-                      <DollarSign className="h-4 w-4 text-gray-600" /> Total: {totalDuration}m • ₹{totalAmount}
+                      <IndianRupee className="h-4 w-4 text-gray-600" /> Total: {totalDuration}m • ₹{totalAmount}
                     </span>
                     <Button
                       type="submit"
