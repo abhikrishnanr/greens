@@ -9,7 +9,7 @@ export async function GET(req: Request) {
   }
   try {
     const staff = await prisma.user.findMany({
-      where: { role: 'staff', branchId: id },
+      where: { role: { in: ['staff', 'customer_staff'] }, branchId: id },
       select: { id: true, name: true },
       orderBy: { name: 'asc' },
     })

@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
     const branchId = searchParams.get('branchId')
-    const where: any = { role: 'customer' }
+    const where: any = { role: { in: ['customer', 'customer_staff'] } }
     if (branchId) where.branchId = branchId
     const customers = await prisma.user.findMany({
       where,

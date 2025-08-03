@@ -21,6 +21,12 @@ export async function POST(req: Request) {
     if (!id) throw new Error('Missing staff ID');
 
     // Extract other fields
+    const existing = await prisma.user.findUnique({ where: { id } });
+    let role = form.get('role') as string;
+    if (existing?.role === 'customer' && role === 'staff') {
+      role = 'customer_staff';
+    }
+
     const data: any = {
       name:        form.get('name') as string,
       email:       form.get('email') as string,
@@ -31,7 +37,7 @@ export async function POST(req: Request) {
       designation: form.get('designation') as string,
       experience:  form.get('experience') as string,
       startDate:   form.get('startDate') ? new Date(form.get('startDate') as string) : undefined,
-      role:        form.get('role') as string,
+      role,
       branchId:    form.get('branchId') as string,
     };
 
