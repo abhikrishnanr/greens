@@ -31,6 +31,9 @@ export default function StaffPage() {
   const [searchTerm, setSearchTerm]       = useState('');
   const [showAddModal, setShowAddModal]   = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<Staff|null>(null);
+  const [existingCustomer, setExistingCustomer] = useState<Partial<Staff>|null>(null);
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  const [newPhone, setNewPhone] = useState('');
 
   // fetch data
   const fetchStaff = async() => {
@@ -112,6 +115,28 @@ const handleExport = () => {
       return s.name.toLowerCase().includes(q) || s.email.toLowerCase().includes(q);
     });
 
+  const handlePhoneCheck = async(e:FormEvent<HTMLFormElement>)=>{
+    e.preventDefault();
+    if (!/^\d{10}$/.test(newPhone)) {
+      toast.error('Phone must be 10 digits');
+      return;
+    }
+    const res = await fetch(`/api/staff/check?phone=${newPhone}`);
+    const data = await res.json();
+    if (data.exists) {
+      if (data.user.role !== 'customer') {
+        toast.error('User already staff');
+        return;
+      }
+      const ok = window.confirm('Customer exists with this number. Add as staff?');
+      if (!ok) return;
+      setExistingCustomer(data.user);
+    } else {
+      setExistingCustomer(null);
+    }
+    setPhoneVerified(true);
+  };
+
   // Add Staff
   const handleAdd = async(e:FormEvent<HTMLFormElement>)=>{
     e.preventDefault();
@@ -122,14 +147,21 @@ const handleExport = () => {
       toast.error('Phone must be 10 digits');
       return;
     }
-    const res = await fetch('/api/staff/add',{
-      method:'POST', body: fd
-    });
+    let res: Response;
+    if (existingCustomer) {
+      fd.append('id', existingCustomer.id);
+      res = await fetch('/api/staff/update',{ method:'POST', body: fd });
+    } else {
+      res = await fetch('/api/staff/add',{ method:'POST', body: fd });
+    }
     const { success } = await res.json();
     if (success) {
       toast.success('Staff added!');
       form.reset();
       setShowAddModal(false);
+      setPhoneVerified(false);
+      setExistingCustomer(null);
+      setNewPhone('');
       fetchStaff();
     } else {
       toast.error('Failed to add');
@@ -300,149 +332,184 @@ const handleExport = () => {
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-xl w-full max-w-2xl border border-gray-300 overflow-auto max-h-[90vh]">
             <h2 className="text-2xl mb-4">Add New Staff</h2>
-            <form
-              onSubmit={handleAdd}
-              encType="multipart/form-data"
-              className="grid grid-cols-2 gap-4 text-gray-900"
-            >
-              {/* Profile Pic */}
-              <div className="col-span-2">
-                <label className="block mb-1">Profile Pic</label>
-                <input type="file" name="image" accept="image/*" className="w-full"/>
-                <small className="text-gray-400">optional JPG/PNG</small>
-              </div>
-              {/* Name */}
-              <div>
-                <label className="block mb-1">Name*</label>
-                <input
-                  name="name"
-                  required
-                  className="w-full p-2 rounded bg-gray-200"
-                />
-              </div>
-              {/* Email */}
-              <div>
-                <label className="block mb-1">Email*</label>
-                <input
-                  name="email"
-                  type="email"
-                  required
-                  className="w-full p-2 rounded bg-gray-200"
-                />
-              </div>
-              {/* Phone */}
-              <div>
-                <label className="block mb-1">Phone*</label>
-                <input
-                  name="phone"
-                  required maxLength={10} pattern="\d{10}"
-                  className="w-full p-2 rounded bg-gray-200"
-                />
-              </div>
-              {/* Gender */}
-              <div>
-                <label className="block mb-1">Gender*</label>
-                <select
-                  name="gender"
-                  required
-                  className="w-full p-2 rounded bg-gray-200"
-                >
-                  <option value="">— select —</option>
-                  <option>Male</option>
-                  <option>Female</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              {/* DOB */}
-              <div>
-                <label className="block mb-1">DOB*</label>
-                <input
-                  name="dob"
-                  type="date"
-                  required
-                  className="w-full p-2 rounded bg-gray-200"
-                />
-              </div>
-              {/* Address */}
-              <div className="col-span-2">
-                <label className="block mb-1">Address*</label>
-                <input
-                  name="address"
-                  required
-                  className="w-full p-2 rounded bg-gray-200"
-                />
-              </div>
-              {/* Designation */}
-              <div>
-                <label className="block mb-1">Designation*</label>
-                <input
-                  name="designation"
-                  required
-                  className="w-full p-2 rounded bg-gray-200"
-                />
-              </div>
-              {/* Experience */}
-              <div>
-                <label className="block mb-1">Experience</label>
-                <input
-                  name="experience"
-                  className="w-full p-2 rounded bg-gray-200"
-                />
-              </div>
-              {/* Start Date */}
-              <div>
-                <label className="block mb-1">Start Date*</label>
-                <input
-                  name="startDate"
-                  type="date"
-                  required
-                  className="w-full p-2 rounded bg-gray-200"
-                />
-              </div>
-              {/* Role */}
-              <div>
-                <label className="block mb-1">Role*</label>
-                <select
-                  name="role"
-                  required
-                  className="w-full p-2 rounded bg-gray-200"
-                >
-                  <option>customer</option>
-                  <option>staff</option>
-                  <option>manager</option>
-                </select>
-              </div>
-              {/* Branch */}
-              <div>
-                <label className="block mb-1">Branch*</label>
-                <select
-                  name="branchId"
-                  required
-                  className="w-full p-2 rounded bg-gray-200"
-                >
-                  <option value="">— select —</option>
-                  {branches.map(b=>(
-                    <option key={b.id} value={b.id}>{b.name}</option>
-                  ))}
-                </select>
-              </div>
-              {/* Buttons */}
-              <div className="col-span-2 flex justify-end gap-2 mt-4">
-                <button
-                  type="button"
-                  onClick={()=>setShowAddModal(false)}
-                  className="px-4 py-2 bg-gray-300 rounded"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-green-600 rounded"
-                >
-                  Add
-                </button>
-              </div>
-            </form>
+            {!phoneVerified ? (
+              <form onSubmit={handlePhoneCheck} className="grid grid-cols-2 gap-4 text-gray-900">
+                <div className="col-span-2">
+                  <label className="block mb-1">Phone*</label>
+                  <input
+                    value={newPhone}
+                    onChange={e=>setNewPhone(e.target.value)}
+                    required maxLength={10} pattern="\d{10}"
+                    className="w-full p-2 rounded bg-gray-200"
+                  />
+                </div>
+                <div className="col-span-2 flex justify-end gap-2 mt-4">
+                  <button
+                    type="button"
+                    onClick={()=>{setShowAddModal(false);setNewPhone('');setPhoneVerified(false);setExistingCustomer(null);}}
+                    className="px-4 py-2 bg-gray-300 rounded"
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className="px-4 py-2 bg-green-600 rounded">
+                    Next
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <form
+                onSubmit={handleAdd}
+                encType="multipart/form-data"
+                className="grid grid-cols-2 gap-4 text-gray-900"
+              >
+                {/* Profile Pic */}
+                <div className="col-span-2">
+                  <label className="block mb-1">Profile Pic</label>
+                  <input type="file" name="image" accept="image/*" className="w-full"/>
+                  <small className="text-gray-400">optional JPG/PNG</small>
+                </div>
+                {/* Name */}
+                <div>
+                  <label className="block mb-1">Name*</label>
+                  <input
+                    name="name"
+                    defaultValue={existingCustomer?.name}
+                    required
+                    className="w-full p-2 rounded bg-gray-200"
+                  />
+                </div>
+                {/* Email */}
+                <div>
+                  <label className="block mb-1">Email*</label>
+                  <input
+                    name="email"
+                    type="email"
+                    defaultValue={existingCustomer?.email}
+                    required
+                    className="w-full p-2 rounded bg-gray-200"
+                  />
+                </div>
+                {/* Phone */}
+                <div>
+                  <label className="block mb-1">Phone*</label>
+                  <input
+                    name="phone"
+                    value={newPhone}
+                    readOnly
+                    className="w-full p-2 rounded bg-gray-200"
+                  />
+                </div>
+                {/* Gender */}
+                <div>
+                  <label className="block mb-1">Gender*</label>
+                  <select
+                    name="gender"
+                    defaultValue={existingCustomer?.gender || ''}
+                    required
+                    className="w-full p-2 rounded bg-gray-200"
+                  >
+                    <option value="">— select —</option>
+                    <option>Male</option>
+                    <option>Female</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                {/* DOB */}
+                <div>
+                  <label className="block mb-1">DOB*</label>
+                  <input
+                    name="dob"
+                    type="date"
+                    defaultValue={existingCustomer?.dob?.split?.('T')[0]}
+                    required
+                    className="w-full p-2 rounded bg-gray-200"
+                  />
+                </div>
+                {/* Address */}
+                <div className="col-span-2">
+                  <label className="block mb-1">Address*</label>
+                  <input
+                    name="address"
+                    defaultValue={existingCustomer?.address}
+                    required
+                    className="w-full p-2 rounded bg-gray-200"
+                  />
+                </div>
+                {/* Designation */}
+                <div>
+                  <label className="block mb-1">Designation*</label>
+                  <input
+                    name="designation"
+                    defaultValue={existingCustomer?.designation}
+                    required
+                    className="w-full p-2 rounded bg-gray-200"
+                  />
+                </div>
+                {/* Experience */}
+                <div>
+                  <label className="block mb-1">Experience</label>
+                  <input
+                    name="experience"
+                    defaultValue={existingCustomer?.experience}
+                    className="w-full p-2 rounded bg-gray-200"
+                  />
+                </div>
+                {/* Start Date */}
+                <div>
+                  <label className="block mb-1">Start Date*</label>
+                  <input
+                    name="startDate"
+                    type="date"
+                    required
+                    className="w-full p-2 rounded bg-gray-200"
+                  />
+                </div>
+                {/* Role */}
+                <div>
+                  <label className="block mb-1">Role*</label>
+                  <select
+                    name="role"
+                    defaultValue="staff"
+                    required
+                    className="w-full p-2 rounded bg-gray-200"
+                  >
+                    <option>customer</option>
+                    <option>staff</option>
+                    <option>manager</option>
+                  </select>
+                </div>
+                {/* Branch */}
+                <div>
+                  <label className="block mb-1">Branch*</label>
+                  <select
+                    name="branchId"
+                    required
+                    className="w-full p-2 rounded bg-gray-200"
+                  >
+                    <option value="">— select —</option>
+                    {branches.map(b=>(
+                      <option key={b.id} value={b.id}>{b.name}</option>
+                    ))}
+                  </select>
+                </div>
+                {/* Buttons */}
+                <div className="col-span-2 flex justify-end gap-2 mt-4">
+                  <button
+                    type="button"
+                    onClick={()=>{setShowAddModal(false);setPhoneVerified(false);setExistingCustomer(null);setNewPhone('');}}
+                    className="px-4 py-2 bg-gray-300 rounded"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-green-600 rounded"
+                  >
+                    Add
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
