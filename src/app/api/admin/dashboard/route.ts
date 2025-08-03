@@ -24,6 +24,7 @@ export async function GET() {
         where: { endDate: null },
         distinct: ['tierId'],
       }),
+
       prisma.booking.count({ where: { date: today } }),
       prisma.billing.count({
         where: { paidAt: { gte: start, lt: end } },
@@ -47,6 +48,7 @@ export async function GET() {
         orderBy: [{ date: 'asc' }, { start: 'asc' }],
         take: 5,
       }),
+
     ])
 
     return NextResponse.json({
@@ -62,6 +64,7 @@ export async function GET() {
       enquiries: {
         today: enquiriesToday,
         open: openEnquiries,
+
       },
     })
   } catch (err) {

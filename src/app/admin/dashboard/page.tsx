@@ -7,6 +7,7 @@ import {
   MessageSquare,
   PhoneCall,
   Scissors,
+
 } from 'lucide-react'
 
 interface DashboardData {
@@ -29,6 +30,9 @@ interface DashboardData {
     today: number
     open: number
   }
+  customers: number
+  enquiries: number
+  revenue: number
 }
 
 export default function DashboardPage() {
@@ -47,6 +51,7 @@ export default function DashboardPage() {
     { label: 'Enquiries Today', value: data.enquiries.today, icon: PhoneCall, color: 'bg-purple-500' },
     { label: 'Open Enquiries', value: data.enquiries.open, icon: MessageSquare, color: 'bg-orange-500' },
     { label: 'Pending Billing', value: data.billing.pending, icon: Banknote, color: 'bg-yellow-500' },
+
   ]
 
   return (
