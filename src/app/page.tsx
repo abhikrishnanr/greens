@@ -1,8 +1,9 @@
 "use client"
+
 import { useState, useEffect, useMemo } from "react"
 import { useCart } from "@/contexts/CartContext"
 import Link from "next/link"
-import { FiShoppingCart, FiPhone, FiMapPin, FiMail, FiInstagram, FiArrowRight } from "react-icons/fi"
+import { FiShoppingCart, FiPhone, FiMapPin, FiMail, FiInstagram, FiArrowRight, FiSearch, FiX } from "react-icons/fi"
 import { MdStar, MdDiamond, MdEco } from "react-icons/md"
 import { motion, AnimatePresence } from "framer-motion"
 import Header from "@/components/Header"
@@ -59,6 +60,10 @@ export default function HomePage() {
   const [heroLoading, setHeroLoading] = useState(true)
   const [selectedGenderTab, setSelectedGenderTab] = useState<"WOMEN" | "MEN">("WOMEN")
 
+  // Search functionality
+  const [searchQuery, setSearchQuery] = useState("")
+  const [isSearchFocused, setIsSearchFocused] = useState(false)
+
   useEffect(() => {
     setLoading(true)
     fetch("/api/v2/service-categories")
@@ -88,11 +93,49 @@ export default function HomePage() {
       .finally(() => setHeroLoading(false))
   }, [])
 
+  // Filter categories and services based on search query
+  const filteredCategories = useMemo(() => {
+    if (!searchQuery.trim()) return categories
+
+    return categories
+      .filter((category) => {
+        // Check if category name or caption matches
+        const categoryMatch =
+          category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          category.caption?.toLowerCase().includes(searchQuery.toLowerCase())
+
+        // Check if any service in the category matches
+        const serviceMatch = category.services?.some(
+          (service: any) =>
+            service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            service.caption?.toLowerCase().includes(searchQuery.toLowerCase()),
+        )
+
+        return categoryMatch || serviceMatch
+      })
+      .map((category) => {
+        // If searching, also filter the services within each category
+        if (searchQuery.trim()) {
+          return {
+            ...category,
+            services: category.services?.filter(
+              (service: any) =>
+                service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                service.caption?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                category.caption?.toLowerCase().includes(searchQuery.toLowerCase()),
+            ),
+          }
+        }
+        return category
+      })
+  }, [categories, searchQuery])
+
   const subServices = useMemo(() => {
     if (!expandedCat) return []
-    const cat = categories.find((c) => c.id === expandedCat)
+    const cat = filteredCategories.find((c) => c.id === expandedCat)
     return cat ? cat.services : []
-  }, [expandedCat, categories])
+  }, [expandedCat, filteredCategories])
 
   function addToCart(service: any) {
     add({ id: service.id, name: service.name, price: service.offerPrice ?? service.mrp })
@@ -102,6 +145,14 @@ export default function HomePage() {
     if (heroTabs.length === 0) return {} as any
     return heroTabs.find((cat) => cat.id === selectedHeroCategory) || heroTabs[0]
   }, [selectedHeroCategory, heroTabs])
+
+  const clearSearch = () => {
+    setSearchQuery("")
+  }
+
+  const totalServicesFound = useMemo(() => {
+    return filteredCategories.reduce((total, cat) => total + (cat.services?.length || 0), 0)
+  }, [filteredCategories])
 
   return (
     <main className="bg-white min-h-screen font-sans text-gray-900">
@@ -352,7 +403,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* COMPACT SERVICES SECTION */}
+      {/* COMPACT SERVICES SECTION WITH SEARCH */}
       <section id="services" className="py-16 bg-gray-50">
         <div className="container mx-auto px-6">
           <motion.div
@@ -368,15 +419,110 @@ export default function HomePage() {
             <p className="text-gray-600 text-lg">Explore our complete range of beauty and wellness services</p>
           </motion.div>
 
+          {/* BEAUTIFUL SEARCH BAR */}
+          <motion.div
+            className="max-w-2xl mx-auto mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <div className="relative">
+              <motion.div
+                className={`relative bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 ${
+                  isSearchFocused ? "border-green-400 shadow-xl" : "border-gray-200"
+                }`}
+                whileHover={{ scale: 1.02 }}
+              >
+                <div className="flex items-center">
+                  <div className="pl-6 pr-4 py-4">
+                    <FiSearch
+                      className={`text-xl transition-colors duration-300 ${
+                        isSearchFocused ? "text-green-500" : "text-gray-400"
+                      }`}
+                    />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search for services, treatments, or categories..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => setIsSearchFocused(true)}
+                    onBlur={() => setIsSearchFocused(false)}
+                    className="flex-1 py-4 pr-4 text-gray-700 placeholder-gray-400 bg-transparent border-none outline-none text-lg"
+                  />
+                  {searchQuery && (
+                    <motion.button
+                      onClick={clearSearch}
+                      className="mr-4 p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                    >
+                      <FiX className="text-lg" />
+                    </motion.button>
+                  )}
+                </div>
+
+                {/* Search suggestions/results indicator */}
+                {searchQuery && (
+                  <motion.div
+                    className="px-6 pb-3"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                  >
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">
+                        Found {filteredCategories.length} categories with {totalServicesFound} services
+                      </span>
+                      {searchQuery && <span className="text-green-600 font-medium">Searching for "{searchQuery}"</span>}
+                    </div>
+                  </motion.div>
+                )}
+              </motion.div>
+
+              {/* Search glow effect */}
+              {isSearchFocused && (
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-400/20 rounded-2xl blur-xl -z-10"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                />
+              )}
+            </div>
+          </motion.div>
+
+          {/* SEARCH RESULTS OR ALL SERVICES */}
           {loading ? (
             <div className="space-y-4 max-w-4xl mx-auto">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="bg-gray-200 rounded-xl h-20 animate-pulse"></div>
               ))}
             </div>
+          ) : filteredCategories.length === 0 ? (
+            <motion.div
+              className="text-center py-12 max-w-md mx-auto"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className="w-20 h-20 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                <FiSearch className="text-2xl text-gray-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">No services found</h3>
+              <p className="text-gray-500 mb-4">
+                We couldn't find any services matching "{searchQuery}". Try a different search term.
+              </p>
+              <button onClick={clearSearch} className="text-green-600 hover:text-green-700 font-medium">
+                Clear search and view all services
+              </button>
+            </motion.div>
           ) : (
             <div className="space-y-4 max-w-4xl mx-auto">
-              {categories.map((cat, idx) => {
+              {filteredCategories.map((cat, idx) => {
                 const isOpen = expandedCat === cat.id
                 return (
                   <motion.div
@@ -403,7 +549,13 @@ export default function HomePage() {
                               {cat.name}
                             </h3>
                             <p className="text-gray-600 text-sm">{cat.caption}</p>
-                            <p className="text-gray-500 text-xs mt-1">{cat.services?.length || 0} services available</p>
+                            <p className="text-gray-500 text-xs mt-1">
+                              {cat.services?.length || 0} services available
+                              {searchQuery &&
+                                cat.services?.length !== categories.find((c) => c.id === cat.id)?.services?.length && (
+                                  <span className="ml-2 text-green-600 font-medium">(filtered)</span>
+                                )}
+                            </p>
                           </div>
                         </div>
                         <motion.div
@@ -516,7 +668,6 @@ export default function HomePage() {
                 <FiPhone className="text-green-400 text-lg" />
                 <span>+91 8891 467678</span>
               </motion.a>
-
               <motion.a
                 href="mailto:greensalon@gmail.com"
                 className="flex items-center gap-3 p-3 bg-blue-500/20 rounded-lg hover:bg-blue-500/30 transition-all group"
@@ -525,7 +676,6 @@ export default function HomePage() {
                 <FiMail className="text-blue-400 text-lg" />
                 <span>greensalon@gmail.com</span>
               </motion.a>
-
               <motion.a
                 href="https://instagram.com/greensbeautysalon"
                 target="_blank"
