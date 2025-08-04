@@ -258,9 +258,9 @@ export default function HomePage() {
       )}
 
       {/* QUICK STATS SECTION */}
-      <section className="py-12 bg-gradient-to-r from-green-50 to-emerald-50">
+      <section className="py-8 bg-gradient-to-r from-green-50 to-emerald-50">
         <div className="container mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {QUICK_STATS.map((stat, idx) => (
               <motion.div
                 key={idx}
@@ -282,10 +282,10 @@ export default function HomePage() {
       </section>
 
       {/* POPULAR SERVICES FROM ACTUAL DATA */}
-      <section className="py-16 bg-white">
+      <section className="py-12 bg-white">
         <div className="container mx-auto px-6">
           <motion.div
-            className="text-center mb-12"
+            className="text-center mb-8"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -304,7 +304,7 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               {categories.slice(0, 4).map((category, idx) => {
                 const firstService = category.services?.[0]
                 return (
@@ -361,10 +361,10 @@ export default function HomePage() {
       </section>
 
       {/* SERVICE TIERS SECTION */}
-      <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
+      <section className="py-12 bg-gradient-to-b from-gray-50 to-white">
         <div className="container mx-auto px-6">
           <motion.div
-            className="text-center mb-12"
+            className="text-center mb-8"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -376,7 +376,7 @@ export default function HomePage() {
             <p className="text-gray-600 text-lg">Three tiers of service to match your needs and budget</p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {Object.entries(TIER_LABELS).map(([k, { label, icon }], idx) => (
               <motion.div
                 key={k}
@@ -404,10 +404,10 @@ export default function HomePage() {
       </section>
 
       {/* COMPACT SERVICES SECTION WITH SEARCH */}
-      <section id="services" className="py-16 bg-gray-50">
+      <section id="services" className="py-12 bg-gray-50">
         <div className="container mx-auto px-6">
           <motion.div
-            className="text-center mb-12"
+            className="text-center mb-8"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -498,7 +498,7 @@ export default function HomePage() {
 
           {/* SEARCH RESULTS OR ALL SERVICES */}
           {loading ? (
-            <div className="space-y-4 max-w-4xl mx-auto">
+            <div className="space-y-3 max-w-4xl mx-auto">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="bg-gray-200 rounded-xl h-20 animate-pulse"></div>
               ))}
@@ -530,25 +530,25 @@ export default function HomePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: idx * 0.1 }}
-                    className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-200"
+                    className="bg-white rounded-lg shadow hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-200"
                   >
                     <motion.button
                       onClick={() => setExpandedCat(isOpen ? null : cat.id)}
-                      className="w-full p-6 focus:outline-none"
+                      className="w-full p-4 focus:outline-none"
                       whileHover={{ backgroundColor: "rgba(65, 235, 112, 0.02)" }}
                     >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3">
                           <img
                             src={cat.imageUrl || "/placeholder.svg?height=60&width=60"}
                             alt={cat.name}
-                            className="w-16 h-16 rounded-lg object-cover shadow-sm"
+                            className="w-12 h-12 rounded-lg object-cover shadow-sm"
                           />
                           <div className="text-left">
-                            <h3 className="text-xl font-bold mb-1" style={{ color: "#41eb70" }}>
+                            <h3 className="text-lg font-bold mb-1" style={{ color: "#41eb70" }}>
                               {cat.name}
                             </h3>
-                            <p className="text-gray-600 text-sm">{cat.caption}</p>
+                            <p className="text-gray-600 text-xs">{cat.caption}</p>
                             <p className="text-gray-500 text-xs mt-1">
                               {cat.services?.length || 0} services available
                               {searchQuery &&
@@ -563,10 +563,10 @@ export default function HomePage() {
                           animate={{ rotate: isOpen ? 90 : 0 }}
                           transition={{ duration: 0.3 }}
                         >
-                          <span className="text-sm text-gray-500 hidden md:block">
+                          <span className="text-xs text-gray-500 hidden md:block">
                             {isOpen ? "Hide" : "View"} Services
                           </span>
-                          <FiArrowRight className="text-green-500 text-xl" />
+                          <FiArrowRight className="text-green-500 text-lg" />
                         </motion.div>
                       </div>
                     </motion.button>
@@ -578,29 +578,29 @@ export default function HomePage() {
                           animate={{ opacity: 1, height: "auto" }}
                           exit={{ opacity: 0, height: 0 }}
                           transition={{ duration: 0.4 }}
-                          className="px-6 pb-6 border-t border-gray-100"
+                          className="px-4 pb-4 border-t border-gray-100"
                         >
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 pt-2">
                             {subServices.map((svc) => (
                               <div
                                 key={svc.id}
-                                className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                                className="flex items-center gap-2 p-2 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors text-sm"
                               >
                                 <img
                                   src={svc.imageUrl || "/placeholder.svg?height=40&width=40"}
                                   alt={svc.name}
-                                  className="w-12 h-12 object-cover rounded-lg"
+                                  className="w-10 h-10 object-cover rounded-lg"
                                 />
                                 <div className="flex-1">
-                                  <h4 className="font-semibold text-gray-900">{svc.name}</h4>
+                                  <h4 className="font-semibold text-gray-900 text-sm">{svc.name}</h4>
                                   <p className="text-gray-600 text-xs line-clamp-1">{svc.caption}</p>
                                   {svc.minPrice != null && (
-                                    <span className="text-green-600 font-bold text-sm">From ₹{svc.minPrice}</span>
+                                    <span className="text-green-600 font-bold text-xs">From ₹{svc.minPrice}</span>
                                   )}
                                 </div>
                                 <Link
                                   href={`/services/${svc.id}`}
-                                  className="text-green-500 hover:text-green-600 font-medium text-sm whitespace-nowrap"
+                                  className="text-green-500 hover:text-green-600 font-medium text-xs whitespace-nowrap"
                                 >
                                   View Details
                                 </Link>
@@ -619,10 +619,10 @@ export default function HomePage() {
       </section>
 
       {/* CONTACT & FOOTER COMBINED */}
-      <section className="py-16 bg-gradient-to-b from-gray-800 to-gray-900 text-white">
+      <section className="py-12 bg-gradient-to-b from-gray-800 to-gray-900 text-white">
         <div className="container mx-auto px-6">
           <motion.div
-            className="text-center mb-12"
+            className="text-center mb-8"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -634,7 +634,7 @@ export default function HomePage() {
             <p className="text-gray-300 text-lg">Get in touch with us today</p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-8">
             <motion.div
               className="text-center md:text-left"
               initial={{ opacity: 0, x: -30 }}
