@@ -1,46 +1,51 @@
-import { PrismaClient } from '@prisma/client';
-import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
 
-const prisma = new PrismaClient();
-
-export async function GET(req, { params }) {
-  const { id } = await params;
-
+export async function GET(req: Request, { params }: { params: { id: string } }) {
+  const { id } = params
   try {
-    // Fetch the service by id with latest price
-    const service = await prisma.service.findUnique({
+    const service = await prisma.serviceNew.findUnique({
       where: { id },
       include: {
-        priceHistory: {
-          orderBy: { offerStartDate: 'desc' },
-          take: 1,
-        }
-      }
-    });
+        images: true,
+        tiers: {
+          include: {
+            priceHistory: {
+              orderBy: { offerStartDate: 'desc' },
+              take: 1,
+            },
+          },
+          orderBy: { name: 'asc' },
+        },
+      },
+    })
 
     if (!service) {
-      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Service not found' }, { status: 404 })
     }
 
-    const price = service.priceHistory[0];
-    const response = {
-      id: service.id,
-      main_service_name: service.mainServiceName,
-      main_service_name_description: service.mainServiceNameDescription ?? '',
-      caption: service.caption ?? '',
-      imageUrl: service.imageUrl ?? null,
-      minPrice: price ? (price.offerPrice ?? price.actualPrice) : null,
-      applicable_to: (service.applicableTo || 'unisex').toLowerCase(),
-      description: service.serviceDescription ?? '',
-      sub_category: service.subCategory ?? '',
-      category_image_url: service.categoryImageUrl ?? '',
-      active: service.active,
-      // Add any other fields your detail page needs!
-    };
+    const tiers = service.tiers.map((t) => {
+      const history = t.priceHistory[0]
+      return {
+        id: t.id,
+        name: t.name,
+        actualPrice: history?.actualPrice ?? t.actualPrice,
+        offerPrice: history?.offerPrice ?? t.offerPrice,
+        duration: t.duration,
+      }
+    })
 
-    return NextResponse.json(response);
+    return NextResponse.json({
+      id: service.id,
+      name: service.name,
+      caption: service.caption,
+      description: service.description,
+      imageUrl: service.imageUrl,
+      images: service.images,
+      tiers,
+    })
   } catch (err) {
-    console.error("/api/services/[id] error:", err);
-    return NextResponse.json({ error: 'Server error', details: err.message }, { status: 500 });
+    console.error('/api/services/[id] error:', err)
+    return NextResponse.json({ error: 'Failed to load service' }, { status: 500 })
   }
 }
