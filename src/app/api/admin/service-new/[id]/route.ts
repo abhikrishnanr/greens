@@ -12,6 +12,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       description: data.description || null,
       imageUrl: data.imageUrl || null,
       applicableTo: data.applicableTo,
+      order: data.order ?? 0,
     },
   })
   return NextResponse.json(service)

@@ -78,6 +78,7 @@ export async function GET(
       caption: v.serviceTier.service.caption ?? null,
       description: v.serviceTier.service.description ?? null,
       imageUrl: v.serviceTier.service.imageUrl ?? null,
+      applicableTo: v.serviceTier.service.applicableTo,
       price,
       actualPrice,
       offerPrice,

@@ -127,6 +127,7 @@ model ServiceNew {
   description String?         @db.LongText
   imageUrl    String?
   applicableTo String         @map("applicable_to") @db.VarChar(191)
+  order        Int            @default(0)
   images      ServiceImage[]
   tiers       ServiceTier[]
 }
