@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export async function GET(req: Request, { params }: { params: { categoryId: string } }) {
-  const { categoryId } = params
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ categoryId: string }> }
+) {
+  const { categoryId } = await params
   const services = await prisma.serviceNew.findMany({
     where: { categoryId },
     include: { tiers: true },
@@ -27,7 +30,10 @@ export async function GET(req: Request, { params }: { params: { categoryId: stri
   return NextResponse.json(response)
 }
 
-export async function POST(req: Request, { params }: { params: { categoryId: string } }) {
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ categoryId: string }> }
+) {
   const { categoryId } = await params
   const data = await req.json()
   const service = await prisma.serviceNew.create({
@@ -44,7 +50,7 @@ export async function POST(req: Request, { params }: { params: { categoryId: str
   return NextResponse.json(service)
 }
 
-export async function PUT(req: Request, { params }: { params: { categoryId: string } }) {
+export async function PUT(req: Request) {
   const newOrder: { id: string; order: number }[] = await req.json()
   for (const s of newOrder) {
     await prisma.serviceNew.update({ where: { id: s.id }, data: { order: s.order } })
