@@ -30,7 +30,7 @@ model User {
   createdAt   DateTime  @default(now()) @db.Timestamp(3)
   updatedAt   DateTime  @default(now()) @updatedAt @db.Timestamp(3)
 
-  bookings Booking[]
+  bookings  Booking[]
   enquiries Enquiry[]
 }
 
@@ -119,17 +119,18 @@ model BranchService {
 }
 
 model ServiceNew {
-  id          String          @id @default(uuid())
-  categoryId  String
-  category    ServiceCategory @relation(fields: [categoryId], references: [id])
-  name        String
-  caption     String?
-  description String?         @db.LongText
-  imageUrl    String?
-  applicableTo String         @map("applicable_to") @db.VarChar(191)
-  order        Int            @default(0)
-  images      ServiceImage[]
-  tiers       ServiceTier[]
+  id               String            @id @default(uuid())
+  categoryId       String
+  category         ServiceCategory   @relation(fields: [categoryId], references: [id])
+  name             String
+  caption          String?
+  description      String?           @db.LongText
+  imageUrl         String?
+  applicableTo     String            @map("applicable_to") @db.VarChar(191)
+  order            Int               @default(0)
+  images           ServiceImage[]
+  tiers            ServiceTier[]
+  featuredServices FeaturedService[]
 }
 
 model ServiceTier {
