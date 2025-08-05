@@ -25,12 +25,22 @@ export default function FeaturedServicesAdmin() {
   const [selected, setSelected] = useState<Record<string, string>>({ female: "", male: "", children: "" })
 
   const loadData = async () => {
-    const svcRes = await fetch("/api/admin/services-new/all")
-    const svcData = await svcRes.json()
-    setServices(svcData)
-    const featRes = await fetch("/api/admin/featured-services")
-    const featData = await featRes.json()
-    setFeatured(featData)
+    try {
+      const [svcRes, featRes] = await Promise.all([
+        fetch("/api/admin/services-new"),
+        fetch("/api/admin/featured-services"),
+      ])
+      if (!svcRes.ok) throw new Error("Failed to fetch services")
+      if (!featRes.ok) throw new Error("Failed to fetch featured services")
+
+      const svcData: ServiceOption[] = await svcRes.json()
+      const featData = await featRes.json()
+      setServices(svcData)
+      setFeatured(featData)
+    } catch (error) {
+      console.error("Error loading data:", error)
+    }
+
   }
 
   useEffect(() => {
