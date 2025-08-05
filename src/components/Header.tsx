@@ -32,7 +32,7 @@ export default function Header() {
         About Greens
       </Link>
       <Link href="#" className="hover:text-green-400 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
-        Connect
+        Contact Us
       </Link>
       <Link href="#" className="hover:text-green-400 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
         My Account
