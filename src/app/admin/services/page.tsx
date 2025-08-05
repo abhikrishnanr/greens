@@ -18,6 +18,11 @@ import {
     FileText,
     Grid3X3,
     Users,
+    ListOrdered,
+    Boxes,
+    Mars,
+    Venus,
+    Baby,
   } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -52,6 +57,7 @@ interface Service {
   description?: string | null
   imageUrl?: string | null
   applicableTo: string
+  order: number
   variants: Variant[]
 }
 
@@ -60,10 +66,14 @@ export default function ServicesAdmin() {
   const [category, setCategory] = useState("")
   const [services, setServices] = useState<Service[]>([])
 
-  const emptyService: Partial<Service> = { id: "", name: "", caption: "", description: "", imageUrl: "", applicableTo: "" }
+  const emptyService: Partial<Service> = { id: "", name: "", caption: "", description: "", imageUrl: "", applicableTo: "", order: 0 }
   const [serviceForm, setServiceForm] = useState<Partial<Service>>(emptyService)
   const [showServiceForm, setShowServiceForm] = useState(false)
   const [editingService, setEditingService] = useState(false)
+
+  const maleCount = services.filter((s) => s.applicableTo === 'male').length
+  const femaleCount = services.filter((s) => s.applicableTo === 'female').length
+  const childrenCount = services.filter((s) => s.applicableTo === 'children').length
 
   const handleServiceImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -133,6 +143,7 @@ export default function ServicesAdmin() {
       description: svc.description || "",
       imageUrl: svc.imageUrl || "",
       applicableTo: svc.applicableTo,
+      order: svc.order,
     })
     setEditingService(true)
     setShowServiceForm(true)
@@ -146,6 +157,7 @@ export default function ServicesAdmin() {
       description: serviceForm.description,
       imageUrl: serviceForm.imageUrl,
       applicableTo: serviceForm.applicableTo,
+      order: serviceForm.order ?? 0,
     }
     if (editingService) {
       await fetch(`/api/admin/service-new/${serviceForm.id}`, {
@@ -324,6 +336,39 @@ export default function ServicesAdmin() {
             </div>
           </CardContent>
         </Card>
+        {/* Stats */}
+        {services.length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="flex items-center gap-3 p-4 bg-slate-100 rounded-lg">
+              <Boxes className="h-6 w-6 text-slate-600" />
+              <div>
+                <p className="text-sm text-slate-600">Total</p>
+                <p className="text-xl font-bold text-slate-700">{services.length}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-4 bg-blue-100 rounded-lg">
+              <Mars className="h-6 w-6 text-blue-600" />
+              <div>
+                <p className="text-sm text-blue-600">Male</p>
+                <p className="text-xl font-bold text-blue-600">{maleCount}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-4 bg-pink-100 rounded-lg">
+              <Venus className="h-6 w-6 text-pink-600" />
+              <div>
+                <p className="text-sm text-pink-600">Female</p>
+                <p className="text-xl font-bold text-pink-600">{femaleCount}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-4 bg-yellow-100 rounded-lg">
+              <Baby className="h-6 w-6 text-yellow-600" />
+              <div>
+                <p className="text-sm text-yellow-600">Children</p>
+                <p className="text-xl font-bold text-yellow-600">{childrenCount}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Services Grid */}
         {services.length > 0 && (
@@ -331,7 +376,15 @@ export default function ServicesAdmin() {
             {services.map((service) => (
               <Card
                 key={service.id}
-                className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm overflow-hidden"
+                className={`group hover:shadow-xl transition-all duration-300 border-2 bg-white/80 backdrop-blur-sm overflow-hidden ${
+                  service.applicableTo === 'female'
+                    ? 'border-pink-400'
+                    : service.applicableTo === 'male'
+                      ? 'border-blue-400'
+                      : service.applicableTo === 'children'
+                        ? 'border-yellow-400'
+                        : 'border-slate-200'
+                }`}
               >
                 <div className="relative">
                   {service.imageUrl ? (
@@ -438,6 +491,21 @@ export default function ServicesAdmin() {
                       value={serviceForm.caption || ""}
                       onChange={(e) => setServiceForm({ ...serviceForm, caption: e.target.value })}
                       placeholder="Short tagline for the service"
+                      className="focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="order" className="flex items-center gap-2">
+                      <ListOrdered className="h-4 w-4" />
+                      Order
+                    </Label>
+                    <Input
+                      id="order"
+                      type="number"
+                      value={serviceForm.order ?? 0}
+                      onChange={(e) => setServiceForm({ ...serviceForm, order: Number(e.target.value) })}
+                      placeholder="Display order"
                       className="focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
