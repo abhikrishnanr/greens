@@ -220,7 +220,7 @@ export default function HomePage() {
                       className="w-full h-full object-cover"
                     />
                   )}
-                  <div className="absolute inset-0 bg-black/40"></div>
+                 
                 </div>
                 <div className="relative z-20 text-white max-w-3xl space-y-4">
                   <h1 className="text-3xl md:text-4xl font-bold tracking-wide text-white drop-shadow-lg">
@@ -232,11 +232,12 @@ export default function HomePage() {
                     </p>
                   ) : (
                     <Link
-                      href={`/hero-tabs/${currentHeroContent.slug || currentHeroContent.id}`}
-                      className="inline-block px-8 py-3 font-semibold text-md shadow-lg transition-all duration-300 bg-emerald-600 text-white hover:bg-emerald-700 hover:scale-105 rounded-full"
-                    >
-                      {currentHeroContent.buttonLabel || "Explore Now"}
-                    </Link>
+  href={`/hero-tabs/${currentHeroContent.slug || currentHeroContent.id}`}
+  className="inline-block px-8 py-3 font-semibold text-md shadow-lg transition-all duration-300 bg-transparent text-white border border-white hover:bg-white hover:text-emerald-600 hover:scale-105 rounded-none"
+>
+  {currentHeroContent.buttonLabel || "Explore Now"}
+</Link>
+
                   )}
                 </div>
               </motion.div>
