@@ -46,6 +46,7 @@ async function main() {
           name: row['Sub category'],
           caption: row['Service Description']?.slice(0, 120) || null,
           description: row['Service Description'] || null,
+          applicableTo: row['Applicable to'] || 'female',
         },
       });
       serviceMap.set(svcKey, svc);

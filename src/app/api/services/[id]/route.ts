@@ -35,17 +35,18 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
       }
     })
 
-    return NextResponse.json({
-      id: service.id,
-      name: service.name,
-      caption: service.caption,
-      description: service.description,
-      imageUrl: service.imageUrl,
-      images: service.images,
-      tiers,
-    })
-  } catch (err) {
-    console.error('/api/services/[id] error:', err)
-    return NextResponse.json({ error: 'Failed to load service' }, { status: 500 })
-  }
+      return NextResponse.json({
+        id: service.id,
+        name: service.name,
+        caption: service.caption,
+        description: service.description,
+        imageUrl: service.imageUrl,
+        applicableTo: service.applicableTo,
+        images: service.images,
+        tiers,
+      })
+    } catch (err) {
+      console.error('/api/services/[id] error:', err)
+      return NextResponse.json({ error: 'Failed to load service' }, { status: 500 })
+    }
 }
