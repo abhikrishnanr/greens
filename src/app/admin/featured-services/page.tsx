@@ -40,6 +40,7 @@ export default function FeaturedServicesAdmin() {
     } catch (error) {
       console.error("Error loading data:", error)
     }
+
   }
 
   useEffect(() => {
