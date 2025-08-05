@@ -157,6 +157,16 @@ model ServiceTierPriceHistory {
   @@map("servicetierpricehistory")
 }
 
+model FeaturedService {
+  id           String     @id @default(uuid())
+  serviceId    String
+  service      ServiceNew @relation(fields: [serviceId], references: [id])
+  applicableTo String     @db.VarChar(191)
+  order        Int        @default(0)
+  createdAt    DateTime   @default(now()) @db.Timestamp(3)
+  updatedAt    DateTime   @default(now()) @updatedAt @db.Timestamp(3)
+}
+
 model Booking {
   id        String        @id @default(uuid())
   customer  String?       @db.VarChar(191)
