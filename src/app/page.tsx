@@ -2,9 +2,10 @@
 import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
 import { FiPhone, FiMapPin, FiMail, FiInstagram, FiArrowRight, FiSearch, FiX } from "react-icons/fi"
-import { Users, Sparkles, Star, ChevronRight, BabyIcon as Woman, User } from "lucide-react"
+import { Users, Sparkles, Star, ChevronRight, Baby, Venus, Mars } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Header from "@/components/Header"
+import slugify from "@/lib/slugify"
 
 const TIER_LABELS = {
   deluxe: {
@@ -27,42 +28,29 @@ const TIER_LABELS = {
   },
 }
 
-const FEATURED_SERVICES = {
-  WOMEN: [
-    { name: "Hair Styling & Cuts", slug: "hair-styling-cuts" },
-    { name: "Facial Treatments", slug: "facial-treatments" },
-    { name: "Bridal Makeup", slug: "bridal-makeup" },
-    { name: "Manicure & Pedicure", slug: "manicure-pedicure" },
-    { name: "Hair Coloring", slug: "hair-coloring" },
-    { name: "Eyebrow Threading", slug: "eyebrow-threading" },
-    { name: "Body Spa", slug: "body-spa" },
-    { name: "Skin Treatments", slug: "skin-treatments" },
-  ],
-  MEN: [
-    { name: "Hair Cut & Styling", slug: "mens-haircut-styling" },
-    { name: "Beard Grooming", slug: "beard-grooming" },
-    { name: "Facial Cleanup", slug: "mens-facial-cleanup" },
-    { name: "Hair Wash & Massage", slug: "hair-wash-massage" },
-    { name: "Mustache Styling", slug: "mustache-styling" },
-    { name: "Head Massage", slug: "head-massage" },
-    { name: "Skin Care", slug: "mens-skin-care" },
-  ],
-}
-
 const GENDER_STYLES = {
-  WOMEN: {
+  female: {
+    label: "Female",
     activeClass: "bg-pink-500 text-white",
     borderColor: "from-pink-300 via-pink-500 to-fuchsia-500",
     dotColor: "text-pink-400",
-    icon: <Woman className="w-4 h-4 mr-2" />,
+    icon: <Venus className="w-4 h-4 mr-2" />,
   },
-  MEN: {
+  male: {
+    label: "Male",
     activeClass: "bg-blue-500 text-white",
     borderColor: "from-sky-300 via-blue-500 to-indigo-500",
     dotColor: "text-blue-400",
-    icon: <User className="w-4 h-4 mr-2" />,
+    icon: <Mars className="w-4 h-4 mr-2" />,
   },
-}
+  children: {
+    label: "Children",
+    activeClass: "bg-amber-500 text-white",
+    borderColor: "from-amber-300 via-amber-500 to-orange-500",
+    dotColor: "text-amber-400",
+    icon: <Baby className="w-4 h-4 mr-2" />,
+  },
+} as const
 
 export default function HomePage() {
   const [categories, setCategories] = useState<any[]>([])
@@ -72,7 +60,12 @@ export default function HomePage() {
   const [selectedHeroCategory, setSelectedHeroCategory] = useState<string>("") // default empty until load
   const [heroTabs, setHeroTabs] = useState<any[]>([])
   const [heroLoading, setHeroLoading] = useState(true)
-  const [selectedGenderTab, setSelectedGenderTab] = useState<"WOMEN" | "MEN">("WOMEN")
+  const [featuredServices, setFeaturedServices] = useState<Record<string, { id: string; name: string }[]>>({
+    female: [],
+    male: [],
+    children: [],
+  })
+  const [selectedGenderTab, setSelectedGenderTab] = useState<"female" | "male" | "children">("female")
 
   // Search functionality
   const [searchQuery, setSearchQuery] = useState("")
@@ -104,6 +97,12 @@ export default function HomePage() {
         }
       })
       .finally(() => setHeroLoading(false))
+  }, [])
+
+  useEffect(() => {
+    fetch("/api/featured-services")
+      .then((res) => res.json())
+      .then((data) => setFeaturedServices(data || {}))
   }, [])
 
   const filteredCategories = useMemo(() => {
@@ -267,7 +266,7 @@ export default function HomePage() {
               <p className="text-3xl md:text-4xl font-bold text-gray-900">Featured Services</p>
             </div>
             <div className="flex items-center gap-1 bg-white/50 rounded-full p-1 shadow-inner border">
-              {(["WOMEN", "MEN"] as const).map((gender) => (
+              {(Object.keys(GENDER_STYLES) as Array<keyof typeof GENDER_STYLES>).map((gender) => (
                 <button
                   key={gender}
                   onClick={() => setSelectedGenderTab(gender)}
@@ -276,7 +275,7 @@ export default function HomePage() {
                   }`}
                 >
                   {GENDER_STYLES[gender].icon}
-                  {gender}
+                  {GENDER_STYLES[gender].label}
                 </button>
               ))}
             </div>
@@ -296,15 +295,15 @@ export default function HomePage() {
             >
               <div className="bg-white rounded-[15px] p-6">
                 <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-2 text-center">
-                  {FEATURED_SERVICES[selectedGenderTab].map((service, index) => (
-                    <div key={service.slug} className="flex items-center">
+                  {featuredServices[selectedGenderTab]?.map((service, index) => (
+                    <div key={service.id} className="flex items-center">
                       <Link
-                        href={`/services/${service.slug}`}
+                        href={`/services/${slugify(service.name)}`}
                         className="text-gray-700 hover:text-emerald-600 font-medium transition-colors duration-200 hover:underline decoration-emerald-600 decoration-2 underline-offset-4 px-2 py-1"
                       >
                         {service.name}
                       </Link>
-                      {index < FEATURED_SERVICES[selectedGenderTab].length - 1 && (
+                      {index < (featuredServices[selectedGenderTab]?.length || 0) - 1 && (
                         <span
                           className={`${
                             GENDER_STYLES[selectedGenderTab].dotColor

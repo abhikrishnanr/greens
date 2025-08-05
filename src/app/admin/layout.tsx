@@ -13,6 +13,7 @@ import {
   MdStore,
   MdCategory,
   MdDesignServices,
+  MdStar,
   MdHistory,
   MdPayment,
   MdLogout,
@@ -62,6 +63,7 @@ const sections: {
     items: [
       { href: '/admin/service-categories', label: 'Categories', icon: MdCategory },
       { href: '/admin/services', label: 'Services', icon: MdDesignServices },
+      { href: '/admin/featured-services', label: 'Featured Services', icon: MdStar },
       { href: '/admin/variant-price-history', label: 'Price History', icon: MdHistory },
     ],
   },
