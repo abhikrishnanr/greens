@@ -15,9 +15,10 @@ import {
   DollarSign,
   Clock,
   Tag,
-  FileText,
-  Grid3X3,
-} from "lucide-react"
+    FileText,
+    Grid3X3,
+    Users,
+  } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -50,6 +51,7 @@ interface Service {
   caption?: string | null
   description?: string | null
   imageUrl?: string | null
+  applicableTo: string
   variants: Variant[]
 }
 
@@ -58,7 +60,7 @@ export default function ServicesAdmin() {
   const [category, setCategory] = useState("")
   const [services, setServices] = useState<Service[]>([])
 
-  const emptyService: Partial<Service> = { id: "", name: "", caption: "", description: "", imageUrl: "" }
+  const emptyService: Partial<Service> = { id: "", name: "", caption: "", description: "", imageUrl: "", applicableTo: "" }
   const [serviceForm, setServiceForm] = useState<Partial<Service>>(emptyService)
   const [showServiceForm, setShowServiceForm] = useState(false)
   const [editingService, setEditingService] = useState(false)
@@ -130,6 +132,7 @@ export default function ServicesAdmin() {
       caption: svc.caption || "",
       description: svc.description || "",
       imageUrl: svc.imageUrl || "",
+      applicableTo: svc.applicableTo,
     })
     setEditingService(true)
     setShowServiceForm(true)
@@ -142,6 +145,7 @@ export default function ServicesAdmin() {
       caption: serviceForm.caption,
       description: serviceForm.description,
       imageUrl: serviceForm.imageUrl,
+      applicableTo: serviceForm.applicableTo,
     }
     if (editingService) {
       await fetch(`/api/admin/service-new/${serviceForm.id}`, {
@@ -436,6 +440,27 @@ export default function ServicesAdmin() {
                       placeholder="Short tagline for the service"
                       className="focus:ring-2 focus:ring-blue-500"
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="applicableTo" className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      Applicable To
+                    </Label>
+                    <Select
+                      value={serviceForm.applicableTo || ""}
+                      onValueChange={(val) => setServiceForm({ ...serviceForm, applicableTo: val })}
+                      required
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                        <SelectItem value="children">Children under 10 years</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">

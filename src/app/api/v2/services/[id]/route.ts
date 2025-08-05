@@ -48,19 +48,20 @@ export async function GET(req, { params }: { params: { id: string } }) {
       })
     )
 
-    const result = {
-      id: service.id,
-      name: service.name,
-      caption: service.caption ?? '',
-      description: service.description ?? '',
-      imageUrl: service.imageUrl ?? null,
-      images: images.map((img) => ({
-        id: img.id,
-        imageUrl: img.imageUrl,
-        caption: img.caption ?? null,
-      })),
-      variants,
-    }
+      const result = {
+        id: service.id,
+        name: service.name,
+        caption: service.caption ?? '',
+        description: service.description ?? '',
+        imageUrl: service.imageUrl ?? null,
+        applicableTo: service.applicableTo,
+        images: images.map((img) => ({
+          id: img.id,
+          imageUrl: img.imageUrl,
+          caption: img.caption ?? null,
+        })),
+        variants,
+      }
 
     return NextResponse.json(result)
   } catch (err) {

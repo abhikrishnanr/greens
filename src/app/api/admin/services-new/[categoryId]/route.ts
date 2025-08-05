@@ -15,6 +15,7 @@ export async function GET(req: Request, { params }: { params: { categoryId: stri
     caption: svc.caption,
     description: svc.description,
     imageUrl: svc.imageUrl,
+    applicableTo: svc.applicableTo,
     variants: svc.tiers.map((t) => ({
       id: t.id,
       name: t.name,
@@ -35,6 +36,7 @@ export async function POST(req: Request, { params }: { params: { categoryId: str
       caption: data.caption || null,
       description: data.description || null,
       imageUrl: data.imageUrl || null,
+      applicableTo: data.applicableTo,
     },
   })
   return NextResponse.json(service)

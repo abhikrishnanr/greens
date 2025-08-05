@@ -7,19 +7,20 @@ export async function GET(
 ) {
   const { categoryId } = params
   const now = new Date()
-  const services = await prisma.serviceNew.findMany({
-    where: { categoryId },
-    select: {
-      id: true,
-      name: true,
-      caption: true,
-      description: true,
-      imageUrl: true,
-      tiers: {
-        select: {
-          id: true,
-          name: true,
-          duration: true,
+    const services = await prisma.serviceNew.findMany({
+      where: { categoryId },
+      select: {
+        id: true,
+        name: true,
+        caption: true,
+        description: true,
+        imageUrl: true,
+        applicableTo: true,
+        tiers: {
+          select: {
+            id: true,
+            name: true,
+            duration: true,
           priceHistory: {
             where: {
               startDate: { lte: now },
@@ -35,17 +36,18 @@ export async function GET(
     orderBy: { name: 'asc' },
   })
 
-  const response = services.map((svc) => ({
-    id: svc.id,
-    name: svc.name,
-    caption: svc.caption,
-    description: svc.description,
-    imageUrl: svc.imageUrl,
-    variants: svc.tiers.map((t) => ({
-      id: t.id,
-      name: t.name,
-      duration: t.duration ?? 0,
-      currentPrice: t.priceHistory[0]
+    const response = services.map((svc) => ({
+      id: svc.id,
+      name: svc.name,
+      caption: svc.caption,
+      description: svc.description,
+      imageUrl: svc.imageUrl,
+      applicableTo: svc.applicableTo,
+      variants: svc.tiers.map((t) => ({
+        id: t.id,
+        name: t.name,
+        duration: t.duration ?? 0,
+        currentPrice: t.priceHistory[0]
         ? {
             actualPrice: t.priceHistory[0].actualPrice,
             offerPrice: t.priceHistory[0].offerPrice,
