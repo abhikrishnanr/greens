@@ -16,6 +16,7 @@ interface Variant {
   price: number
   actualPrice: number
   offerPrice: number | null
+  applicableTo?: string
 }
 
 function stripHtml(html: string): string {
@@ -33,9 +34,17 @@ export default function ServiceCard({
   const desc = variant.description ? stripHtml(variant.description) : ''
   const short = desc.slice(0, 160)
   const hasMore = desc.length > 160
+  const borderColor =
+    variant.applicableTo === 'female'
+      ? 'border-pink-400'
+      : variant.applicableTo === 'male'
+        ? 'border-blue-400'
+        : variant.applicableTo === 'children'
+          ? 'border-yellow-400'
+          : 'border-slate-200'
 
   return (
-    <div className="bg-white rounded-2xl shadow flex flex-col md:flex-row overflow-hidden">
+    <div className={`bg-white rounded-2xl shadow flex flex-col md:flex-row overflow-hidden border-4 ${borderColor}`}>
       <img
         src={variant.imageUrl || '/placeholder-service.png'}
         alt={variant.serviceName}

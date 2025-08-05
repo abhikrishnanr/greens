@@ -6,7 +6,7 @@ export async function GET(req: Request, { params }: { params: { categoryId: stri
   const services = await prisma.serviceNew.findMany({
     where: { categoryId },
     include: { tiers: true },
-    orderBy: { name: 'asc' },
+    orderBy: [{ order: 'asc' }, { name: 'asc' }],
   })
 
   const response = services.map((svc) => ({
@@ -16,6 +16,7 @@ export async function GET(req: Request, { params }: { params: { categoryId: stri
     description: svc.description,
     imageUrl: svc.imageUrl,
     applicableTo: svc.applicableTo,
+    order: svc.order,
     variants: svc.tiers.map((t) => ({
       id: t.id,
       name: t.name,
@@ -37,6 +38,7 @@ export async function POST(req: Request, { params }: { params: { categoryId: str
       description: data.description || null,
       imageUrl: data.imageUrl || null,
       applicableTo: data.applicableTo,
+      order: data.order ?? 0,
     },
   })
   return NextResponse.json(service)
