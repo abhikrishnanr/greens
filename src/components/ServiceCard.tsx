@@ -18,6 +18,7 @@ interface Variant {
   actualPrice: number
   offerPrice: number | null
   applicableTo?: string
+  slug?: string
 }
 
 function stripHtml(html: string): string {
@@ -88,7 +89,7 @@ export default function ServiceCard({
             )}
             {!hideDetails && (
               <Link
-                href={`/services/${slugify(variant.serviceName)}`}
+                href={`/services/${variant.slug ?? slugify(variant.serviceName)}`}
                 className="text-blue-600 underline text-sm"
               >
                 Details
