@@ -26,15 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       tierMap[t.id] = t
     })
 
-    const priceHistories = await prisma.serviceTierPriceHistory.findMany({
-      where: { tierId: { in: tierIds } },
-      orderBy: { startDate: 'desc' },
-    })
-    const priceHistMap: Record<string, typeof priceHistories> = {}
-    priceHistories.forEach(ph => {
-      if (!priceHistMap[ph.tierId]) priceHistMap[ph.tierId] = []
-      priceHistMap[ph.tierId].push(ph)
-    })
+
     const tz = "+05:30"
     const billed = await prisma.billing.findMany({
       where: {
@@ -58,13 +50,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       offerPrice: number
       scheduledAt: string
     }[] = []
-    bookings.forEach(b => {
-      b.items.forEach(it => {
+    for (const b of bookings) {
+      for (const it of b.items) {
         const scheduledAt = new Date(`${b.date}T${it.start}:00${tz}`)
-        if (billedSet.has(scheduledAt.toISOString())) return
+        if (billedSet.has(scheduledAt.toISOString())) continue
         const tier = tierMap[it.tierId]
-        const entries = priceHistMap[it.tierId] || []
-        const ph = entries.find(h => h.startDate <= scheduledAt && (!h.endDate || h.endDate >= scheduledAt))
+        const ph = await prisma.serviceTierPriceHistory.findFirst({
+          where: {
+            tierId: it.tierId,
+            startDate: { lte: scheduledAt },
+            OR: [{ endDate: null }, { endDate: { gte: scheduledAt } }],
+          },
+          orderBy: { startDate: 'desc' },
+        })
         const actualPrice = ph?.actualPrice ?? tier?.actualPrice ?? it.price
         const offerPrice = ph?.offerPrice ?? tier?.offerPrice ?? actualPrice
 
@@ -80,8 +78,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           offerPrice,
           scheduledAt: scheduledAt.toISOString(),
         })
-      })
-    })
+      }
+    }
     return res.status(200).json(services)
   } catch (err) {
     console.error('billing services error', err)

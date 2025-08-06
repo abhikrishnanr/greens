@@ -79,7 +79,8 @@ export default function BillingPage() {
 
   const totalOffer = selected.reduce((acc, id) => {
     const s = services.find((s) => s.id === id)
-    return acc + (s?.offerPrice ?? s?.actualPrice || 0)
+    return acc + (s?.offerPrice ?? s?.actualPrice ?? 0)
+
   }, 0)
 
   const discount = coupon
