@@ -3,6 +3,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Badge from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import slugify from '@/lib/slugify'
 
 interface Variant {
   id: string
@@ -17,6 +18,7 @@ interface Variant {
   actualPrice: number
   offerPrice: number | null
   applicableTo?: string
+  slug?: string
 }
 
 function stripHtml(html: string): string {
@@ -87,7 +89,7 @@ export default function ServiceCard({
             )}
             {!hideDetails && (
               <Link
-                href={`/services/${variant.serviceId}`}
+                href={`/services/${variant.slug ?? slugify(variant.serviceName)}`}
                 className="text-blue-600 underline text-sm"
               >
                 Details
