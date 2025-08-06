@@ -26,6 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       tierMap[t.id] = t
     })
 
+
     const tz = "+05:30"
     const billed = await prisma.billing.findMany({
       where: {
@@ -64,6 +65,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         })
         const actualPrice = ph?.actualPrice ?? tier?.actualPrice ?? 0
         const offerPrice = ph?.offerPrice ?? ph?.actualPrice ?? tier?.offerPrice ?? actualPrice
+
         services.push({
           id: it.id,
           phone: b.phone,

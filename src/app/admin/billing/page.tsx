@@ -80,6 +80,7 @@ export default function BillingPage() {
   const totalOffer = selected.reduce((acc, id) => {
     const s = services.find((s) => s.id === id)
     return acc + (s?.offerPrice ?? s?.actualPrice ?? 0)
+
   }, 0)
 
   const discount = coupon
@@ -113,6 +114,7 @@ export default function BillingPage() {
         variant: s.variant,
         amountBefore: s.actualPrice,
         amountAfter: s.offerPrice ?? s.actualPrice,
+
         scheduledAt: s.scheduledAt,
       }))
     const phones = Array.from(new Set(svcData.map((s) => s.phone).filter(Boolean))) as string[]
