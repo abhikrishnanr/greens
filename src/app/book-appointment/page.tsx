@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import Select, { type MultiValue } from "react-select"
@@ -10,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Save, User, Phone as PhoneIcon, Calendar, Clock } from "lucide-react"
+
 
 interface VariantOption {
   id: string
@@ -28,6 +30,7 @@ export default function BookAppointmentPage() {
     preferredDate: "",
     preferredTime: "",
   })
+
   const [variants, setVariants] = useState<VariantOption[]>([])
   const [submitted, setSubmitted] = useState(false)
 
@@ -55,6 +58,7 @@ export default function BookAppointmentPage() {
         preferredDate: "",
         preferredTime: "",
       })
+
     }
   }
 
@@ -84,6 +88,7 @@ export default function BookAppointmentPage() {
                   id="name"
                   className="mt-1"
                   placeholder="Your full name"
+
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   required
@@ -97,6 +102,7 @@ export default function BookAppointmentPage() {
                   id="phone"
                   className="mt-1"
                   placeholder="10-digit number"
+
                   value={form.phone}
                   onChange={(e) =>
                     setForm({ ...form, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })
@@ -148,6 +154,7 @@ export default function BookAppointmentPage() {
                   required
                 />
               </div>
+
             </div>
             <div>
               <Label>Customer Enquiry</Label>
@@ -158,6 +165,7 @@ export default function BookAppointmentPage() {
                 onChange={(e) => setForm({ ...form, enquiry: e.target.value })}
               />
               <p className="text-xs text-gray-500 mt-1">Any specific requests or questions?</p>
+
             </div>
             <div>
               <Label>Services Interested In</Label>
@@ -179,6 +187,7 @@ export default function BookAppointmentPage() {
                   setForm({ ...form, variantIds: vals.map((v) => v.value) })
                 }
                 placeholder="Select services"
+
               />
             </div>
             <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">

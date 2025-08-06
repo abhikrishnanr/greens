@@ -52,6 +52,7 @@ interface Enquiry {
   gender?: string | null
   preferredDate?: string | null
   preferredTime?: string | null
+
   customer?: { id: string; name: string | null; phone: string | null; gender: string | null }
 }
 
@@ -415,6 +416,7 @@ export default function EnquiriesPage() {
                   <th className="text-left py-3 px-4 font-medium text-gray-700 border-b">Date</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-700 border-b">Status</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-700 border-b">Preferred</th>
+
                   <th className="text-left py-3 px-4 font-medium text-gray-700 border-b">Source</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-700 border-b">Remark</th>
                 </tr>
@@ -431,6 +433,7 @@ export default function EnquiriesPage() {
                       {p.preferredTime ? ` ${p.preferredTime}` : ""}
                     </td>
                     <td className="py-3 px-4 border-b">
+
                       <Badge className="capitalize">{p.source}</Badge>
                     </td>
                     <td className="py-3 px-4 border-b">{p.remark || "-"}</td>
@@ -455,6 +458,7 @@ export default function EnquiriesPage() {
                 <th className="text-left py-3 px-4 font-medium text-gray-700 border-b">Phone</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-700 border-b">Status</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-700 border-b">Preferred</th>
+
                 <th className="text-left py-3 px-4 font-medium text-gray-700 border-b">Source</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-700 border-b">Date</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-700 border-b">Action</th>
@@ -487,6 +491,7 @@ export default function EnquiriesPage() {
                     {e.preferredTime ? ` ${e.preferredTime}` : ""}
                   </td>
                   <td className="py-3 px-4 border-b">
+
                     <Badge className="capitalize">{e.source}</Badge>
                   </td>
                   <td className="py-3 px-4 border-b">{new Date(e.createdAt).toLocaleDateString()}</td>

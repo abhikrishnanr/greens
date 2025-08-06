@@ -254,6 +254,7 @@ model Enquiry {
   source     String   @default("admin") @db.VarChar(191)
   preferredDate DateTime? @db.Date
   preferredTime String?  @db.VarChar(191)
+
   createdAt  DateTime @default(now()) @db.Timestamp(3)
   updatedAt  DateTime @default(now()) @updatedAt @db.Timestamp(3)
 }
