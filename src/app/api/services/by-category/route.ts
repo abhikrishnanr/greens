@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
       where: { categoryId, active: true },
       include: {
         priceHistory: {
-          orderBy: { offerStartDate: 'desc' },
+          orderBy: { startDate: 'desc' },
           take: 1,
         }
       },

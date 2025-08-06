@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import slugify from '@/lib/slugify'
 
 export async function GET(
   req: Request,
@@ -40,6 +41,7 @@ export async function POST(
     data: {
       categoryId,
       name: data.name,
+      slug: slugify(data.name),
       caption: data.caption || null,
       description: data.description || null,
       imageUrl: data.imageUrl || null,
