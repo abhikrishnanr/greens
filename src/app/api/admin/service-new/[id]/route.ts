@@ -9,7 +9,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     where: { id },
     data: {
       name: data.name,
-      slug: slugify(data.name),
+      slug: slugify(`${data.name} ${data.applicableTo}`),
       caption: data.caption || null,
       description: data.description || null,
       imageUrl: data.imageUrl || null,

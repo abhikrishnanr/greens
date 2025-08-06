@@ -41,7 +41,7 @@ export async function POST(
     data: {
       categoryId,
       name: data.name,
-      slug: slugify(data.name),
+      slug: slugify(`${data.name} ${data.applicableTo}`),
       caption: data.caption || null,
       description: data.description || null,
       imageUrl: data.imageUrl || null,
