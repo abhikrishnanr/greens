@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, phone, gender, enquiry, variantIds } = await req.json()
+    const { name, phone, gender, enquiry, variantIds, preferredDate, preferredTime } = await req.json()
 
     if (!phone) {
       return NextResponse.json({ success: false, error: 'Phone required' }, { status: 400 })
@@ -55,6 +55,9 @@ export async function POST(req: NextRequest) {
         variantIds: Array.isArray(variantIds) ? JSON.stringify(variantIds) : null,
         status: 'new',
         source: 'admin',
+        preferredDate: preferredDate ? new Date(preferredDate) : null,
+        preferredTime: preferredTime || null,
+
       },
     })
 

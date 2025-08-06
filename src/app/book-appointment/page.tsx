@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
+
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import Select, { type MultiValue } from "react-select"
@@ -8,7 +10,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { Save } from "lucide-react"
+import { Save, User, Phone as PhoneIcon, Calendar, Clock } from "lucide-react"
+
 
 interface VariantOption {
   id: string
@@ -18,7 +21,16 @@ interface VariantOption {
 }
 
 export default function BookAppointmentPage() {
-  const [form, setForm] = useState({ name: "", phone: "", gender: "", enquiry: "", variantIds: [] as string[] })
+  const [form, setForm] = useState({
+    name: "",
+    phone: "",
+    gender: "",
+    enquiry: "",
+    variantIds: [] as string[],
+    preferredDate: "",
+    preferredTime: "",
+  })
+
   const [variants, setVariants] = useState<VariantOption[]>([])
   const [submitted, setSubmitted] = useState(false)
 
@@ -37,7 +49,16 @@ export default function BookAppointmentPage() {
     })
     if (res.ok) {
       setSubmitted(true)
-      setForm({ name: "", phone: "", gender: "", enquiry: "", variantIds: [] })
+      setForm({
+        name: "",
+        phone: "",
+        gender: "",
+        enquiry: "",
+        variantIds: [],
+        preferredDate: "",
+        preferredTime: "",
+      })
+
     }
   }
 
@@ -45,56 +66,106 @@ export default function BookAppointmentPage() {
     <main className="flex flex-col min-h-screen bg-white">
       <Header />
       <div className="flex-1 container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold text-center text-green-700 mb-8">Book an Appointment</h1>
         {submitted ? (
           <div className="max-w-xl mx-auto text-center p-6 bg-white border rounded-lg shadow">
-            <p className="text-green-600">Thank you! We will contact you shortly.</p>
+            <p className="text-green-600 mb-4">Thank you! We will contact you shortly.</p>
+            <Link href="/" className="text-blue-600 hover:underline">
+              Go back to Home
+            </Link>
           </div>
         ) : (
-          <form onSubmit={submit} className="max-w-xl mx-auto space-y-4 bg-white p-6 border rounded-lg shadow">
+          <form
+            onSubmit={submit}
+            className="max-w-xl mx-auto space-y-6 bg-white p-6 border rounded-lg shadow"
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name" className="flex items-center gap-1">
+                  <User className="h-4 w-4" /> Name
+                </Label>
                 <Input
                   id="name"
+                  className="mt-1"
+                  placeholder="Your full name"
+
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone" className="flex items-center gap-1">
+                  <PhoneIcon className="h-4 w-4" /> Mobile Number
+                </Label>
                 <Input
                   id="phone"
+                  className="mt-1"
+                  placeholder="10-digit number"
+
                   value={form.phone}
                   onChange={(e) =>
                     setForm({ ...form, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })
                   }
                   required
                 />
+                <p className="text-xs text-gray-500 mt-1">We'll never share your number.</p>
               </div>
             </div>
-            <div>
-              <Label htmlFor="gender">Gender</Label>
-              <select
-                id="gender"
-                className="w-full mt-1 p-2 border rounded-md"
-                value={form.gender}
-                onChange={(e) => setForm({ ...form, gender: e.target.value })}
-                required
-              >
-                <option value="">Select Gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-              </select>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="gender">Gender</Label>
+                <select
+                  id="gender"
+                  className="w-full mt-1 p-2 border rounded-md"
+                  value={form.gender}
+                  onChange={(e) => setForm({ ...form, gender: e.target.value })}
+                  required
+                >
+                  <option value="">Select Gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <Label htmlFor="preferredDate" className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4" /> Preferred Date
+                </Label>
+                <Input
+                  type="date"
+                  id="preferredDate"
+                  className="mt-1"
+                  value={form.preferredDate}
+                  onChange={(e) => setForm({ ...form, preferredDate: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="preferredTime" className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" /> Preferred Time
+                </Label>
+                <Input
+                  type="time"
+                  id="preferredTime"
+                  className="mt-1"
+                  value={form.preferredTime}
+                  onChange={(e) => setForm({ ...form, preferredTime: e.target.value })}
+                  required
+                />
+              </div>
+
             </div>
             <div>
               <Label>Customer Enquiry</Label>
               <Textarea
                 className="mt-1"
+                placeholder="Tell us about your needs"
                 value={form.enquiry}
                 onChange={(e) => setForm({ ...form, enquiry: e.target.value })}
               />
+              <p className="text-xs text-gray-500 mt-1">Any specific requests or questions?</p>
+
             </div>
             <div>
               <Label>Services Interested In</Label>
@@ -115,6 +186,8 @@ export default function BookAppointmentPage() {
                 onChange={(vals: MultiValue<{ value: string; label: string }>) =>
                   setForm({ ...form, variantIds: vals.map((v) => v.value) })
                 }
+                placeholder="Select services"
+
               />
             </div>
             <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">

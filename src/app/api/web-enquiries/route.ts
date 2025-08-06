@@ -3,7 +3,8 @@ import { prisma } from '@/lib/prisma'
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, phone, gender, enquiry, variantIds } = await req.json()
+    const { name, phone, gender, enquiry, variantIds, preferredDate, preferredTime } = await req.json()
+
     if (!name || !phone) {
       return NextResponse.json({ success: false, error: 'Name and phone are required' }, { status: 400 })
     }
@@ -16,6 +17,9 @@ export async function POST(req: NextRequest) {
         variantIds: Array.isArray(variantIds) ? JSON.stringify(variantIds) : null,
         status: 'new',
         source: 'web',
+        preferredDate: preferredDate ? new Date(preferredDate) : null,
+        preferredTime: preferredTime || null,
+
       },
     })
     return NextResponse.json({ success: true, enquiry: saved })
