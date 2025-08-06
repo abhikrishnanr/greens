@@ -256,22 +256,22 @@ export default function HomePage() {
       >
         <div className="container mx-auto px-6 relative z-10">
           <motion.div
-            className="flex justify-between items-center mb-8"
+            className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <div className="text-left">
+            <div className="text-center md:text-left">
               <h2 className="text-sm font-bold uppercase tracking-widest text-emerald-600 mb-2">Popular Choices</h2>
               <p className="text-3xl md:text-4xl font-bold text-gray-900">Featured Services</p>
             </div>
-            <div className="flex items-center gap-1 bg-white/50 rounded-full p-1 shadow-inner border">
+            <div className="flex flex-wrap justify-center items-center gap-2 bg-white/50 rounded-full p-1 shadow-inner border w-full md:w-auto">
               {(Object.keys(GENDER_STYLES) as Array<keyof typeof GENDER_STYLES>).map((gender) => (
                 <button
                   key={gender}
                   onClick={() => setSelectedGenderTab(gender)}
-                  className={`flex items-center justify-center min-w-[140px] px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
+                  className={`flex items-center justify-center w-full md:w-auto min-w-[120px] px-4 py-2 sm:px-6 sm:py-3 rounded-full font-semibold transition-all duration-300 ${
                     selectedGenderTab === gender ? GENDER_STYLES[gender].activeClass : "text-gray-600 hover:bg-white/80"
                   }`}
                 >
