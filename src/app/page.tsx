@@ -144,6 +144,11 @@ export default function HomePage() {
   return (
     <main className="bg-white min-h-screen font-sans text-gray-800">
       <Header />
+      <div className="text-center mt-4">
+        <Link href="/book-appointment" className="text-green-700 font-semibold hover:underline">
+          Book an Appointment
+        </Link>
+      </div>
 
       {/* HERO SECTION (DARK) */}
       <section className="relative flex flex-col overflow-hidden min-h-[70vh] md:min-h-[70vh] bg-gray-800">
@@ -597,6 +602,12 @@ export default function HomePage() {
           <p className="text-xs mt-2">TC 45/215, Kunjalumood Junction, Karamana PO, Trivandrum</p>
         </div>
       </footer>
+      <Link
+        href="/book-appointment"
+        className="fixed bottom-6 right-6 bg-green-600 text-white px-4 py-2 rounded-full shadow-lg"
+      >
+        Book Appointment
+      </Link>
     </main>
   )
 }

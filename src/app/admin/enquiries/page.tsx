@@ -21,6 +21,7 @@ import {
   Filter,
   X,
   AlertCircle,
+  Globe,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -45,6 +46,12 @@ interface Enquiry {
   createdAt: string
   status: string
   remark?: string | null
+  source: string
+  name?: string | null
+  phone?: string | null
+  gender?: string | null
+  preferredDate?: string | null
+  preferredTime?: string | null
   customer?: { id: string; name: string | null; phone: string | null; gender: string | null }
 }
 
@@ -53,6 +60,8 @@ interface Stats {
   new: number
   processing: number
   closed: number
+  web: number
+  webClosed: number
 }
 
 export default function EnquiriesPage() {
@@ -63,7 +72,7 @@ export default function EnquiriesPage() {
   const [prevEnquiries, setPrevEnquiries] = useState<Enquiry[]>([])
   const [enquiries, setEnquiries] = useState<Enquiry[]>([])
   const [variants, setVariants] = useState<VariantOption[]>([])
-  const [stats, setStats] = useState<Stats>({ today: 0, new: 0, processing: 0, closed: 0 })
+  const [stats, setStats] = useState<Stats>({ today: 0, new: 0, processing: 0, closed: 0, web: 0, webClosed: 0 })
   const [selected, setSelected] = useState<Enquiry | null>(null)
   const [modalStatus, setModalStatus] = useState("")
   const [modalRemark, setModalRemark] = useState("")
@@ -81,6 +90,8 @@ export default function EnquiriesPage() {
     { key: "new", label: "New", value: stats.new, bgColor: "bg-green-500", icon: Sparkles },
     { key: "processing", label: "Processing", value: stats.processing, bgColor: "bg-yellow-500", icon: Clock },
     { key: "closed", label: "Closed", value: stats.closed, bgColor: "bg-gray-500", icon: CheckCircle2 },
+    { key: "web", label: "Web Enquiries", value: stats.web, bgColor: "bg-purple-500", icon: Globe },
+    { key: "webClosed", label: "Web Closed", value: stats.webClosed, bgColor: "bg-pink-500", icon: CheckCircle2 },
   ]
 
   const handlePhoneChange = (value: string) => {
@@ -96,7 +107,7 @@ export default function EnquiriesPage() {
   }
 
   const bookServices = () => {
-    if (!selected) return
+    if (!selected?.customer) return
     const params = new URLSearchParams()
     if (selected.customer?.name) params.set("name", selected.customer.name)
     if (selected.customer?.phone) params.set("phone", selected.customer.phone)
@@ -188,6 +199,14 @@ export default function EnquiriesPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: modalStatus, remark: modalRemark }),
     })
+    setSelected(null)
+    loadEnquiries()
+    loadStats()
+  }
+
+  const convertToCustomer = async () => {
+    if (!selected) return
+    await fetch(`/api/admin/enquiries/${selected.id}/convert`, { method: 'POST' })
     setSelected(null)
     loadEnquiries()
     loadStats()
@@ -395,6 +414,8 @@ export default function EnquiriesPage() {
                 <tr className="bg-gray-50">
                   <th className="text-left py-3 px-4 font-medium text-gray-700 border-b">Date</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-700 border-b">Status</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-700 border-b">Preferred</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-700 border-b">Source</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-700 border-b">Remark</th>
                 </tr>
               </thead>
@@ -404,6 +425,13 @@ export default function EnquiriesPage() {
                     <td className="py-3 px-4 border-b">{new Date(p.createdAt).toLocaleDateString()}</td>
                     <td className="py-3 px-4 border-b">
                       <Badge className={`${statusColors[p.status] || ""} capitalize`}>{p.status}</Badge>
+                    </td>
+                    <td className="py-3 px-4 border-b">
+                      {p.preferredDate ? new Date(p.preferredDate).toLocaleDateString() : "-"}
+                      {p.preferredTime ? ` ${p.preferredTime}` : ""}
+                    </td>
+                    <td className="py-3 px-4 border-b">
+                      <Badge className="capitalize">{p.source}</Badge>
                     </td>
                     <td className="py-3 px-4 border-b">{p.remark || "-"}</td>
                   </tr>
@@ -426,6 +454,8 @@ export default function EnquiriesPage() {
                 <th className="text-left py-3 px-4 font-medium text-gray-700 border-b">Customer</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-700 border-b">Phone</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-700 border-b">Status</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-700 border-b">Preferred</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-700 border-b">Source</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-700 border-b">Date</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-700 border-b">Action</th>
               </tr>
@@ -442,13 +472,22 @@ export default function EnquiriesPage() {
                         {e.customer.name || "Unnamed"}
                         <ArrowUpRight className="h-4 w-4 ml-1" />
                       </Link>
+                    ) : e.name ? (
+                      <span className="text-gray-700">{e.name}</span>
                     ) : (
                       <span className="text-gray-500">-</span>
                     )}
                   </td>
-                  <td className="py-3 px-4 border-b font-mono">{e.customer?.phone || "-"}</td>
+                  <td className="py-3 px-4 border-b font-mono">{e.customer?.phone || e.phone || "-"}</td>
                   <td className="py-3 px-4 border-b">
                     <Badge className={`${statusColors[e.status] || ""} capitalize`}>{e.status}</Badge>
+                  </td>
+                  <td className="py-3 px-4 border-b">
+                    {e.preferredDate ? new Date(e.preferredDate).toLocaleDateString() : "-"}
+                    {e.preferredTime ? ` ${e.preferredTime}` : ""}
+                  </td>
+                  <td className="py-3 px-4 border-b">
+                    <Badge className="capitalize">{e.source}</Badge>
                   </td>
                   <td className="py-3 px-4 border-b">{new Date(e.createdAt).toLocaleDateString()}</td>
                   <td className="py-3 px-4 border-b">
@@ -489,12 +528,22 @@ export default function EnquiriesPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <span className="font-medium text-gray-700">Name:</span>
-                    <p className="text-gray-600 mt-1">{selected.customer?.name || "-"}</p>
+                    <p className="text-gray-600 mt-1">{selected.customer?.name || selected.name || "-"}</p>
                   </div>
                   <div>
                     <span className="font-medium text-gray-700">Phone:</span>
-                    <p className="text-gray-600 font-mono mt-1">{selected.customer?.phone || "-"}</p>
+                    <p className="text-gray-600 font-mono mt-1">{selected.customer?.phone || selected.phone || "-"}</p>
                   </div>
+                </div>
+
+                <div>
+                  <span className="font-medium text-gray-700">Preferred Slot:</span>
+                  <p className="text-gray-600 mt-1">
+                    {selected.preferredDate
+                      ? new Date(selected.preferredDate).toLocaleDateString()
+                      : "-"}
+                    {selected.preferredTime ? ` ${selected.preferredTime}` : ""}
+                  </p>
                 </div>
 
                 <div>
@@ -564,15 +613,27 @@ export default function EnquiriesPage() {
                       View Profile
                     </Link>
                   )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={bookServices}
-                    className="border-green-300 text-green-700 hover:bg-green-50 bg-transparent"
-                  >
-                    <BookOpen className="h-4 w-4 mr-1" />
-                    Book Services
-                  </Button>
+                  {selected.customer ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={bookServices}
+                      className="border-green-300 text-green-700 hover:bg-green-50 bg-transparent"
+                    >
+                      <BookOpen className="h-4 w-4 mr-1" />
+                      Book Services
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={convertToCustomer}
+                      className="border-green-300 text-green-700 hover:bg-green-50 bg-transparent"
+                    >
+                      <User className="h-4 w-4 mr-1" />
+                      Convert to Customer
+                    </Button>
+                  )}
                 </div>
 
                 <div className="flex gap-2">
