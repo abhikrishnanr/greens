@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export async function GET() {
+export async function GET(req: Request) {
+  const url = new URL(req.url)
+  const gender = url.searchParams.get('gender') || undefined
+
   const now = new Date()
   const variants = await prisma.serviceTier.findMany({
+    where: gender ? { service: { applicableTo: gender } } : undefined,
     include: {
       service: {
         select: {
