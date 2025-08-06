@@ -6,11 +6,19 @@ export async function GET() {
     include: { service: true },
     orderBy: { order: 'asc' },
   })
-  const grouped: Record<string, { id: string; name: string }[]> = { female: [], male: [], children: [] }
+  const grouped: Record<string, { id: string; name: string; slug: string }[]> = {
+    female: [],
+    male: [],
+    children: [],
+  }
   featured.forEach((f) => {
     const gender = (f.applicableTo || f.service.applicableTo) as 'female' | 'male' | 'children'
     if (!grouped[gender]) grouped[gender] = []
-    grouped[gender].push({ id: f.service.id, name: f.service.name })
+    grouped[gender].push({
+      id: f.service.id,
+      name: f.service.name,
+      slug: f.service.slug,
+    })
   })
   return NextResponse.json(grouped)
 }
