@@ -25,6 +25,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     tiers.forEach(t => {
       tierMap[t.id] = t
     })
+
+    const priceHistories = await prisma.serviceTierPriceHistory.findMany({
+      where: { tierId: { in: tierIds } },
+      orderBy: { startDate: 'desc' },
+    })
+    const priceHistMap: Record<string, typeof priceHistories> = {}
+    priceHistories.forEach(ph => {
+      if (!priceHistMap[ph.tierId]) priceHistMap[ph.tierId] = []
+      priceHistMap[ph.tierId].push(ph)
+    })
     const tz = "+05:30"
     const billed = await prisma.billing.findMany({
       where: {
@@ -44,7 +54,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       service: string
       variant: string
       start: string
-      price: number
+      actualPrice: number
+      offerPrice: number
       scheduledAt: string
     }[] = []
     bookings.forEach(b => {
@@ -52,6 +63,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const scheduledAt = new Date(`${b.date}T${it.start}:00${tz}`)
         if (billedSet.has(scheduledAt.toISOString())) return
         const tier = tierMap[it.tierId]
+        const entries = priceHistMap[it.tierId] || []
+        const ph = entries.find(h => h.startDate <= scheduledAt && (!h.endDate || h.endDate >= scheduledAt))
+        const actualPrice = ph?.actualPrice ?? tier?.actualPrice ?? it.price
+        const offerPrice = ph?.offerPrice ?? actualPrice
         services.push({
           id: it.id,
           phone: b.phone,
@@ -60,7 +75,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           service: tier?.service.name || '',
           variant: tier?.name || it.name,
           start: it.start,
-          price: it.price,
+          actualPrice,
+          offerPrice,
           scheduledAt: scheduledAt.toISOString(),
         })
       })
