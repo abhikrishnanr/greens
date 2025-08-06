@@ -10,7 +10,16 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { Save, User, Phone as PhoneIcon, Calendar, Clock } from "lucide-react"
+import {
+  Save,
+  User,
+  Phone as PhoneIcon,
+  Calendar,
+  Clock,
+  CheckCircle,
+} from "lucide-react"
+import DatePicker from "react-datepicker"
+import { format, isToday, setHours, setMinutes } from "date-fns"
 
 
 interface VariantOption {
@@ -20,15 +29,25 @@ interface VariantOption {
   variantName: string
 }
 
+interface FormState {
+  name: string
+  phone: string
+  gender: string
+  enquiry: string
+  variantIds: string[]
+  preferredDate: Date | null
+  preferredTime: Date | null
+}
+
 export default function BookAppointmentPage() {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<FormState>({
     name: "",
     phone: "",
     gender: "",
     enquiry: "",
     variantIds: [] as string[],
-    preferredDate: "",
-    preferredTime: "",
+    preferredDate: null,
+    preferredTime: null,
   })
 
   const [variants, setVariants] = useState<VariantOption[]>([])
@@ -40,12 +59,27 @@ export default function BookAppointmentPage() {
       .then((data) => setVariants(data))
   }, [])
 
+  const now = new Date()
+  const isDateToday = form.preferredDate ? isToday(form.preferredDate) : false
+  const minTime = isDateToday ? now : setHours(setMinutes(new Date(), 0), 0)
+  const maxTime = setHours(setMinutes(new Date(), 59), 23)
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const payload = {
+      ...form,
+      preferredDate: form.preferredDate
+        ? format(form.preferredDate, "yyyy-MM-dd")
+        : "",
+      preferredTime: form.preferredTime
+        ? format(form.preferredTime, "HH:mm")
+        : "",
+    }
+
     const res = await fetch("/api/web-enquiries", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify(payload),
     })
     if (res.ok) {
       setSubmitted(true)
@@ -55,29 +89,32 @@ export default function BookAppointmentPage() {
         gender: "",
         enquiry: "",
         variantIds: [],
-        preferredDate: "",
-        preferredTime: "",
+        preferredDate: null,
+        preferredTime: null,
       })
 
     }
   }
 
   return (
-    <main className="flex flex-col min-h-screen bg-white">
+    <main className="flex flex-col min-h-screen bg-gradient-to-b from-green-50 to-white">
       <Header />
       <div className="flex-1 container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-center text-green-700 mb-8">Book an Appointment</h1>
+        <h1 className="flex items-center justify-center text-3xl font-bold text-green-700 mb-8">
+          <Calendar className="h-8 w-8 mr-2 text-green-600" /> Book an Appointment
+        </h1>
         {submitted ? (
-          <div className="max-w-xl mx-auto text-center p-6 bg-white border rounded-lg shadow">
-            <p className="text-green-600 mb-4">Thank you! We will contact you shortly.</p>
-            <Link href="/" className="text-blue-600 hover:underline">
+          <div className="max-w-xl mx-auto text-center p-6 bg-green-50 border border-green-200 rounded-lg shadow">
+            <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
+            <p className="text-green-700 mb-4">Thank you! We will contact you shortly.</p>
+            <Link href="/" className="text-green-600 hover:underline">
               Go back to Home
             </Link>
           </div>
         ) : (
           <form
             onSubmit={submit}
-            className="max-w-xl mx-auto space-y-6 bg-white p-6 border rounded-lg shadow"
+            className="max-w-xl mx-auto space-y-6 bg-green-50 p-6 border border-green-200 rounded-lg shadow"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -109,7 +146,7 @@ export default function BookAppointmentPage() {
                   }
                   required
                 />
-                <p className="text-xs text-gray-500 mt-1">We'll never share your number.</p>
+                <p className="text-xs text-gray-500 mt-1">We&apos;ll never share your number.</p>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -132,12 +169,13 @@ export default function BookAppointmentPage() {
                 <Label htmlFor="preferredDate" className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" /> Preferred Date
                 </Label>
-                <Input
-                  type="date"
+                <DatePicker
                   id="preferredDate"
-                  className="mt-1"
-                  value={form.preferredDate}
-                  onChange={(e) => setForm({ ...form, preferredDate: e.target.value })}
+                  selected={form.preferredDate}
+                  onChange={(date) => setForm({ ...form, preferredDate: date })}
+                  minDate={new Date()}
+                  placeholderText="Select date"
+                  className="w-full mt-1 p-2 border rounded-md"
                   required
                 />
               </div>
@@ -145,12 +183,19 @@ export default function BookAppointmentPage() {
                 <Label htmlFor="preferredTime" className="flex items-center gap-1">
                   <Clock className="h-4 w-4" /> Preferred Time
                 </Label>
-                <Input
-                  type="time"
+                <DatePicker
                   id="preferredTime"
-                  className="mt-1"
-                  value={form.preferredTime}
-                  onChange={(e) => setForm({ ...form, preferredTime: e.target.value })}
+                  selected={form.preferredTime}
+                  onChange={(date) => setForm({ ...form, preferredTime: date })}
+                  showTimeSelect
+                  showTimeSelectOnly
+                  timeIntervals={15}
+                  timeCaption="Time"
+                  dateFormat="HH:mm"
+                  minTime={minTime}
+                  maxTime={maxTime}
+                  placeholderText="Select time"
+                  className="w-full mt-1 p-2 border rounded-md"
                   required
                 />
               </div>
