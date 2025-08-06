@@ -52,7 +52,7 @@ async function main() {
         data: {
           categoryId: category.id,
           name: row['Sub category'],
-          slug: slugify(row['Sub category']),
+          slug: slugify(`${row['Sub category']} ${row['Applicable to'] || 'female'}`),
           caption: row['Service Description']?.slice(0, 120) || null,
           description: row['Service Description'] || null,
           applicableTo: row['Applicable to'] || 'female',

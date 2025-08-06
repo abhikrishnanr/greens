@@ -89,7 +89,14 @@ export default function ServiceCard({
             )}
             {!hideDetails && (
               <Link
-                href={`/services/${variant.slug ?? slugify(variant.serviceName)}`}
+                href={`/services/${
+                  variant.slug ??
+                  slugify(
+                    variant.applicableTo
+                      ? `${variant.serviceName} ${variant.applicableTo}`
+                      : variant.serviceName
+                  )
+                }`}
                 className="text-blue-600 underline text-sm"
               >
                 Details
