@@ -1,11 +1,12 @@
 import Link from 'next/link'
 import { headers } from 'next/headers'
 
-export default async function ServiceDetailsPage({ params }: { params: { id: string } }) {
-  const { id } = params
+export default async function ServiceDetailsPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const headersList = await headers()
   const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL || `http://${headers().get('host')}`
-  const res = await fetch(`${baseUrl}/api/services/${id}`, { cache: 'no-store' })
+    process.env.NEXT_PUBLIC_BASE_URL || `http://${headersList.get('host')}`
+  const res = await fetch(`${baseUrl}/api/services/${slug}`, { cache: 'no-store' })
   if (!res.ok) {
     return <div className="text-red-500 text-xl p-8">Unable to load service details</div>
   }

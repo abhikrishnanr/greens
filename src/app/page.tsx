@@ -60,7 +60,9 @@ export default function HomePage() {
   const [selectedHeroCategory, setSelectedHeroCategory] = useState<string>("") // default empty until load
   const [heroTabs, setHeroTabs] = useState<any[]>([])
   const [heroLoading, setHeroLoading] = useState(true)
-  const [featuredServices, setFeaturedServices] = useState<Record<string, { id: string; name: string }[]>>({
+  const [featuredServices, setFeaturedServices] = useState<
+    Record<string, { id: string; name: string; slug: string }[]>
+  >({
     female: [],
     male: [],
     children: [],
@@ -299,7 +301,7 @@ export default function HomePage() {
                   {featuredServices[selectedGenderTab]?.map((service, index) => (
                     <div key={service.id} className="flex items-center">
                       <Link
-                        href={`/services/${slugify(service.name)}`}
+                        href={`/services/${service.slug}`}
                         className="text-gray-700 hover:text-emerald-600 font-medium transition-colors duration-200 hover:underline decoration-emerald-600 decoration-2 underline-offset-4 px-2 py-1"
                       >
                         {service.name}
@@ -364,7 +366,7 @@ export default function HomePage() {
                       <h3 className="text-xl font-bold mb-2">{category.name}</h3>
                       <p className="text-sm opacity-80 mb-4 line-clamp-2">{category.caption}</p>
                       <Link
-                        href={`/services/${category.id}`}
+                        href={`/services/${slugify(category.name)}`}
                         className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-300 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:text-emerald-200"
                       >
                         Explore Services <FiArrowRight />
@@ -515,7 +517,7 @@ export default function HomePage() {
                               {subServices.map((svc) => (
                                 <li key={svc.id}>
                                   <Link
-                                    href={`/services/${svc.id}`}
+                                    href={`/services/${svc.slug}`}
                                     className="flex justify-between items-center p-2 rounded-md hover:bg-emerald-800/50 transition-colors"
                                   >
                                     <span className="font-semibold text-gray-300 text-sm">{svc.name}</span>

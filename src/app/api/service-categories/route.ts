@@ -11,7 +11,7 @@ export async function GET() {
         services: {
           include: {
             priceHistory: {
-              orderBy: { offerStartDate: 'desc' },
+              orderBy: { startDate: 'desc' },
               take: 1,
             }
           }

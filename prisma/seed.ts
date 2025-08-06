@@ -6,6 +6,14 @@ const Papa = require('papaparse');
 
 const prisma = new PrismaClient();
 
+function slugify(title) {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+}
+
 async function main() {
   const csvPath = path.join(__dirname, 'Rate_Chart_with_Main___Service_Descriptions.csv');
   const csv = fs.readFileSync(csvPath, 'utf8');
@@ -44,6 +52,7 @@ async function main() {
         data: {
           categoryId: category.id,
           name: row['Sub category'],
+          slug: slugify(row['Sub category']),
           caption: row['Service Description']?.slice(0, 120) || null,
           description: row['Service Description'] || null,
           applicableTo: row['Applicable to'] || 'female',

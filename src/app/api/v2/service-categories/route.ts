@@ -37,6 +37,7 @@ export async function GET() {
           return {
             id: svc.id,
             name: svc.name,
+            slug: svc.slug,
             caption: svc.caption ?? '',
             imageUrl: svc.imageUrl ?? null,
             minPrice: min,

@@ -8,7 +8,7 @@ export async function GET(req: Request) {
     where: { active: true },
     include: {
       priceHistory: {
-        orderBy: { offerStartDate: 'desc' },
+        orderBy: { startDate: 'desc' },
         take: 1,
       },
       category: true,
@@ -26,10 +26,10 @@ export async function GET(req: Request) {
     let showOffer = false;
     if (
       priceObj?.offerPrice != null &&
-      priceObj.offerStartDate &&
-      priceObj.offerEndDate &&
-      new Date(priceObj.offerStartDate) <= today &&
-      today <= new Date(priceObj.offerEndDate)
+      priceObj.startDate &&
+      priceObj.endDate &&
+      new Date(priceObj.startDate) <= today &&
+      today <= new Date(priceObj.endDate)
     ) {
       showOffer = true;
     }
