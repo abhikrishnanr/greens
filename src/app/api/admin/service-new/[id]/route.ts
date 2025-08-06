@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import slugify from '@/lib/slugify'
 
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
   const { id } = await params
@@ -8,6 +9,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     where: { id },
     data: {
       name: data.name,
+      slug: slugify(data.name),
       caption: data.caption || null,
       description: data.description || null,
       imageUrl: data.imageUrl || null,

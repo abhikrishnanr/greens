@@ -4,12 +4,12 @@ import { prisma } from '@/lib/prisma'
 export async function GET(req: Request, { params }: { params: { slug: string } }) {
   const { slug } = params
   try {
-    const name = slug.toLowerCase().replace(/-/g, ' ')
     const service = await prisma.serviceNew.findFirst({
       where: {
         OR: [
           { id: slug },
-          { name: { equals: name, mode: 'insensitive' } },
+          { slug },
+          { name: { equals: slug.replace(/-/g, ' '), mode: 'insensitive' } },
         ],
       },
       include: {

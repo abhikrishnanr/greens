@@ -123,6 +123,7 @@ model ServiceNew {
   categoryId       String
   category         ServiceCategory   @relation(fields: [categoryId], references: [id])
   name             String
+  slug             String            @unique
   caption          String?
   description      String?           @db.LongText
   imageUrl         String?
