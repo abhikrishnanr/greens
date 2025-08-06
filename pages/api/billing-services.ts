@@ -67,6 +67,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const ph = entries.find(h => h.startDate <= scheduledAt && (!h.endDate || h.endDate >= scheduledAt))
         const actualPrice = ph?.actualPrice ?? tier?.actualPrice ?? it.price
         const offerPrice = ph?.offerPrice ?? tier?.offerPrice ?? actualPrice
+
         services.push({
           id: it.id,
           phone: b.phone,
