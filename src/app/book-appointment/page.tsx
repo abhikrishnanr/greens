@@ -54,15 +54,22 @@ export default function BookAppointmentPage() {
   const [submitted, setSubmitted] = useState(false)
 
   useEffect(() => {
-    fetch("/api/admin/service-variants/all")
+    if (!form.gender) {
+      setVariants([])
+      setForm((prev) => ({ ...prev, variantIds: [] }))
+      return
+    }
+    fetch(`/api/admin/service-variants/all?gender=${form.gender}`)
       .then((res) => res.json())
       .then((data) => setVariants(data))
-  }, [])
+  }, [form.gender])
 
   const now = new Date()
   const isDateToday = form.preferredDate ? isToday(form.preferredDate) : false
-  const minTime = isDateToday ? now : setHours(setMinutes(new Date(), 0), 0)
-  const maxTime = setHours(setMinutes(new Date(), 59), 23)
+  const startTime = setHours(setMinutes(new Date(), 0), 9)
+  const endTime = setHours(setMinutes(new Date(), 30), 20)
+  const minTime = isDateToday && now > startTime ? now : startTime
+  const maxTime = endTime
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -162,7 +169,7 @@ export default function BookAppointmentPage() {
                   <option value="">Select Gender</option>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
-                  <option value="other">Other</option>
+                  <option value="children">Children</option>
                 </select>
               </div>
               <div>
@@ -234,6 +241,7 @@ export default function BookAppointmentPage() {
                 placeholder="Select services"
 
               />
+              <p className="text-xs text-gray-500 mt-1">You can select multiple services.</p>
             </div>
             <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">
               <Save className="h-4 w-4 mr-1" /> Submit
