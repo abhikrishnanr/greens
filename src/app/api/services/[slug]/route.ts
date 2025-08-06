@@ -13,6 +13,7 @@ export async function GET(
       },
       include: {
         category: { select: { name: true } },
+
         images: true,
         tiers: {
           include: {
@@ -49,6 +50,7 @@ export async function GET(
       imageUrl: service.imageUrl,
       applicableTo: service.applicableTo,
       category: service.category?.name,
+
       images: service.images,
       tiers,
     })
