@@ -33,7 +33,8 @@ interface ServiceInfo {
   service: string
   variant: string
   start: string
-  price: number
+  actualPrice: number
+  offerPrice: number
   scheduledAt: string
 }
 
@@ -76,18 +77,18 @@ export default function BillingPage() {
     return classes[idx % classes.length]
   }
 
-  const totalBefore = selected.reduce((acc, id) => {
+  const totalOffer = selected.reduce((acc, id) => {
     const s = services.find((s) => s.id === id)
-    return acc + (s?.price || 0)
+    return acc + (s?.offerPrice ?? s?.actualPrice ?? 0)
   }, 0)
 
   const discount = coupon
     ? coupon.discountType === "fixed"
       ? coupon.discountValue
-      : (coupon.discountValue / 100) * totalBefore
+      : (coupon.discountValue / 100) * totalOffer
     : 0
 
-  const finalTotal = totalBefore - discount
+  const finalTotal = totalOffer - discount
   const gstAmount = finalTotal * 0.18
 
   const applyVoucher = async () => {
@@ -110,8 +111,8 @@ export default function BillingPage() {
         category: s.category,
         service: s.service,
         variant: s.variant,
-        amountBefore: s.price,
-        amountAfter: s.price * (finalTotal / totalBefore || 1),
+        amountBefore: s.actualPrice,
+        amountAfter: s.offerPrice ?? s.actualPrice,
         scheduledAt: s.scheduledAt,
       }))
     const phones = Array.from(new Set(svcData.map((s) => s.phone).filter(Boolean))) as string[]
@@ -218,7 +219,7 @@ export default function BillingPage() {
                         <span className="text-muted-foreground">({s.variant})</span>
                         <span className="ml-auto font-semibold text-foreground">
                           <IndianRupee className="inline-block h-4 w-4 mr-1" />
-                          {s.price.toFixed(2)}
+                          {(s.offerPrice ?? s.actualPrice).toFixed(2)}
                         </span>
                         <span className="text-sm text-muted-foreground w-full text-right">
                           Scheduled: {format(new Date(s.scheduledAt), "MMM dd, yyyy hh:mm a")}
@@ -253,7 +254,7 @@ export default function BillingPage() {
                             </span>
                             <span className="font-medium text-foreground">
                               <IndianRupee className="inline-block h-3 w-3 mr-0.5" />
-                              {s.price.toFixed(2)}
+                              {(s.offerPrice ?? s.actualPrice).toFixed(2)}
                             </span>
                           </li>
                         )
@@ -266,7 +267,7 @@ export default function BillingPage() {
                       <span className="text-muted-foreground">Subtotal:</span>
                       <span className="font-semibold text-foreground">
                         <IndianRupee className="inline-block h-4 w-4 mr-1" />
-                        {totalBefore.toFixed(2)}
+                        {totalOffer.toFixed(2)}
                       </span>
                     </p>
                     {coupon && (

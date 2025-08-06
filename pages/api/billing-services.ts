@@ -25,6 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     tiers.forEach(t => {
       tierMap[t.id] = t
     })
+
     const tz = "+05:30"
     const billed = await prisma.billing.findMany({
       where: {
@@ -44,14 +45,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       service: string
       variant: string
       start: string
-      price: number
+      actualPrice: number
+      offerPrice: number
       scheduledAt: string
     }[] = []
-    bookings.forEach(b => {
-      b.items.forEach(it => {
+    for (const b of bookings) {
+      for (const it of b.items) {
         const scheduledAt = new Date(`${b.date}T${it.start}:00${tz}`)
-        if (billedSet.has(scheduledAt.toISOString())) return
+        if (billedSet.has(scheduledAt.toISOString())) continue
         const tier = tierMap[it.tierId]
+        const ph = await prisma.serviceTierPriceHistory.findFirst({
+          where: {
+            tierId: it.tierId,
+            startDate: { lte: scheduledAt },
+            OR: [{ endDate: null }, { endDate: { gt: scheduledAt } }],
+          },
+          orderBy: { startDate: 'desc' },
+        })
+        const actualPrice = ph?.actualPrice ?? tier?.actualPrice ?? 0
+        const offerPrice = ph?.offerPrice ?? ph?.actualPrice ?? tier?.offerPrice ?? actualPrice
         services.push({
           id: it.id,
           phone: b.phone,
@@ -60,11 +72,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           service: tier?.service.name || '',
           variant: tier?.name || it.name,
           start: it.start,
-          price: it.price,
+          actualPrice,
+          offerPrice,
           scheduledAt: scheduledAt.toISOString(),
         })
-      })
-    })
+      }
+    }
     return res.status(200).json(services)
   } catch (err) {
     console.error('billing services error', err)
