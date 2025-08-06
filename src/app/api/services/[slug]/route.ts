@@ -1,16 +1,16 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export async function GET(req: Request, { params }: { params: { slug: string } }) {
-  const { slug } = params
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const { slug } = await params
   try {
     const service = await prisma.serviceNew.findFirst({
       where: {
-        OR: [
-          { id: slug },
-          { slug },
-          { name: { equals: slug.replace(/-/g, ' '), mode: 'insensitive' } },
-        ],
+        OR: [{ id: slug }, { slug }, { name: slug.replace(/-/g, ' ') }],
+
       },
       include: {
         images: true,
