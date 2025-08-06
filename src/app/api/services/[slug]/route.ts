@@ -17,7 +17,8 @@ export async function GET(
         tiers: {
           include: {
             priceHistory: {
-              orderBy: { offerStartDate: 'desc' },
+              orderBy: { startDate: 'desc' },
+
               take: 1,
             },
           },

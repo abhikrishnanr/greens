@@ -9,7 +9,7 @@ export async function GET() {
     const services = await prisma.service.findMany({
       include: {
         priceHistory: {
-          orderBy: { offerStartDate: 'desc' },
+          orderBy: { startDate: 'desc' },
           take: 1,
         }
       },

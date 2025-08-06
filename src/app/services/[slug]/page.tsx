@@ -6,7 +6,6 @@ export default async function ServiceDetailsPage({ params }: { params: Promise<{
   const headersList = await headers()
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL || `http://${headersList.get('host')}`
-
   const res = await fetch(`${baseUrl}/api/services/${slug}`, { cache: 'no-store' })
   if (!res.ok) {
     return <div className="text-red-500 text-xl p-8">Unable to load service details</div>
