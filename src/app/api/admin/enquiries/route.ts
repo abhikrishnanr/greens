@@ -7,10 +7,13 @@ export async function GET(req: NextRequest) {
   if (phone) {
     const customer = await prisma.user.findUnique({ where: { phone } })
     const enquiries = await prisma.enquiry.findMany({
-      where: { customer: { phone } },
+      where: {
+        OR: [{ customer: { phone } }, { phone }],
+      },
       orderBy: { createdAt: 'desc' },
+      include: { customer: true },
     })
-    const result = enquiries.map(e => ({
+    const result = enquiries.map((e) => ({
       ...e,
       variantIds: e.variantIds ? JSON.parse(e.variantIds) : [],
     }))
@@ -21,7 +24,7 @@ export async function GET(req: NextRequest) {
     orderBy: { createdAt: 'desc' },
     include: { customer: true },
   })
-  const result = data.map(e => ({
+  const result = data.map((e) => ({
     ...e,
     variantIds: e.variantIds ? JSON.parse(e.variantIds) : [],
   }))
@@ -45,9 +48,13 @@ export async function POST(req: NextRequest) {
     const saved = await prisma.enquiry.create({
       data: {
         customerId: customer.id,
+        name,
+        phone,
+        gender,
         enquiry: enquiry || null,
         variantIds: Array.isArray(variantIds) ? JSON.stringify(variantIds) : null,
         status: 'new',
+        source: 'admin',
       },
     })
 

@@ -37,6 +37,9 @@ export default function Header() {
       <Link href="#" className="hover:text-green-400 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
         My Account
       </Link>
+      <Link href="/book-appointment" className="hover:text-green-400 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+        Book Appointment
+      </Link>
     </>
   )
 
