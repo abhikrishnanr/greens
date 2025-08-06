@@ -139,7 +139,10 @@ export default function BillingHistoryPage() {
             font-weight: bold;
             background-color: #f9f9f9;
           }
-          .items-table td:last-child, .items-table th:last-child {
+          .items-table td:nth-child(2),
+          .items-table td:nth-child(3),
+          .items-table th:nth-child(2),
+          .items-table th:nth-child(3) {
             text-align: right;
           }
           .summary {
@@ -156,6 +159,13 @@ export default function BillingHistoryPage() {
             font-weight: bold;
             font-size: 14px;
             color: #e75480; /* Primary color */
+          }
+          .savings {
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 10px;
+            color: #2e7d32;
           }
           .footer {
             text-align: center;
@@ -188,8 +198,8 @@ export default function BillingHistoryPage() {
             <thead>
               <tr>
                 <th>Service</th>
-                <th>Variant</th>
-                <th>Amount</th>
+                <th>Actual</th>
+                <th>Offer</th>
               </tr>
             </thead>
             <tbody>
@@ -197,8 +207,8 @@ export default function BillingHistoryPage() {
                 .map(
                   (it) => `
                 <tr>
-                  <td>${it.service}</td>
-                  <td>${it.variant}</td>
+                  <td>${it.service} - ${it.variant}</td>
+                  <td>₹${it.amountBefore.toFixed(2)}</td>
                   <td>₹${it.amountAfter.toFixed(2)}</td>
                 </tr>
               `,
@@ -212,6 +222,8 @@ export default function BillingHistoryPage() {
             <p><span>GST (18%):</span> <span>₹${(b.totalAfter * 0.18).toFixed(2)}</span></p>
             <p class="total"><span>Net Amount:</span> <span>₹${b.totalAfter.toFixed(2)}</span></p>
           </div>
+
+          <div class="savings">You saved Rs ${(b.totalBefore - b.totalAfter).toFixed(2)} on offer</div>
 
           <div class="footer">
             <p>Thank you for your visit!</p>
@@ -230,13 +242,10 @@ export default function BillingHistoryPage() {
 
   const downloadPdf = async (b: Bill) => {
     const { PDFDocument, rgb, StandardFonts } = await import("pdf-lib")
-    const fontkit = (await import("@pdf-lib/fontkit")).default
-    const fontBytes = await fetch("/fonts/NotoSans-Regular.ttf").then((res) => res.arrayBuffer())
     const logoBytes = await fetch(SALON_INFO.logo).then((res) => res.arrayBuffer())
 
     const pdf = await PDFDocument.create()
-    pdf.registerFontkit(fontkit)
-    const font = await pdf.embedFont(fontBytes)
+    const font = await pdf.embedFont(StandardFonts.Helvetica)
     const boldFont = await pdf.embedFont(StandardFonts.HelveticaBold)
     const png = await pdf.embedPng(logoBytes)
 
@@ -303,8 +312,8 @@ export default function BillingHistoryPage() {
 
     // Table Headers
     page.drawText("Service", { x: margin, y, size: 11, font: boldFont })
-    page.drawText("Variant", { x: margin + contentWidth * 0.4, y, size: 11, font: boldFont })
-    page.drawText("Amount", { x: margin + contentWidth * 0.75, y, size: 11, font: boldFont })
+    page.drawText("Actual", { x: margin + contentWidth * 0.55, y, size: 11, font: boldFont })
+    page.drawText("Offer", { x: margin + contentWidth * 0.8, y, size: 11, font: boldFont })
     y -= 10
     page.drawLine({
       start: { x: margin, y },
@@ -316,9 +325,9 @@ export default function BillingHistoryPage() {
 
     // Table Rows
     b.items.forEach((it) => {
-      page.drawText(it.service, { x: margin, y, size: 10, font })
-      page.drawText(it.variant, { x: margin + contentWidth * 0.4, y, size: 10, font })
-      page.drawText(`₹${it.amountAfter.toFixed(2)}`, { x: margin + contentWidth * 0.75, y, size: 10, font })
+      page.drawText(`${it.service} - ${it.variant}`, { x: margin, y, size: 10, font })
+      page.drawText(`Rs ${it.amountBefore.toFixed(2)}`, { x: margin + contentWidth * 0.55, y, size: 10, font })
+      page.drawText(`Rs ${it.amountAfter.toFixed(2)}`, { x: margin + contentWidth * 0.8, y, size: 10, font })
       y -= 15
     })
 
@@ -350,9 +359,18 @@ export default function BillingHistoryPage() {
       return currentY - (isTotal ? 20 : 15)
     }
 
-    y = drawSummaryLine("Actual Amount:", `₹${b.totalBefore.toFixed(2)}`, y)
-    y = drawSummaryLine("GST (18%):", `₹${(b.totalAfter * 0.18).toFixed(2)}`, y)
-    y = drawSummaryLine("Net Amount:", `₹${b.totalAfter.toFixed(2)}`, y, true)
+    y = drawSummaryLine("Actual Amount:", `Rs ${b.totalBefore.toFixed(2)}`, y)
+    y = drawSummaryLine("GST (18%):", `Rs ${(b.totalAfter * 0.18).toFixed(2)}`, y)
+    y = drawSummaryLine("Net Amount:", `Rs ${b.totalAfter.toFixed(2)}`, y, true)
+
+    y -= 10
+    page.drawText(`You saved Rs ${(b.totalBefore - b.totalAfter).toFixed(2)} on offer`, {
+      x: margin,
+      y,
+      size: 16,
+      font: boldFont,
+      color: rgb(0.2, 0.6, 0.2),
+    })
 
     // Footer
     y -= 30
@@ -570,19 +588,30 @@ export default function BillingHistoryPage() {
                   <strong>Address:</strong> {viewBill.billingAddress || "N/A"}
                 </div>
                 <div className="mt-4 mb-2 font-semibold text-foreground">Services:</div>
-                <ul className="list-disc pl-5 space-y-1">
-                  {viewBill.items.map((it, idx) => (
-                    <li key={idx} className="flex justify-between items-center">
-                      <span>
-                        {it.service} - {it.variant}
-                      </span>
-                      <span className="font-medium text-foreground">
-                        <IndianRupee className="inline-block h-3 w-3 mr-0.5" />
-                        {it.amountAfter.toFixed(2)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                <table className="w-full text-sm mb-2">
+                  <thead>
+                    <tr>
+                      <th className="text-left">Service</th>
+                      <th className="text-right">Actual</th>
+                      <th className="text-right">Offer</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {viewBill.items.map((it, idx) => (
+                      <tr key={idx}>
+                        <td>{it.service} - {it.variant}</td>
+                        <td className="text-right">
+                          <IndianRupee className="inline-block h-3 w-3 mr-0.5" />
+                          {it.amountBefore.toFixed(2)}
+                        </td>
+                        <td className="text-right">
+                          <IndianRupee className="inline-block h-3 w-3 mr-0.5" />
+                          {it.amountAfter.toFixed(2)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
                 <div className="mt-4 space-y-1">
                   <div className="flex justify-between items-center">
                     <strong>Amount Before:</strong>{" "}
@@ -610,6 +639,9 @@ export default function BillingHistoryPage() {
                       <IndianRupee className="inline-block h-4 w-4 mr-0.5" />
                       {viewBill.totalAfter.toFixed(2)}
                     </span>
+                  </div>
+                  <div className="text-center text-lg font-bold text-green-600 mt-4">
+                    You saved Rs {(viewBill.totalBefore - viewBill.totalAfter).toFixed(2)} on offer
                   </div>
                 </div>
                 <div className="mt-4 pt-4 border-t border-border text-xs text-center space-y-1">
