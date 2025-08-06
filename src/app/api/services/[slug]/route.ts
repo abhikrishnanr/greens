@@ -10,15 +10,15 @@ export async function GET(
     const service = await prisma.serviceNew.findFirst({
       where: {
         OR: [{ id: slug }, { slug }, { name: slug.replace(/-/g, ' ') }],
-
       },
       include: {
+        category: { select: { name: true } },
+
         images: true,
         tiers: {
           include: {
             priceHistory: {
               orderBy: { startDate: 'desc' },
-
               take: 1,
             },
           },
@@ -49,6 +49,8 @@ export async function GET(
       description: service.description,
       imageUrl: service.imageUrl,
       applicableTo: service.applicableTo,
+      category: service.category?.name,
+
       images: service.images,
       tiers,
     })
