@@ -6,20 +6,19 @@ const prisma = new PrismaClient()
 export async function GET(req, { params }: { params: { id: string } }) {
   const { id } = await params
   try {
-    let service = await prisma.serviceNew.findUnique({
-      where: { id },
+    const service = await prisma.serviceNew.findFirst({
+      where: {
+        OR: [
+          { id },
+          { slug: id },
+          { name: { equals: id.replace(/-/g, ' '), mode: 'insensitive' } },
+        ],
+      },
       include: { tiers: true },
     })
 
     if (!service) {
-      const slug = id.toLowerCase().replace(/-/g, ' ')
-      service = await prisma.serviceNew.findFirst({
-        where: { name: { equals: slug, mode: 'insensitive' } },
-        include: { tiers: true },
-      })
-      if (!service) {
-        return NextResponse.json({ error: 'Not found' }, { status: 404 })
-      }
+      return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
 
     const images = await prisma.serviceImage.findMany({
