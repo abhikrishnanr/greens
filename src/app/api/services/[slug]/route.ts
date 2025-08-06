@@ -10,6 +10,7 @@ export async function GET(
     const service = await prisma.serviceNew.findFirst({
       where: {
         OR: [{ id: slug }, { slug }, { name: slug.replace(/-/g, ' ') }],
+
       },
       include: {
         images: true,
@@ -17,6 +18,7 @@ export async function GET(
           include: {
             priceHistory: {
               orderBy: { startDate: 'desc' },
+
               take: 1,
             },
           },
