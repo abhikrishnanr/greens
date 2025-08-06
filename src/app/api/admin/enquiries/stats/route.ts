@@ -10,5 +10,7 @@ export async function GET() {
   const newCount = await prisma.enquiry.count({ where: { status: 'new' } })
   const processing = await prisma.enquiry.count({ where: { status: 'processing' } })
   const closed = await prisma.enquiry.count({ where: { status: 'closed' } })
-  return NextResponse.json({ today, new: newCount, processing, closed })
+  const web = await prisma.enquiry.count({ where: { source: 'web' } })
+  const webClosed = await prisma.enquiry.count({ where: { source: 'web', status: 'closed' } })
+  return NextResponse.json({ today, new: newCount, processing, closed, web, webClosed })
 }
