@@ -25,7 +25,12 @@ export interface DashboardData {
     activeOffers: number
   }
   customers: number
-  revenue: number
+  revenue: {
+    total: number
+    today: number
+    gstTotal: number
+    gstToday: number
+  }
   enquiries: {
     today: number
     open: number
@@ -51,6 +56,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     activeOffers,
     customersCount,
     revenueSum,
+    todayRevenueSum,
     todayEnquiries,
     openEnquiries,
   ] = await prisma.$transaction([
@@ -70,6 +76,10 @@ export async function getDashboardData(): Promise<DashboardData> {
     prisma.serviceTier.count({ where: { offerPrice: { not: null } } }),
     prisma.user.count({ where: { role: 'customer', removed: false } }),
     prisma.billing.aggregate({ _sum: { amountAfter: true } }),
+    prisma.billing.aggregate({
+      _sum: { amountAfter: true },
+      where: { createdAt: { gte: startOfToday, lte: endOfToday } },
+    }),
     prisma.enquiry.count({
       where: { createdAt: { gte: startOfToday, lte: endOfToday } },
     }),
@@ -95,7 +105,12 @@ export async function getDashboardData(): Promise<DashboardData> {
       activeOffers,
     },
     customers: customersCount,
-    revenue: revenueSum._sum.amountAfter ?? 0,
+    revenue: {
+      total: revenueSum._sum.amountAfter ?? 0,
+      today: todayRevenueSum._sum.amountAfter ?? 0,
+      gstTotal: (revenueSum._sum.amountAfter ?? 0) * 0.18,
+      gstToday: (todayRevenueSum._sum.amountAfter ?? 0) * 0.18,
+    },
     enquiries: {
       today: todayEnquiries,
       open: openEnquiries,
