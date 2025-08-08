@@ -144,11 +144,7 @@ export default function HomePage() {
   return (
     <main className="bg-white min-h-screen font-sans text-gray-800">
       <Header />
-      <div className="text-center mt-4">
-        <Link href="/book-appointment" className="text-green-700 font-semibold hover:underline">
-          Book an Appointment
-        </Link>
-      </div>
+     
 
       {/* HERO SECTION (DARK) */}
       <section className="relative flex flex-col overflow-hidden min-h-[70vh] md:min-h-[70vh] bg-gray-800">
@@ -566,12 +562,12 @@ export default function HomePage() {
             <p className="text-lg text-white/90 mb-8">
               Ready to indulge in a moment of pure bliss? Book your appointment today and let our experts pamper you.
             </p>
-            <button
-              onClick={() => document.getElementById("services")?.scrollIntoView({ behavior: "smooth" })}
+            <a
+              href="/book-appointment"
               className="bg-emerald-600 text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-emerald-700 transition-colors shadow-lg hover:shadow-emerald-500/30"
             >
               Book an Appointment
-            </button>
+            </a>
           </motion.div>
         </div>
       </section>
