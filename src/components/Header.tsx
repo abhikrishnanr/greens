@@ -2,7 +2,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Menu, X, LogOut } from "lucide-react"
+import { Menu, X, LogOut, Home } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useSession, signOut } from "next-auth/react"
 
@@ -79,7 +79,7 @@ export default function Header() {
 
   return (
     <header
-      className="text-white py-4 px-6 flex items-center justify-between w-full relative z-50 bg-transparent"
+      className="fixed top-0 left-0 w-full text-white py-4 px-6 flex items-center justify-between z-50 bg-transparent"
       style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}
     >
       <div className="flex items-center gap-4">
@@ -89,10 +89,15 @@ export default function Header() {
       </div>
       <nav className="hidden md:flex items-center gap-6 text-sm font-medium">{navLinks}</nav>
 
-      {/* Mobile menu button */}
-      <button className="md:hidden text-white" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-      </button>
+      {/* Mobile menu actions */}
+      <div className="md:hidden flex items-center gap-4">
+        <Link href="/" aria-label="Home" className="text-white">
+          <Home size={24} />
+        </Link>
+        <button className="text-white" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
 
       {/* Mobile menu overlay */}
       <AnimatePresence>
