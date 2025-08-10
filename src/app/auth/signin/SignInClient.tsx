@@ -3,14 +3,14 @@
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { Mail, Lock } from 'lucide-react'
+import { Phone, Lock } from 'lucide-react'
 
 interface Props {
   type?: string
 }
 
 export default function SignInClient({ type }: Props) {
-  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const router = useRouter()
@@ -19,11 +19,11 @@ export default function SignInClient({ type }: Props) {
     e.preventDefault()
     const res = await signIn('credentials', {
       redirect: false,
-      email,
+      phone,
       password,
     })
     if (res?.error) {
-      setError('Invalid email or password')
+      setError('Invalid mobile number or password')
       return
     }
 
@@ -70,19 +70,19 @@ export default function SignInClient({ type }: Props) {
           </div>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Email</label>
+              <label className="text-sm font-medium text-gray-700">Mobile Number</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input
-                  type="email"
+                  type="tel"
                   className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="9999999999"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                   required
                 />
               </div>
-              <p className="text-xs text-gray-500">We&apos;ll never share your email.</p>
+              <p className="text-xs text-gray-500">We&apos;ll never share your mobile number.</p>
             </div>
             <div className="space-y-1">
               <label className="text-sm font-medium text-gray-700">Password</label>
