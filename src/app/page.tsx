@@ -193,7 +193,7 @@ export default function HomePage() {
     <main className="bg-white min-h-screen font-sans text-gray-800">
 
       {/* HERO SECTION (DARK) */}
-      <section className="relative flex flex-col overflow-hidden min-h-[80vh] md:min-h-[80vh] bg-gray-800 pt-20">
+      <section className="relative flex flex-col overflow-hidden min-h-[80vh] md:min-h-[80vh] bg-gray-800">
         <div className="absolute inset-x-0 top-0 z-20">
           <Header />
         </div>
