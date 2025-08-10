@@ -41,7 +41,8 @@ export async function GET() {
           return {
             id: svc.id,
             name: svc.name,
-            slug: svc.slug,
+            // use slug when available, otherwise fall back to id so links remain valid
+            slug: svc.slug || svc.id,
             caption: svc.caption ?? '',
             imageUrl: svc.imageUrl ?? null,
             minOfferPrice: minOffer,

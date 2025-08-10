@@ -332,7 +332,7 @@ export default function HomePage() {
                       <h3 className="text-xl font-bold mb-2">{service.name}</h3>
                       <p className="text-sm opacity-80 mb-4 line-clamp-2">{service.caption}</p>
                       <Link
-                        href={`/services/${service.slug}`}
+                        href={`/services/${service.slug || service.id}`}
                         className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-300 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:text-emerald-200"
                       >
                         Explore Service <FiArrowRight />
@@ -481,7 +481,7 @@ export default function HomePage() {
                               {subServices.map((svc) => (
                                 <li key={svc.id}>
                                   <Link
-                                    href={`/services/${svc.slug}`}
+                                    href={`/services/${svc.slug || svc.id}`}
                                     onClick={() => {
                                       if (expandedCat) {
                                         sessionStorage.setItem('expandedCat', expandedCat)
