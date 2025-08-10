@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
-import { FiPhone, FiArrowLeft, FiCalendar,  FiMapPin, FiMail, FiInstagram, FiArrowRight, FiSearch, FiX } from "react-icons/fi"
+import { FiPhone, FiArrowLeft, FiCalendar, FiArrowUp, FiMapPin, FiMail, FiInstagram, FiArrowRight, FiSearch, FiX } from "react-icons/fi"
 import { ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Header from "@/components/Header"
@@ -1073,6 +1073,33 @@ export default function HomePage() {
   {/* iOS safe-area shim */}
   <div className="h-[env(safe-area-inset-bottom)]" />
 </nav>
+
+{/* Desktop helpers (left: Book, right: Top) */}
+<div className="hidden md:block">
+  {/* Book – bottom-left */}
+  <div className="fixed bottom-6 left-6 z-50">
+    <Link
+      href="/book-appointment"
+      className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 text-white font-semibold shadow-lg hover:bg-emerald-700 active:scale-[0.98] transition"
+      aria-label="Book appointment"
+    >
+      <FiCalendar className="text-lg" />
+      <span>Book Appointment</span>
+    </Link>
+  </div>
+
+  {/* Scroll to top – bottom-right */}
+  <div className="fixed bottom-6 right-6 z-50">
+    <button
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2.5 text-white font-semibold shadow-lg hover:bg-emerald-700 active:scale-[0.98] transition"
+      aria-label="Scroll to top"
+    >
+      <FiArrowUp className="text-lg" />
+      <span>Top</span>
+    </button>
+  </div>
+</div>
     </main>
   )
 }
