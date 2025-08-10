@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
         status: 'new',
         source: 'admin',
         preferredDate: preferredDate ? new Date(preferredDate) : null,
-        preferredTime: preferredTime || null,
+        preferredTime: preferredTime && preferredTime !== '' ? preferredTime : null,
 
       },
     })
