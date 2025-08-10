@@ -706,7 +706,7 @@ export default function HomePage() {
         🌟 Deluxe
       </span>
       <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-slate-100 to-white px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200/70">
-        💎 Premium
+        ⭐ Premium
       </span>
       <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-100 to-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800 ring-1 ring-emerald-200/70">
         🌿 Basic
@@ -750,7 +750,7 @@ export default function HomePage() {
         <div className="relative rounded-2xl p-[1px] bg-gradient-to-br from-slate-300/60 via-white to-slate-100/40">
           <div className="rounded-2xl bg-white/85 backdrop-blur-md border border-slate-200/70 p-4 shadow-md transition-all group-hover:shadow-lg group-hover:-translate-y-0.5">
             <div className="mb-2 flex items-center gap-2">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-base">💎</span>
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-base">⭐</span>
               <span className="text-xs font-medium text-slate-700">Premium Services </span>
             </div>
             <p className="font-semibold text-gray-900 mb-1 text-sm md:text-base">
