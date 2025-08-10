@@ -342,31 +342,41 @@ export default function HomePage() {
               💫 About Our Services
             </p>
           </motion.div>
-          <div className="text-center space-y-6 text-gray-700">
+          <div className="max-w-3xl mx-auto text-center space-y-4 mb-12 text-gray-700">
             <p className="text-lg font-semibold text-gray-900">
               Luxury, Quality, and Simplicity
             </p>
             <p>
               At Greens Beauty Salon, we understand that beauty needs vary from person to person. That’s why we offer our services under three distinct categories—Deluxe, Premium, and Basic—allowing you to choose based on your preferences, needs, and budget.
             </p>
-            <p className="font-semibold text-gray-900">
-              🌟 Deluxe Services – The Ultimate in Beauty and Care
-            </p>
-            <p>
-              Indulge in our most exclusive offerings. Our Deluxe category features luxury treatments using internationally renowned brands like Shahnaz Husain and L'Oréal. These services are designed for those who demand the highest level of quality, care, and effectiveness.
-            </p>
-            <p className="font-semibold text-gray-900">
-              💎 Premium Services – Trusted Brands, Superior Results
-            </p>
-            <p>
-              Our Premium category strikes the perfect balance between quality and affordability. We use products from leading brands such as Biotique, Streax, Matrix, Nature’s Way, Oxyglow, and Nature’s Essence to deliver visible results without a hefty price tag.
-            </p>
-            <p className="font-semibold text-gray-900">
-              🌿 Basic Services – Simple, Effective, Everyday Care
-            </p>
-            <p>
-              Designed for everyday beauty needs, our Basic category offers reliable treatments using standard creams and techniques. These services focus on delivering clean, efficient, and affordable results—perfect for your regular self-care routine.
-            </p>
+          </div>
+          <div className="grid gap-8 md:grid-cols-3">
+            <div className="bg-white/80 backdrop-blur-sm border border-amber-200 rounded-2xl p-6 shadow-lg text-gray-700">
+              <p className="font-semibold text-gray-900 mb-2">
+                🌟 Deluxe Services – The Ultimate in Beauty and Care
+              </p>
+              <p>
+                Indulge in our most exclusive offerings. Our Deluxe category features luxury treatments using internationally renowned brands like Shahnaz Husain and L'Oréal. These services are designed for those who demand the highest level of quality, care, and effectiveness.
+              </p>
+            </div>
+            <div className="bg-white/80 backdrop-blur-sm border border-amber-200 rounded-2xl p-6 shadow-lg text-gray-700">
+              <p className="font-semibold text-gray-900 mb-2">
+                💎 Premium Services – Trusted Brands, Superior Results
+              </p>
+              <p>
+                Our Premium category strikes the perfect balance between quality and affordability. We use products from leading brands such as Biotique, Streax, Matrix, Nature’s Way, Oxyglow, and Nature’s Essence to deliver visible results without a hefty price tag.
+              </p>
+            </div>
+            <div className="bg-white/80 backdrop-blur-sm border border-amber-200 rounded-2xl p-6 shadow-lg text-gray-700">
+              <p className="font-semibold text-gray-900 mb-2">
+                🌿 Basic Services – Simple, Effective, Everyday Care
+              </p>
+              <p>
+                Designed for everyday beauty needs, our Basic category offers reliable treatments using standard creams and techniques. These services focus on delivering clean, efficient, and affordable results—perfect for your regular self-care routine.
+              </p>
+            </div>
+          </div>
+          <div className="max-w-3xl mx-auto text-center mt-12 space-y-4 text-gray-700">
             <p className="font-semibold text-gray-900">
               💚 Personalized Guidance, Always
             </p>
