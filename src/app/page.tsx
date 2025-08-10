@@ -494,7 +494,7 @@ export default function HomePage() {
                                         <span className="text-xs">
                                           {svc.minOfferPrice && svc.minActualPrice && svc.minActualPrice > svc.minOfferPrice ? (
                                             <>
-                                              <span className="line-through text-gray-400 mr-1">₹{svc.minActualPrice} onwards</span>
+                                              <span className="line-through text-gray-400 mr-1">₹{svc.minActualPrice}</span>
                                               <span className="text-emerald-400">₹{svc.minOfferPrice} onwards</span>
                                             </>
                                           ) : (
