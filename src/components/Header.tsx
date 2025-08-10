@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Menu, X, LogOut, Home } from "lucide-react"
@@ -8,7 +8,16 @@ import { useSession, signOut } from "next-auth/react"
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
   const { data: session } = useSession()
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const closeMenus = () => {
     setIsMobileMenuOpen(false)
@@ -79,7 +88,7 @@ export default function Header() {
 
   return (
     <header
-      className="fixed top-0 left-0 w-full text-white py-4 px-6 flex items-center justify-between z-50 bg-transparent"
+      className={`fixed top-0 left-0 w-full text-white py-4 px-6 flex items-center justify-between z-50 transition-colors duration-300 border-b ${isScrolled ? 'bg-emerald-950 border-emerald-800' : 'bg-transparent border-transparent'}`}
       style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}
     >
       <div className="flex items-center gap-4">
