@@ -191,12 +191,10 @@ export default function HomePage() {
 
   return (
     <main className="bg-white min-h-screen font-sans text-gray-800">
+      <Header />
 
       {/* HERO SECTION (DARK) */}
-      <section className="relative flex flex-col overflow-hidden min-h-[80vh] md:min-h-[80vh] bg-gray-800 pt-20">
-        <div className="absolute inset-x-0 top-0 z-20">
-          <Header />
-        </div>
+      <section className="relative flex flex-col overflow-hidden min-h-[80vh] md:min-h-[80vh] bg-gray-800">
         {heroLoading ? (
           <div className="w-full h-full flex flex-col">
             <div className="flex-1 bg-gray-200 animate-pulse flex items-center justify-center">
