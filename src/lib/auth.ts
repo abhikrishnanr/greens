@@ -12,16 +12,23 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   providers: [
     CredentialsProvider({
-      name: 'OTP (123456)',
+      name: 'Credentials',
       credentials: {
         email: { label: 'Email', type: 'email', placeholder: 'you@example.com' },
-        otp:   { label: 'OTP',   type: 'text',  placeholder: '123456' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (credentials?.email && credentials.otp === '123456') {
-          return { id: 'temp-id', name: 'Test User', email: credentials.email }
+        if (!credentials?.email || !credentials.password) return null
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email },
+        })
+        if (!user || user.password !== credentials.password) return null
+        return {
+          id: user.id,
+          name: user.name ?? undefined,
+          email: user.email ?? undefined,
+          role: user.role,
         }
-        return null
       },
     }),
     GoogleProvider({

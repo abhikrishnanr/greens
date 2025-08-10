@@ -61,6 +61,7 @@ export async function POST(req: Request) {
       experience,
       startDate: startRaw ? new Date(startRaw) : undefined,
       role,
+      password: 'User@1234',
       removed: false,
       imageUrl,
     };
