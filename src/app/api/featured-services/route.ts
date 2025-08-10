@@ -6,7 +6,10 @@ export async function GET() {
     include: { service: true },
     orderBy: { order: 'asc' },
   })
-  const grouped: Record<string, { id: string; name: string; slug: string }[]> = {
+  const grouped: Record<
+    string,
+    { id: string; name: string; slug: string; caption: string | null; imageUrl: string | null }[]
+  > = {
     female: [],
     male: [],
     children: [],
@@ -18,6 +21,8 @@ export async function GET() {
       id: f.service.id,
       name: f.service.name,
       slug: f.service.slug,
+      caption: f.service.caption || null,
+      imageUrl: f.service.imageUrl || null,
     })
   })
   return NextResponse.json(grouped)

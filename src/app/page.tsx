@@ -2,10 +2,9 @@
 import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
 import { FiPhone, FiMapPin, FiMail, FiInstagram, FiArrowRight, FiSearch, FiX } from "react-icons/fi"
-import { Users, Sparkles, Star, ChevronRight, Baby, Venus, Mars } from "lucide-react"
+import { Users, Sparkles, Star, ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Header from "@/components/Header"
-import slugify from "@/lib/slugify"
 
 const TIER_LABELS = {
   deluxe: {
@@ -28,46 +27,25 @@ const TIER_LABELS = {
   },
 }
 
-const GENDER_STYLES = {
-  female: {
-    label: "Female",
-    activeClass: "bg-pink-500 text-white",
-    borderColor: "from-pink-300 via-pink-500 to-fuchsia-500",
-    dotColor: "text-pink-400",
-    icon: <Venus className="w-4 h-4 mr-2" />,
-  },
-  male: {
-    label: "Male",
-    activeClass: "bg-blue-500 text-white",
-    borderColor: "from-sky-300 via-blue-500 to-indigo-500",
-    dotColor: "text-blue-400",
-    icon: <Mars className="w-4 h-4 mr-2" />,
-  },
-  children: {
-    label: "Children",
-    activeClass: "bg-amber-500 text-white",
-    borderColor: "from-amber-300 via-amber-500 to-orange-500",
-    dotColor: "text-amber-400",
-    icon: <Baby className="w-4 h-4 mr-2" />,
-  },
-} as const
+
 
 export default function HomePage() {
   const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedCat, setExpandedCat] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
   const [selectedHeroCategory, setSelectedHeroCategory] = useState<string>("") // default empty until load
   const [heroTabs, setHeroTabs] = useState<any[]>([])
   const [heroLoading, setHeroLoading] = useState(true)
   const [featuredServices, setFeaturedServices] = useState<
-    Record<string, { id: string; name: string; slug: string }[]>
+    Record<
+      string,
+      { id: string; name: string; slug: string; caption: string | null; imageUrl: string | null }[]
+    >
   >({
     female: [],
     male: [],
     children: [],
   })
-  const [selectedGenderTab, setSelectedGenderTab] = useState<"female" | "male" | "children">("female")
 
   // Search functionality
   const [searchQuery, setSearchQuery] = useState("")
@@ -84,7 +62,6 @@ export default function HomePage() {
         setLoading(false)
       })
       .catch(() => {
-        setError("Unable to fetch services.")
         setLoading(false)
       })
   }, [])
@@ -132,6 +109,11 @@ export default function HomePage() {
     return cat ? cat.services : []
   }, [expandedCat, filteredCategories])
 
+  const signatureServices = useMemo(
+    () => Object.values(featuredServices).flat(),
+    [featuredServices],
+  )
+
   const currentHeroContent = useMemo(() => {
     if (heroTabs.length === 0) return {} as any
     return heroTabs.find((cat) => cat.id === selectedHeroCategory) || heroTabs[0]
@@ -147,16 +129,9 @@ export default function HomePage() {
      
 
       {/* HERO SECTION (DARK) */}
-      <section className="relative flex flex-col overflow-hidden min-h-[70vh] md:min-h-[70vh] bg-gray-800">
+      <section className="relative flex flex-col overflow-hidden min-h-[60vh] md:min-h-[60vh] bg-gray-800">
         {heroLoading ? (
           <div className="w-full h-full flex flex-col">
-            <div className="w-full py-2 bg-gray-200/80 shadow-lg">
-              <div className="flex gap-2 justify-center px-4 animate-pulse">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="bg-gray-300 rounded-lg h-20 w-24"></div>
-                ))}
-              </div>
-            </div>
             <div className="flex-1 bg-gray-200 animate-pulse flex items-center justify-center">
               <div className="text-center space-y-4">
                 <div className="bg-gray-300 h-8 w-64 mx-auto rounded"></div>
@@ -167,38 +142,10 @@ export default function HomePage() {
           </div>
         ) : (
           <>
-            <div className="w-full overflow-x-auto py-2 scrollbar-hide bg-gray-100 shadow-lg">
-              <div className="flex gap-0 justify-start px-4 md:justify-center">
-                {heroTabs
-                  .filter((cat) => cat.id !== "home")
-                  .map((cat, idx) => (
-                    <motion.button
-                      key={cat.id}
-                      className={`flex flex-col items-center justify-center p-3 min-w-[100px] text-center transition-all duration-300 relative ${
-                        selectedHeroCategory === cat.id
-                          ? `bg-white text-black shadow-md rounded-t-lg`
-                          : "bg-transparent text-gray-600 hover:bg-gray-200"
-                      } ${idx === 0 ? "rounded-tl-lg" : ""} ${idx === heroTabs.length - 2 ? "rounded-tr-lg" : ""}`}
-                      onClick={() => setSelectedHeroCategory(cat.id)}
-                      whileHover={{ scale: 1.05, y: -5 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <img
-                        src={cat.iconUrl || "/placeholder.svg"}
-                        alt={cat.name}
-                        width={32}
-                        height={32}
-                        className="w-8 h-8 mb-1"
-                      />
-                      <span className="text-xs font-medium whitespace-nowrap">{cat.name}</span>
-                    </motion.button>
-                  ))}
-              </div>
-            </div>
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentHeroContent.id}
-                className="relative flex-1 w-full flex items-end justify-center p-8 text-center overflow-hidden pb-12"
+                className="relative flex-1 w-full flex items-end justify-center p-8 text-center overflow-hidden pb-8"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -223,7 +170,7 @@ export default function HomePage() {
                       className="w-full h-full object-cover"
                     />
                   )}
-                 
+
                 </div>
                 <div className="relative z-20 text-white max-w-3xl space-y-4">
                   <h1 className="text-3xl md:text-4xl font-bold tracking-wide text-white drop-shadow-lg">
@@ -245,102 +192,53 @@ export default function HomePage() {
                 </div>
               </motion.div>
             </AnimatePresence>
+            <div className="w-full overflow-x-auto py-2 scrollbar-hide bg-gray-100 shadow-lg">
+              <div className="flex gap-0 justify-start px-4 md:justify-center">
+                {heroTabs
+                  .filter((cat) => cat.id !== "home")
+                  .map((cat, idx) => (
+                    <motion.button
+                      key={cat.id}
+                      className={`flex flex-col items-center justify-center p-3 min-w-[100px] text-center transition-all duration-300 relative ${
+                        selectedHeroCategory === cat.id
+                          ? `bg-white text-black shadow-md rounded-b-lg`
+                          : "bg-transparent text-gray-600 hover:bg-gray-200"
+                      } ${idx === 0 ? "rounded-bl-lg" : ""} ${idx === heroTabs.length - 2 ? "rounded-br-lg" : ""}`}
+                      onClick={() => setSelectedHeroCategory(cat.id)}
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <img
+                        src={cat.iconUrl || "/placeholder.svg"}
+                        alt={cat.name}
+                        width={32}
+                        height={32}
+                        className="w-8 h-8 mb-1"
+                      />
+                      <span className="text-xs font-medium whitespace-nowrap">{cat.name}</span>
+                    </motion.button>
+                  ))}
+              </div>
+            </div>
           </>
         )}
       </section>
 
-      {/* FEATURED SERVICES SECTION (LIGHT) */}
-      <section
-        className="py-12 sm:py-16 relative bg-fixed bg-cover bg-center"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('/emerald-gold-pattern.png')",
-        }}
-      >
-        <div className="container mx-auto px-6 relative z-10">
-          <motion.div
-            className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
-            <div className="text-center md:text-left">
-              <h2 className="text-sm font-bold uppercase tracking-widest text-emerald-600 mb-2">Popular Choices</h2>
-              <p className="text-3xl md:text-4xl font-bold text-gray-900">Featured Services</p>
-            </div>
-            <div className="flex flex-wrap justify-center items-center gap-2 bg-white/50 rounded-full p-1 shadow-inner border w-full md:w-auto">
-              {(Object.keys(GENDER_STYLES) as Array<keyof typeof GENDER_STYLES>).map((gender) => (
-                <button
-                  key={gender}
-                  onClick={() => setSelectedGenderTab(gender)}
-                  className={`flex items-center justify-center w-full md:w-auto min-w-[120px] px-4 py-2 sm:px-6 sm:py-3 rounded-full font-semibold transition-all duration-300 ${
-                    selectedGenderTab === gender ? GENDER_STYLES[gender].activeClass : "text-gray-600 hover:bg-white/80"
-                  }`}
-                >
-                  {GENDER_STYLES[gender].icon}
-                  {GENDER_STYLES[gender].label}
-                </button>
-              ))}
-            </div>
-          </motion.div>
-
-          <motion.div
-            key={selectedGenderTab}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="max-w-4xl mx-auto"
-          >
-            <div
-              className={`rounded-2xl p-0.5 bg-gradient-to-br ${
-                GENDER_STYLES[selectedGenderTab].borderColor
-              } shadow-lg transition-all duration-300`}
-            >
-              <div className="bg-white rounded-[15px] p-6">
-                <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-2 text-center">
-                  {featuredServices[selectedGenderTab]?.map((service, index) => (
-                    <div key={service.id} className="flex items-center">
-                      <Link
-                        href={`/services/${service.slug}`}
-                        className="text-gray-700 hover:text-emerald-600 font-medium transition-colors duration-200 hover:underline decoration-emerald-600 decoration-2 underline-offset-4 px-2 py-1"
-                      >
-                        {service.name}
-                      </Link>
-                      {index < (featuredServices[selectedGenderTab]?.length || 0) - 1 && (
-                        <span
-                          className={`${
-                            GENDER_STYLES[selectedGenderTab].dotColor
-                          } mx-2 font-bold hidden sm:inline transition-colors duration-300`}
-                        >
-                          •
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
       {/* SIGNATURE TREATMENTS SECTION (DARK) */}
-      <section className="py-20 sm:py-24 bg-emerald-950 text-white relative">
+      <section className="py-12 sm:py-16 bg-emerald-950 text-white relative">
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-amber-300 to-transparent" />
         <div className="container mx-auto px-6 relative z-10">
           <motion.div
-            className="text-center mb-12"
+            className="text-center mb-8"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-sm font-bold uppercase tracking-widest text-emerald-400 mb-2">Client Favorites</h2>
             <p className="text-3xl md:text-4xl font-bold text-white">Our Signature Treatments</p>
           </motion.div>
           <div className="relative">
-            {loading ? (
+            {signatureServices.length === 0 ? (
               <div className="flex gap-8 animate-pulse">
                 {[...Array(4)].map((_, i) => (
                   <div key={i} className="bg-emerald-900 rounded-lg h-96 w-80 flex-shrink-0"></div>
@@ -348,9 +246,9 @@ export default function HomePage() {
               </div>
             ) : (
               <div className="flex overflow-x-auto gap-8 custom-scrollbar py-4">
-                {categories.map((category, idx) => (
+                {signatureServices.map((service, idx) => (
                   <motion.div
-                    key={category.id}
+                    key={service.id}
                     className="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-2xl transition-all duration-500 flex-shrink-0 w-80"
                     initial={{ opacity: 0, x: 40 }}
                     whileInView={{ opacity: 1, x: 0 }}
@@ -358,19 +256,19 @@ export default function HomePage() {
                     viewport={{ once: true, amount: 0.2 }}
                   >
                     <img
-                      src={category.imageUrl || `/placeholder.svg?height=400&width=320&query=${category.name}`}
-                      alt={category.name}
+                      src={service.imageUrl || `/placeholder.svg?height=400&width=320&query=${service.name}`}
+                      alt={service.name}
                       className="w-full h-96 object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
                     <div className="absolute bottom-0 left-0 p-6 text-white w-full">
-                      <h3 className="text-xl font-bold mb-2">{category.name}</h3>
-                      <p className="text-sm opacity-80 mb-4 line-clamp-2">{category.caption}</p>
+                      <h3 className="text-xl font-bold mb-2">{service.name}</h3>
+                      <p className="text-sm opacity-80 mb-4 line-clamp-2">{service.caption}</p>
                       <Link
-                        href={`/services/${slugify(category.name)}`}
+                        href={`/services/${service.slug}`}
                         className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-300 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:text-emerald-200"
                       >
-                        Explore Services <FiArrowRight />
+                        Explore Service <FiArrowRight />
                       </Link>
                     </div>
                   </motion.div>
@@ -383,7 +281,7 @@ export default function HomePage() {
 
       {/* TAILORED EXPERIENCES (TIERS) SECTION (LIGHT) */}
       <section
-        className="py-20 sm:py-24 relative bg-fixed bg-cover bg-center"
+        className="py-12 sm:py-16 relative bg-fixed bg-cover bg-center"
         style={{
           backgroundImage:
             "linear-gradient(rgba(250, 252, 249, 0.95), rgba(250, 252, 249, 0.95)), url('/luxury-salon-mural.png')",
@@ -391,13 +289,12 @@ export default function HomePage() {
       >
         <div className="container mx-auto px-6 relative z-10">
           <motion.div
-            className="text-center mb-12"
+            className="text-center mb-8"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-sm font-bold uppercase tracking-widest text-emerald-600 mb-2">Your Perfect Match</h2>
             <p className="text-3xl md:text-4xl font-bold text-gray-900">Tailored Experiences</p>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -422,21 +319,20 @@ export default function HomePage() {
       </section>
 
       {/* ALL SERVICES SECTION (DARK) */}
-      <section id="services" className="py-20 sm:py-24 bg-emerald-950 text-white relative">
+      <section id="services" className="py-12 sm:py-16 bg-emerald-950 text-white relative">
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-amber-300 to-transparent" />
         <div className="container mx-auto px-6 relative z-10">
           <motion.div
-            className="text-center mb-12"
+            className="text-center mb-8"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-sm font-bold uppercase tracking-widest text-emerald-400 mb-2">Our Full Menu</h2>
             <p className="text-3xl md:text-4xl font-bold text-white">Explore All Services</p>
           </motion.div>
           <motion.div
-            className="max-w-2xl mx-auto mb-10"
+            className="max-w-2xl mx-auto mb-6"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -496,8 +392,8 @@ export default function HomePage() {
                             className="w-14 h-14 rounded-lg object-cover"
                           />
                           <div>
-                            <h3 className="text-lg font-bold text-emerald-300">{cat.name}</h3>
-                            <p className="text-gray-400 text-sm">{cat.services?.length || 0} services</p>
+                            <h3 className="text-lg font-bold text-white">{cat.name}</h3>
+                            <p className="text-gray-200 text-sm">{cat.services?.length || 0} services</p>
                           </div>
                         </div>
                         <motion.div animate={{ rotate: isOpen ? 90 : 0 }}>
@@ -521,7 +417,7 @@ export default function HomePage() {
                                     href={`/services/${svc.slug}`}
                                     className="flex justify-between items-center p-2 rounded-md hover:bg-emerald-800/50 transition-colors"
                                   >
-                                    <span className="font-semibold text-gray-300 text-sm">{svc.name}</span>
+                                    <span className="font-semibold text-white text-sm">{svc.name}</span>
                                     {svc.minPrice != null && (
                                       <span className="text-sm text-emerald-400 font-medium whitespace-nowrap">
                                         ₹{svc.minPrice} onwards
@@ -545,7 +441,7 @@ export default function HomePage() {
 
       {/* BOOKING & CONTACT SECTION (DARK with BG Image) */}
       <section
-        className="py-24 sm:py-32 bg-cover bg-center bg-fixed"
+        className="py-16 sm:py-24 bg-cover bg-center bg-fixed"
         style={{
           backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/serene-salon-interior.png')",
         }}
@@ -558,8 +454,8 @@ export default function HomePage() {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl md:text-5xl font-bold mb-6 text-white">Your Escape Awaits</h2>
-            <p className="text-lg text-white/90 mb-8">
+            <h2 className="text-3xl md:text-5xl font-bold mb-4 text-white">Your Escape Awaits</h2>
+            <p className="text-lg text-white/90 mb-6">
               Ready to indulge in a moment of pure bliss? Book your appointment today and let our experts pamper you.
             </p>
             <a
