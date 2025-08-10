@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { signIn, getSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { Mail, Lock } from 'lucide-react'
 
 export default function SignInClient() {
   const [email, setEmail] = useState('')
@@ -44,43 +45,59 @@ export default function SignInClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-900 to-gray-900 flex items-center justify-center p-4">
-      <div className="bg-black/70 backdrop-blur-sm p-8 rounded-2xl w-full max-w-md shadow-lg space-y-6">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-primary mb-2">Hello!</h1>
-          <p className="text-primary">Sign in to continue</p>
+    <div className="min-h-screen grid md:grid-cols-2">
+      <div className="hidden md:flex flex-col items-center justify-center bg-gradient-to-br from-green-600 to-green-900 text-white p-10">
+        <h2 className="text-4xl font-bold mb-4">Welcome Back</h2>
+        <p className="text-center max-w-sm">
+          Manage your salon operations, staff, and customers all in one place.
+        </p>
+      </div>
+      <div className="flex items-center justify-center bg-gray-50 p-6">
+        <div className="w-full max-w-md space-y-6">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-primary mb-2">Sign In</h1>
+            <p className="text-gray-500">Enter your credentials to access your account</p>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700">Email</label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <input
+                  type="email"
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <p className="text-xs text-gray-500">We&apos;ll never share your email.</p>
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <input
+                  type="password"
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <p className="text-xs text-gray-500">Use at least 8 characters.</p>
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-primary text-black py-2 rounded-lg font-semibold hover:bg-green-400 transition-colors"
+            >
+              Sign In
+            </button>
+          </form>
+          {error && <p className="text-red-500 text-center">{error}</p>}
         </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="text-primary">Email</label>
-            <input
-              type="email"
-              className="w-full"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className="text-primary">Password</label>
-            <input
-              type="password"
-              className="w-full"
-              placeholder="Your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-primary text-black py-2 rounded font-semibold"
-          >
-            Sign In
-          </button>
-        </form>
-        {error && <p className="text-red-400 text-center">{error}</p>}
       </div>
     </div>
   )
