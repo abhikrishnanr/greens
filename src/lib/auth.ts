@@ -40,18 +40,21 @@ export const authOptions: NextAuthOptions = {
       if (token.sub) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.sub },
-          select: { phone: true, role: true },
+          select: { phone: true, role: true, modules: true },
         })
-        ;(token as any).phone = dbUser?.phone ?? null
-        ;(token as any).role  = dbUser?.role  ?? null
+        ;(token as { phone?: string | null; role?: string | null; modules?: string[] }).phone = dbUser?.phone ?? null
+        ;(token as { phone?: string | null; role?: string | null; modules?: string[] }).role = dbUser?.role ?? null
+        ;(token as { phone?: string | null; role?: string | null; modules?: string[] }).modules =
+          (dbUser?.modules as string[] | null) ?? []
       }
       return token
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id     = token.sub!
-        ;(session.user as any).phone = (token as any).phone
-        ;(session.user as any).role  = (token as any).role
+        session.user.id = token.sub!
+        ;(session.user as { phone?: string | null; role?: string | null; modules?: string[] }).phone = (token as { phone?: string | null }).phone
+        ;(session.user as { phone?: string | null; role?: string | null; modules?: string[] }).role = (token as { role?: string | null }).role
+        ;(session.user as { phone?: string | null; role?: string | null; modules?: string[] }).modules = (token as { modules?: string[] }).modules
       }
       return session
     },

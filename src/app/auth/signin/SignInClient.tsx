@@ -1,17 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import {
-  getProviders,
-  signIn,
-  LiteralUnion,
-  ClientSafeProvider
-} from 'next-auth/react'
-import { BuiltInProviderType } from 'next-auth/providers'
+import { useState } from 'react'
+import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function SignInClient() {
-  const [providers, setProviders] = useState<Record<string, ClientSafeProvider>>({})
   const [method, setMethod] = useState<'google' | 'email' | 'otp'>('google')
 
   const [email, setEmail] = useState('')
@@ -22,9 +15,6 @@ export default function SignInClient() {
   const params = useSearchParams()
   const callbackUrl = params.get('callbackUrl') || '/'
 
-  useEffect(() => {
-    getProviders().then((provs: any) => setProviders(provs))
-  }, [])
 
   // Email magic-link
   const handleEmail = async (e: React.FormEvent) => {
@@ -48,9 +38,9 @@ export default function SignInClient() {
   }
 
   return (
-    <div className="min-h-screen bg-[#052b1e] flex items-center justify-center p-4">
-      <div className="bg-black bg-opacity-80 p-8 rounded-xl w-full max-w-md">
-        <h1 className="text-2xl font-bold text-primary mb-6 text-center">Sign In</h1>
+    <div className="min-h-screen bg-gradient-to-br from-green-900 to-gray-900 flex items-center justify-center p-4">
+      <div className="bg-black/70 backdrop-blur-sm p-8 rounded-2xl w-full max-w-md shadow-lg">
+        <h1 className="text-3xl font-bold text-primary mb-6 text-center">Welcome Back</h1>
 
         {/* Method toggle */}
         <div className="flex mb-6">
@@ -58,7 +48,7 @@ export default function SignInClient() {
             <button
               key={m}
               onClick={() => {
-                setMethod(m as any)
+                setMethod(m as 'google' | 'email' | 'otp')
                 setError('')
               }}
               className={`flex-1 py-2 font-medium ${
