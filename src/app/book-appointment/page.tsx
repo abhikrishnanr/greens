@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useSession } from "next-auth/react"
 
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
@@ -52,6 +53,18 @@ export default function BookAppointmentPage() {
 
   const [variants, setVariants] = useState<VariantOption[]>([])
   const [submitted, setSubmitted] = useState(false)
+  const { data: session } = useSession()
+
+  useEffect(() => {
+    if (session?.user) {
+      setForm((prev) => ({
+        ...prev,
+        name: session.user.name || "",
+        phone: session.user.phone || "",
+        gender: session.user.gender || "",
+      }))
+    }
+  }, [session])
 
   useEffect(() => {
     if (!form.gender) {

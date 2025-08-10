@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
+import { useSession } from 'next-auth/react'
 import { Calendar, Download, FileText, PlusCircle } from 'lucide-react'
+import Header from '@/components/Header'
 
 interface Schedule {
   id: string
@@ -19,11 +22,18 @@ interface Bill {
 export default function CustomerDashboard() {
   const [schedules, setSchedules] = useState<Schedule[]>([])
   const [bills, setBills] = useState<Bill[]>([])
+  const { data: session } = useSession()
 
   useEffect(() => {
     fetch('/api/customer/schedules')
       .then((r) => r.json())
-      .then((d) => setSchedules(d.schedules ?? []))
+      .then((d) => {
+        const today = new Date().toLocaleDateString('en-CA', {
+          timeZone: 'Asia/Kolkata',
+        })
+        const upcoming = (d.schedules ?? []).filter((s: Schedule) => s.date >= today)
+        setSchedules(upcoming)
+      })
       .catch(() => setSchedules([]))
     fetch('/api/customer/bills')
       .then((r) => r.json())
@@ -31,13 +41,47 @@ export default function CustomerDashboard() {
       .catch(() => setBills([]))
   }, [])
 
+  const totalServices = bills.length
+  const totalPaid = bills.reduce((sum, b) => sum + b.amount, 0)
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-100 p-8">
-      <div className="max-w-5xl mx-auto space-y-8">
-        <header className="text-center space-y-2">
-          <h1 className="text-4xl font-bold text-emerald-900">Your Dashboard</h1>
-          <p className="text-emerald-700">Track appointments and billing in style</p>
-        </header>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-100">
+      <Header />
+      <div className="max-w-5xl mx-auto space-y-8 p-8">
+        <div className="flex flex-col items-center gap-4">
+          {session?.user && (
+            <>
+              {session.user.image ? (
+                <Image
+                  src={session.user.image}
+                  alt={session.user.name || 'avatar'}
+                  width={80}
+                  height={80}
+                  className="rounded-full"
+                />
+              ) : (
+                <div className="h-20 w-20 rounded-full bg-emerald-600 flex items-center justify-center text-white text-2xl">
+                  {session.user.name?.[0] || 'U'}
+                </div>
+              )}
+              <div className="text-center">
+                <h1 className="text-3xl font-bold text-emerald-900">{session.user.name}</h1>
+                <p className="text-emerald-700">{session.user.gender}</p>
+                <p className="text-emerald-700">{session.user.phone}</p>
+              </div>
+            </>
+          )}
+          <div className="flex gap-6 mt-4">
+            <div className="text-center">
+              <p className="text-emerald-900 text-2xl font-bold">{totalServices}</p>
+              <p className="text-emerald-700">Services Taken</p>
+            </div>
+            <div className="text-center">
+              <p className="text-emerald-900 text-2xl font-bold">₹{totalPaid}</p>
+              <p className="text-emerald-700">Total Paid</p>
+            </div>
+          </div>
+        </div>
         <section className="grid md:grid-cols-2 gap-8">
           <div className="bg-white/70 backdrop-blur rounded-xl shadow-lg p-6">
             <h2 className="flex items-center gap-2 text-2xl font-semibold text-emerald-900 mb-4">
@@ -76,13 +120,13 @@ export default function CustomerDashboard() {
                     </span>
                     <div className="flex gap-2">
                       <Link
-                        href={`/api/customer/bills/${b.id}`}
+                        href={`/customer/bills/${b.id}`}
                         className="text-emerald-600 hover:underline"
                       >
                         View
                       </Link>
                       <Link
-                        href={`/api/customer/bills/${b.id}?download=1`}
+                        href={`/customer/bills/${b.id}?download=1`}
                         className="text-emerald-600 hover:underline flex items-center"
                       >
                         <Download size={16} />
