@@ -5,118 +5,63 @@ import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function SignInClient() {
-  const [method, setMethod] = useState<'google' | 'email' | 'otp'>('google')
-
   const [email, setEmail] = useState('')
-  const [otp, setOtp] = useState('')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-
   const router = useRouter()
   const params = useSearchParams()
   const callbackUrl = params.get('callbackUrl') || '/'
 
-
-  // Email magic-link
-  const handleEmail = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email) return setError('Enter your email')
-    await signIn('email', { email, callbackUrl })
-  }
-
-  // Dummy OTP sign-in
-  const handleOtp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email || !otp) return setError('Enter email & OTP')
     const res = await signIn('credentials', {
       redirect: false,
       email,
-      otp,
-      callbackUrl
+      password,
+      callbackUrl,
     })
-    if (res?.error) setError('Invalid OTP (must be 123456)')
+    if (res?.error) setError('Invalid email or password')
     else router.push(callbackUrl)
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-900 to-gray-900 flex items-center justify-center p-4">
-      <div className="bg-black/70 backdrop-blur-sm p-8 rounded-2xl w-full max-w-md shadow-lg">
-        <h1 className="text-3xl font-bold text-primary mb-6 text-center">Welcome Back</h1>
-
-        {/* Method toggle */}
-        <div className="flex mb-6">
-          {['google', 'email', 'otp'].map((m) => (
-            <button
-              key={m}
-              onClick={() => {
-                setMethod(m as 'google' | 'email' | 'otp')
-                setError('')
-              }}
-              className={`flex-1 py-2 font-medium ${
-                method === m ? 'bg-primary text-black' : 'bg-transparent text-primary border border-primary'
-              }`}
-            >
-              {m === 'google' ? 'Google' : m === 'email' ? 'Email' : 'OTP'}
-            </button>
-          ))}
+      <div className="bg-black/70 backdrop-blur-sm p-8 rounded-2xl w-full max-w-md shadow-lg space-y-6">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-primary mb-2">Hello!</h1>
+          <p className="text-primary">Sign in to continue</p>
         </div>
-
-        {/* Google */}
-        {method === 'google' && (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="text-primary">Email</label>
+            <input
+              type="email"
+              className="w-full"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label className="text-primary">Password</label>
+            <input
+              type="password"
+              className="w-full"
+              placeholder="Your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
           <button
-            onClick={() => signIn('google', { callbackUrl })}
-            className="w-full flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white py-2 rounded transition mb-4"
+            type="submit"
+            className="w-full bg-primary text-black py-2 rounded font-semibold"
           >
-            <i className="ri-google-line text-xl" />
-            Sign in with Google
+            Sign In
           </button>
-        )}
-
-        {/* Email */}
-        {method === 'email' && (
-          <form onSubmit={handleEmail} className="space-y-4 mb-4">
-            <label className="text-primary">Your Email</label>
-            <input
-              type="email"
-              className="w-full"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <button type="submit" className="w-full bg-primary text-black py-2 rounded font-semibold">
-              Send Magic Link
-            </button>
-          </form>
-        )}
-
-        {/* OTP */}
-        {method === 'otp' && (
-          <form onSubmit={handleOtp} className="space-y-4 mb-4">
-            <label className="text-primary">Your Email</label>
-            <input
-              type="email"
-              className="w-full"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <label className="text-primary">Enter OTP</label>
-            <input
-              type="text"
-              className="w-full"
-              placeholder="123456"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              required
-            />
-            <button type="submit" className="w-full bg-primary text-black py-2 rounded font-semibold">
-              Sign in with OTP
-            </button>
-          </form>
-        )}
-
-        {error && <p className="text-red-400 text-center mt-2">{error}</p>}
+        </form>
+        {error && <p className="text-red-400 text-center">{error}</p>}
       </div>
     </div>
   )

@@ -25,7 +25,13 @@ export default function UsersPage() {
   useEffect(() => {
     fetch('/api/users')
       .then((res) => res.json())
-      .then((data) => setUsers(data.users))
+      .then((data) =>
+        setUsers(
+          data.users.filter(
+            (u: User) => u.role === 'admin' || u.role === 'staff'
+          )
+        )
+      )
   }, [])
 
   const updateUser = async (id: string, role: string, modules: string[]) => {
@@ -40,23 +46,23 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">User Roles</h1>
-      <table className="w-full bg-white rounded shadow">
-        <thead>
-          <tr className="text-left border-b">
-            <th className="p-2">Name</th>
-            <th className="p-2">Email</th>
-            <th className="p-2">Role</th>
-            <th className="p-2">Modules</th>
+    <div className="p-4 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6 text-green-800">User Management</h1>
+      <table className="w-full bg-white rounded-lg shadow overflow-hidden">
+        <thead className="bg-green-100">
+          <tr className="text-left">
+            <th className="p-3">Name</th>
+            <th className="p-3">Email</th>
+            <th className="p-3">Role</th>
+            <th className="p-3">Modules</th>
           </tr>
         </thead>
         <tbody>
           {users.map((user) => (
-            <tr key={user.id} className="border-b last:border-b-0">
-              <td className="p-2">{user.name ?? '—'}</td>
-              <td className="p-2">{user.email ?? '—'}</td>
-              <td className="p-2">
+            <tr key={user.id} className="border-t last:border-b-0">
+              <td className="p-3">{user.name ?? '—'}</td>
+              <td className="p-3">{user.email ?? '—'}</td>
+              <td className="p-3">
                 <select
                   value={user.role}
                   onChange={(e) =>
@@ -65,12 +71,10 @@ export default function UsersPage() {
                   className="border p-1 rounded"
                 >
                   <option value="admin">admin</option>
-                  <option value="manager">manager</option>
                   <option value="staff">staff</option>
-                  <option value="customer">customer</option>
                 </select>
               </td>
-              <td className="p-2">
+              <td className="p-3">
                 <div className="flex flex-wrap gap-2">
                   {allModules.map((m) => {
                     const active = user.modules?.includes(m)
