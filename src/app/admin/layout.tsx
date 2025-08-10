@@ -46,9 +46,10 @@ const sections: {
   {
     heading: 'People',
     items: [
+      { href: '/admin/users', label: 'Users', icon: MdPeople },
       { href: '/admin/staff', label: 'Staff', icon: MdPeople },
       { href: '/admin/customers', label: 'Customers', icon: MdPeople },
-   
+
     ],
   },
   {
@@ -93,7 +94,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </Link>
           </div>
           <button
-            onClick={() => signOut({ callbackUrl: '/' })}
+            onClick={() => signOut({ callbackUrl: '/auth/signin' })}
             className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
           >
             <MdLogout className="text-lg" /> Logout

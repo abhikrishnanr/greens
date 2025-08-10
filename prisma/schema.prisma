@@ -16,6 +16,7 @@ model User {
   name        String?   @db.VarChar(191)
   email       String?   @unique @db.VarChar(191)
   role        String    @default("customer") @db.VarChar(191)
+  modules     Json?    @default("[]")
   branchId    String?   @db.VarChar(191)
   branch      Branch?   @relation(fields: [branchId], references: [id])
   phone       String?   @unique @db.VarChar(191)
