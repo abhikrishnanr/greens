@@ -43,7 +43,7 @@ export default function Header() {
       <Link href="#" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
         Academy & Training
       </Link>
-      <Link href="#" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
+      <Link href="#about" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
         About Greens
       </Link>
       <Link href="#" className="hover:text-green-400 transition-colors" onClick={closeMenus}>

@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
 import { FiPhone, FiMapPin, FiMail, FiInstagram, FiArrowRight, FiSearch, FiX } from "react-icons/fi"
-import { Users, Sparkles, Star, ChevronRight } from "lucide-react"
+import { ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Header from "@/components/Header"
 
@@ -28,29 +28,6 @@ function setCache(key: string, data: any) {
   if (typeof window === "undefined") return
   localStorage.setItem(key, JSON.stringify({ data, timestamp: Date.now() }))
 }
-
-const TIER_LABELS = {
-  deluxe: {
-    label: "Deluxe",
-    icon: <Star className="w-8 h-8 text-amber-400" />,
-    description:
-      "Indulge in pure luxury with world-renowned brands like Shahnaz Husain & L'Oréal for an unparalleled experience.",
-  },
-  premium: {
-    label: "Premium",
-    icon: <Sparkles className="w-8 h-8 text-cyan-400" />,
-    description:
-      "Experience exceptional quality and results with trusted brands like Biotique & Matrix, our most popular choice.",
-  },
-  basic: {
-    label: "Basic",
-    icon: <Users className="w-8 h-8 text-emerald-400" />,
-    description:
-      "Perfect for essential, everyday care. We use proven techniques to deliver efficient and affordable results.",
-  },
-}
-
-
 
 export default function HomePage() {
   const [categories, setCategories] = useState<any[]>([])
@@ -344,8 +321,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* TAILORED EXPERIENCES (TIERS) SECTION (LIGHT) */}
+      {/* ABOUT SERVICES SECTION */}
       <section
+        id="about"
         className="py-12 sm:py-16 relative bg-fixed bg-cover bg-center"
         style={{
           backgroundImage:
@@ -360,25 +338,50 @@ export default function HomePage() {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <p className="text-2xl md:text-3xl font-bold text-gray-900">Tailored Experiences</p>
+            <p className="text-2xl md:text-3xl font-bold text-gray-900">
+              💫 About Our Services
+            </p>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {Object.entries(TIER_LABELS).map(([key, { label, icon, description }], idx) => (
-              <motion.div
-                key={key}
-                className="rounded-xl p-0.5 bg-gradient-to-br from-amber-200 via-amber-400 to-yellow-500 transition-all duration-300 hover:shadow-xl hover:-translate-y-2"
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: idx * 0.15 }}
-                viewport={{ once: true }}
-              >
-                <div className="bg-white rounded-[10px] p-8 text-center flex flex-col items-center h-full">
-                  <div className="mb-5">{icon}</div>
-                  <h3 className="text-2xl font-semibold mb-3 text-stone-800">{label}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed flex-grow">{description}</p>
-                </div>
-              </motion.div>
-            ))}
+          <div className="text-center space-y-6 text-gray-700">
+            <p className="text-lg font-semibold text-gray-900">
+              Luxury, Quality, and Simplicity
+            </p>
+            <p>
+              At Greens Beauty Salon, we understand that beauty needs vary from person to person. That’s why we offer our services under three distinct categories—Deluxe, Premium, and Basic—allowing you to choose based on your preferences, needs, and budget.
+            </p>
+            <p className="font-semibold text-gray-900">
+              🌟 Deluxe Services – The Ultimate in Beauty and Care
+            </p>
+            <p>
+              Indulge in our most exclusive offerings. Our Deluxe category features luxury treatments using internationally renowned brands like Shahnaz Husain and L'Oréal. These services are designed for those who demand the highest level of quality, care, and effectiveness.
+            </p>
+            <p className="font-semibold text-gray-900">
+              💎 Premium Services – Trusted Brands, Superior Results
+            </p>
+            <p>
+              Our Premium category strikes the perfect balance between quality and affordability. We use products from leading brands such as Biotique, Streax, Matrix, Nature’s Way, Oxyglow, and Nature’s Essence to deliver visible results without a hefty price tag.
+            </p>
+            <p className="font-semibold text-gray-900">
+              🌿 Basic Services – Simple, Effective, Everyday Care
+            </p>
+            <p>
+              Designed for everyday beauty needs, our Basic category offers reliable treatments using standard creams and techniques. These services focus on delivering clean, efficient, and affordable results—perfect for your regular self-care routine.
+            </p>
+            <p className="font-semibold text-gray-900">
+              💚 Personalized Guidance, Always
+            </p>
+            <p>
+              Not sure which service to go for? Don’t worry—we’re here to help you choose!
+            </p>
+            <p>
+              At Greens Beauty Salon, our friendly and experienced team is always happy to guide you. Whether you’re booking a facial, a haircut, or a relaxing spa session, we’ll help you choose the right category and treatment based on your skin type, hair condition, and personal preferences.
+            </p>
+            <p>
+              We love getting to know our clients and recommending what truly works best for you—because your comfort, confidence, and satisfaction are what matter most.
+            </p>
+            <p>
+              Just ask us. We’re always ready to help you feel and look your best!
+            </p>
           </div>
         </div>
       </section>
