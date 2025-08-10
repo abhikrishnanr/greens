@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { Phone, Lock, Users, User, CheckCircle2, Sparkles } from 'lucide-react'
+import { Phone, Lock, Users, User, CheckCircle2, Sparkles, Loader2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 export default function SignInClient() {
@@ -11,6 +11,7 @@ export default function SignInClient() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [roles, setRoles] = useState<{ staff: boolean; customer: boolean } | null>(null)
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
 
   // --- helpers: digits only + 10 max ---
@@ -29,30 +30,45 @@ export default function SignInClient() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setLoading(true)
     const res = await signIn('credentials', { redirect: false, phone, password })
     if (res?.error) {
       setError('Invalid mobile number or password')
+      setLoading(false)
       return
     }
-    const rolesRes = await fetch('/api/auth/role-options')
-    const data = await rolesRes.json()
-    if (data.staff && data.customer) setRoles(data)
-    else if (data.staff) await selectRole('staff')
-    else if (data.customer) await selectRole('customer')
-    else setError('No role access found')
+    try {
+      const rolesRes = await fetch('/api/auth/role-options', { credentials: 'include' })
+      const data = await rolesRes.json()
+      if (data.staff && data.customer) {
+        setRoles(data)
+        setLoading(false)
+      } else if (data.staff) {
+        await selectRole('staff')
+      } else if (data.customer) {
+        await selectRole('customer')
+      } else {
+        setError('No role access found')
+        setLoading(false)
+      }
+    } catch {
+      setError('Unable to check role access')
+      setLoading(false)
+    }
   }
 
   const selectRole = async (role: 'staff' | 'customer') => {
     await fetch('/api/auth/set-role', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ role }),
     })
     if (role === 'customer') {
       router.push('/customer')
       return
     }
-    const sessionRes = await fetch('/api/auth/session')
+    const sessionRes = await fetch('/api/auth/session', { credentials: 'include' })
     const session = await sessionRes.json()
     const user = session?.user as { role?: string; modules?: string[] }
     const modules = user?.modules ?? []
@@ -191,9 +207,11 @@ export default function SignInClient() {
               {/* Submit */}
               <button
                 type="submit"
-                className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white py-2.5 rounded-lg font-semibold transition"
+                disabled={loading}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white py-2.5 rounded-lg font-semibold transition flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                Sign In
+                {loading && <Loader2 className="animate-spin" size={18} />}
+                {loading ? 'Signing In...' : 'Sign In'}
               </button>
             </form>
 
