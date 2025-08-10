@@ -16,6 +16,8 @@ interface User {
   email: string | null
   role: string
   modules: string[] | null
+  designation: string | null
+  imageUrl: string | null
   removed: boolean
 }
 
@@ -88,8 +90,10 @@ export default function StaffRolesPage() {
       <table className="w-full bg-white rounded-lg shadow overflow-hidden">
         <thead className="bg-green-100">
           <tr className="text-left">
+            <th className="p-3">Photo</th>
             <th className="p-3">Name</th>
             <th className="p-3">Email</th>
+            <th className="p-3">Designation</th>
             <th className="p-3">Role</th>
             <th className="p-3">Modules</th>
             <th className="p-3 text-center">Active</th>
@@ -102,8 +106,20 @@ export default function StaffRolesPage() {
               key={user.id}
               className="border-t odd:bg-green-50 last:border-b-0 hover:bg-green-100"
             >
+              <td className="p-3">
+                {user.imageUrl ? (
+                  <img
+                    src={user.imageUrl}
+                    alt={user.name ?? ''}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                ) : (
+                  '—'
+                )}
+              </td>
               <td className="p-3">{user.name ?? '—'}</td>
               <td className="p-3">{user.email ?? '—'}</td>
+              <td className="p-3">{user.designation ?? '—'}</td>
               <td className="p-3">
                 <select
                   value={user.role}
@@ -119,14 +135,17 @@ export default function StaffRolesPage() {
               <td className="p-3">
                 <div className="flex flex-wrap gap-2">
                   {allModules.map((m) => {
-                    const active = user.modules?.includes(m)
+                    const active =
+                      user.role === 'admin' || user.modules?.includes(m)
                     const label = m.replace('-', ' ')
                     return (
                       <label key={m} className="flex items-center gap-1 text-sm">
                         <input
                           type="checkbox"
                           checked={active}
+                          disabled={user.role === 'admin'}
                           onChange={() => {
+                            if (user.role === 'admin') return
                             const modules = active
                               ? (user.modules ?? []).filter((x) => x !== m)
                               : [...(user.modules ?? []), m]
