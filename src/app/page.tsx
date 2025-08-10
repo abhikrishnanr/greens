@@ -84,6 +84,21 @@ export default function HomePage() {
       .then((data) => setFeaturedServices(data || {}))
   }, [])
 
+  useEffect(() => {
+    if (!loading) {
+      const savedCat = sessionStorage.getItem('expandedCat')
+      const savedScroll = sessionStorage.getItem('scrollPos')
+      if (savedCat) setExpandedCat(savedCat)
+      if (savedScroll) {
+        setTimeout(() => {
+          window.scrollTo(0, parseInt(savedScroll, 10))
+        }, 0)
+      }
+      sessionStorage.removeItem('expandedCat')
+      sessionStorage.removeItem('scrollPos')
+    }
+  }, [loading])
+
   const filteredCategories = useMemo(() => {
     if (!searchQuery.trim()) return categories
     return categories
@@ -321,7 +336,7 @@ export default function HomePage() {
       {/* ALL SERVICES SECTION (DARK) */}
       <section id="services" className="py-12 sm:py-16 bg-emerald-950 text-white relative">
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-amber-300 to-transparent" />
-        <div className="container mx-auto px-6 relative z-10">
+        <div className="px-4 sm:px-6 relative z-10">
           <motion.div
             className="text-center mb-8"
             initial={{ opacity: 0, y: 30 }}
@@ -332,7 +347,7 @@ export default function HomePage() {
             <p className="text-2xl md:text-3xl font-bold text-white">Explore All Services</p>
           </motion.div>
           <motion.div
-            className="max-w-2xl mx-auto mb-6"
+            className="mb-6"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -358,7 +373,7 @@ export default function HomePage() {
             </div>
           </motion.div>
           {loading ? (
-            <div className="space-y-4 max-w-4xl mx-auto">
+            <div className="space-y-4">
               {[...Array(4)].map((_, i) => (
                 <div key={i} className="bg-emerald-900 rounded-xl h-24 animate-pulse"></div>
               ))}
@@ -369,7 +384,7 @@ export default function HomePage() {
               <p className="text-gray-500">Try a different search term or clear the search.</p>
             </motion.div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-6xl mx-auto">
+            <div className="space-y-4">
               {filteredCategories.map((cat, idx) => {
                 const isOpen = expandedCat === cat.id
                 return (
@@ -410,19 +425,21 @@ export default function HomePage() {
                           className="px-5 pb-5 border-t border-emerald-800"
                         >
                           <div className="pt-2">
-                            <ul className="space-y-2">
+                            <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                               {subServices.map((svc) => (
                                 <li key={svc.id}>
                                   <Link
                                     href={`/services/${svc.slug}`}
-                                    className="flex justify-between items-center p-2 rounded-md hover:bg-emerald-800/50 transition-colors"
+                                    onClick={() => {
+                                      if (expandedCat) {
+                                        sessionStorage.setItem('expandedCat', expandedCat)
+                                      }
+                                      sessionStorage.setItem('scrollPos', window.scrollY.toString())
+                                    }}
+                                    className="flex justify-between items-center p-3 rounded-md bg-emerald-900 hover:bg-emerald-800 transition-colors"
                                   >
                                     <span className="font-semibold text-white text-sm">{svc.name}</span>
-                                    {svc.minPrice != null && (
-                                      <span className="text-sm text-emerald-400 font-medium whitespace-nowrap">
-                                        ₹{svc.minPrice} onwards
-                                      </span>
-                                    )}
+                                    <FiArrowRight className="text-emerald-400" />
                                   </Link>
                                 </li>
                               ))}

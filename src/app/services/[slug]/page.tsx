@@ -94,15 +94,9 @@ export default async function ServiceDetailsPage({ params }: { params: Promise<{
             </li>
           ))}
         </ul>
-        <div className="mt-8 flex justify-between items-center">
+        <div className="mt-8">
           <Link href="/" className="text-green-400 underline">
             Back to Home
-          </Link>
-          <Link
-            href={`/booking?service=${service.id}`}
-            className="bg-green-600 text-gray-900 font-bold px-6 py-3 rounded-xl hover:bg-green-500 transition-colors"
-          >
-            Book Now
           </Link>
         </div>
       </div>
