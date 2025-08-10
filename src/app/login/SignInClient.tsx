@@ -3,16 +3,13 @@
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { Phone, Lock } from 'lucide-react'
+import { Phone, Lock, Users, User } from 'lucide-react'
 
-interface Props {
-  type?: string
-}
-
-export default function SignInClient({ type }: Props) {
+export default function SignInClient() {
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [roles, setRoles] = useState<{ staff: boolean; customer: boolean } | null>(null)
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,6 +24,29 @@ export default function SignInClient({ type }: Props) {
       return
     }
 
+    const rolesRes = await fetch('/api/auth/role-options')
+    const data = await rolesRes.json()
+    if (data.staff && data.customer) {
+      setRoles(data)
+    } else if (data.staff) {
+      await selectRole('staff')
+    } else if (data.customer) {
+      await selectRole('customer')
+    } else {
+      setError('No role access found')
+    }
+  }
+
+  const selectRole = async (role: 'staff' | 'customer') => {
+    await fetch('/api/auth/set-role', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role }),
+    })
+    if (role === 'customer') {
+      router.push('/customer')
+      return
+    }
     const sessionRes = await fetch('/api/auth/session')
     const session = await sessionRes.json()
     const user = session?.user as { role?: string; modules?: string[] }
@@ -40,16 +60,37 @@ export default function SignInClient({ type }: Props) {
       billing: '/admin/billing',
       'staff-roles': '/admin/users',
     }
-
     let destination = '/admin/dashboard'
-    if (user?.role === 'customer') {
-      destination = '/customer'
-    } else if (user?.role !== 'admin' && modules.length > 0 && !modules.includes('dashboard')) {
+    if (user?.role !== 'admin' && modules.length > 0 && !modules.includes('dashboard')) {
       const first = modules[0]
       destination = moduleRoutes[first] || destination
     }
-
     router.push(destination)
+  }
+
+  if (roles && roles.staff && roles.customer) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-green-100 p-6">
+        <div className="bg-white/70 backdrop-blur-xl shadow-xl rounded-2xl p-10 text-center space-y-6 max-w-lg w-full">
+          <h1 className="text-4xl font-extrabold text-emerald-900 mb-2">Choose Role</h1>
+          <p className="text-emerald-700">Select how you want to continue</p>
+          <div className="flex flex-col sm:flex-row gap-6 justify-center mt-6">
+            <button
+              onClick={() => selectRole('staff')}
+              className="flex-1 inline-flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-emerald-600 text-white font-semibold shadow hover:bg-emerald-700 transition-colors"
+            >
+              <Users /> Staff
+            </button>
+            <button
+              onClick={() => selectRole('customer')}
+              className="flex-1 inline-flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-green-100 text-emerald-800 font-semibold shadow hover:bg-green-200 transition-colors"
+            >
+              <User /> Customer
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -63,9 +104,7 @@ export default function SignInClient({ type }: Props) {
       <div className="flex items-center justify-center bg-gray-50 p-6">
         <div className="w-full max-w-md space-y-6">
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-primary mb-2">
-              {type === 'customer' ? 'Customer Sign In' : 'Staff Sign In'}
-            </h1>
+            <h1 className="text-3xl font-bold text-primary mb-2">Sign In</h1>
             <p className="text-gray-500">Enter your credentials to access your account</p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-5">

@@ -1,17 +1,33 @@
-import { withAuth } from 'next-auth/middleware'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { getToken } from 'next-auth/jwt'
 
-export default withAuth({
-  callbacks: {
-    authorized: ({ token }) => {
-      // Return false if there is no token or the user is not an admin
-      return !!token && (token as { role?: string }).role === 'admin'
-    },
-  },
-  pages: {
-    signIn: '/auth/signin',
-  },
-})
+export async function middleware(req: NextRequest) {
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+  const roleCookie = req.cookies.get('role')?.value
+  const { pathname } = req.nextUrl
+
+  if (pathname.startsWith('/admin')) {
+    if (!token || (token as { role?: string }).role !== 'admin') {
+      return NextResponse.redirect(new URL('/login', req.url))
+    }
+  }
+
+  if (pathname.startsWith('/staff')) {
+    if (!token || (token as { role?: string }).role === 'customer' || roleCookie !== 'staff') {
+      return NextResponse.redirect(new URL('/login', req.url))
+    }
+  }
+
+  if (pathname.startsWith('/customer')) {
+    if (!token || ((token as { role?: string }).role !== 'customer' && roleCookie !== 'customer')) {
+      return NextResponse.redirect(new URL('/login', req.url))
+    }
+  }
+
+  return NextResponse.next()
+}
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/staff/:path*', '/customer/:path*'],
 }
