@@ -83,8 +83,16 @@ export default function OffersAdminPage() {
         </div>
         <div>
           <label className="block font-medium mb-1">Image</label>
-          <input type="file" accept="image/*" onChange={handleImage} />
-          {form.imageUrl && <img src={form.imageUrl} className="h-16 mt-2" />}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImage}
+            className="w-full p-2 rounded border"
+          />
+          {form.imageUrl && (
+            <img src={form.imageUrl} alt="preview" className="h-32 object-cover mt-2" />
+          )}
+          <small className="text-gray-500">Upload offer image</small>
         </div>
         <div>
           <label className="block font-medium mb-1">Description</label>
