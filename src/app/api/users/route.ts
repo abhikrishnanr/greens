@@ -10,6 +10,8 @@ export async function GET() {
       email: true,
       role: true,
       modules: true,
+      designation: true,
+      imageUrl: true,
       removed: true,
     },
   })

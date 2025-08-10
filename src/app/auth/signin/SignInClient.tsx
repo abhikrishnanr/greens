@@ -24,7 +24,8 @@ export default function SignInClient() {
     }
 
     const session = await getSession()
-    const modules = (session?.user as { modules?: string[] })?.modules || []
+    const user = session?.user as { role?: string; modules?: unknown }
+    const modules = Array.isArray(user?.modules) ? (user!.modules as string[]) : []
     const moduleRoutes: Record<string, string> = {
       dashboard: '/admin/dashboard',
       staff: '/admin/staff',
@@ -36,7 +37,7 @@ export default function SignInClient() {
     }
 
     let destination = '/admin/dashboard'
-    if (!modules.includes('dashboard') && modules.length > 0) {
+    if (user?.role !== 'admin' && modules.length > 0 && !modules.includes('dashboard')) {
       const first = modules[0]
       destination = moduleRoutes[first] || destination
     }
