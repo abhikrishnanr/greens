@@ -12,43 +12,42 @@ export default function Header() {
   const { data: session } = useSession()
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 0)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    const handleScroll = () => setIsScrolled(window.scrollY > 0)
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  const closeMenus = () => {
-    setIsMobileMenuOpen(false)
-  }
+  const closeMenus = () => setIsMobileMenuOpen(false)
 
   const navLinks = (
     <>
       <Link href="/" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
-        Home {/* Added Home link */}
+        Home
       </Link>
-      <Link href="#" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
+
+      {/* Anchor to sections in Home page */}
+      <Link href="#featured" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
         Explore Services
       </Link>
-      <Link href="#" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
+      <Link href="#services" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
         Service Rates
       </Link>
-      <Link href="#" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
+      <Link href="#offers" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
         Current Offers
       </Link>
-      <Link href="#" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
+      <Link href="#booking" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
         Schedule Visit
       </Link>
-      <Link href="#" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
+      <Link href="#academy" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
         Academy & Training
       </Link>
       <Link href="#about" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
         About Greens
       </Link>
-      <Link href="#" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
+      <Link href="#contact" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
         Contact Us
       </Link>
+
       {session?.user ? (
         <>
           <span className="flex items-center gap-2">
@@ -88,17 +87,20 @@ export default function Header() {
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full text-white py-4 px-6 flex items-center justify-between z-50 transition-colors duration-300 border-b ${isScrolled ? 'bg-emerald-950 border-emerald-800' : 'bg-transparent border-transparent'}`}
-      style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}
+      className={`fixed top-0 left-0 w-full text-white py-4 px-6 flex items-center justify-between z-50 transition-colors duration-300 border-b ${
+        isScrolled ? "bg-emerald-950 border-emerald-800" : "bg-transparent border-transparent"
+      }`}
+      style={{ textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}
     >
       <div className="flex items-center gap-4">
         <Link href="/" className="flex items-center">
           <Image src="/logo.png" alt="Greens Beauty Salon Logo" width={150} height={60} />
         </Link>
       </div>
+
       <nav className="hidden md:flex items-center gap-6 text-sm font-medium">{navLinks}</nav>
 
-      {/* Mobile menu actions */}
+      {/* Mobile actions */}
       <div className="md:hidden flex items-center gap-4">
         <Link href="/" aria-label="Home" className="text-white">
           <Home size={24} />
@@ -108,7 +110,7 @@ export default function Header() {
         </button>
       </div>
 
-      {/* Mobile menu overlay */}
+      {/* Mobile menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
@@ -117,9 +119,7 @@ export default function Header() {
             exit={{ opacity: 0, x: "100%" }}
             transition={{ duration: 0.3, ease: "easeOut" }}
             className="fixed inset-0 z-40 flex flex-col items-center justify-center gap-8 text-lg md:hidden"
-            style={{
-              backgroundColor: '#052b1e',
-            }}
+            style={{ backgroundColor: "#052b1e" }}
           >
             <button className="absolute top-4 right-4 text-white" onClick={() => setIsMobileMenuOpen(false)}>
               <X size={32} />

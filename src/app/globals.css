@@ -299,23 +299,127 @@
   -webkit-line-clamp: 2;
 }
 
-/* Custom Scrollbar for Signature Treatments */
-.custom-scrollbar::-webkit-scrollbar {
-  height: 10px;
+/* Fancy horizontal scrollbar styling */
+.fancy-scroll {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(52, 211, 153, 0.6) transparent;
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background-color: #022c22; /* Darker emerald */
-  border-radius: 10px;
-  margin: 0 100px; /* Give some space from the edges */
+.fancy-scroll::-webkit-scrollbar {
+  height: 10px; /* horizontal scroller height */
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #34d399; /* emerald-400 */
-  border-radius: 10px;
-  border: 2px solid #022c22; /* Creates padding */
+.fancy-scroll::-webkit-scrollbar-track {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(16, 185, 129, 0.1),
+    transparent
+  );
+  border-radius: 9999px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: #6ee7b7; /* emerald-300 */
+.fancy-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    90deg,
+    rgba(251, 191, 36, 0.9),
+    rgba(16, 185, 129, 0.9)
+  );
+  border-radius: 9999px;
+  border: 2px solid rgba(6, 78, 59, 0.6); /* emerald ring */
 }
+
+.fancy-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    90deg,
+    rgba(251, 191, 36, 1),
+    rgba(16, 185, 129, 1)
+  );
+}
+
+
+/* Fancy horizontal scrollbar */
+.fancy-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(52, 211, 153, .6) transparent;
+}
+.fancy-scroll::-webkit-scrollbar { height: 10px; }
+.fancy-scroll::-webkit-scrollbar-track {
+  background: linear-gradient(90deg, transparent, rgba(16,185,129,.10), transparent);
+  border-radius: 9999px;
+}
+.fancy-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, rgba(251,191,36,.9), rgba(16,185,129,.9));
+  border-radius: 9999px;
+  border: 2px solid rgba(6, 78, 59, .6);
+}
+.fancy-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, rgba(251,191,36,1), rgba(16,185,129,1));
+}
+
+/* swipe hint fades out automatically */
+@keyframes hintFade {
+  0% { opacity: 1; transform: translate(-50%, 0); }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, 0); }
+}
+.swipe-hint {
+  animation: hintFade 3.2s ease-out 0.8s forwards;
+}
+
+
+
+
+
+/* Offers section animations */
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(12px); }
+}
+.animate-float-slow { animation: floatY 12s ease-in-out infinite; }
+.animate-float-slower { animation: floatY 18s ease-in-out infinite; }
+
+/* slow panning for radial gradient layer */
+@keyframes gradient-pan {
+  0%   { transform: translate3d(-2%, 0, 0); }
+  100% { transform: translate3d(2%, 0, 0); }
+}
+.animate-pan {
+  animation: gradient-pan 12s ease-in-out infinite alternate;
+}
+
+/* CTA shine */
+.btn-shine {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+}
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 0%, rgba(255,255,255,.5) 20%, transparent 40%);
+  transform: translateX(-120%);
+  transition: transform .6s ease;
+  border-radius: .5rem;
+  pointer-events: none;
+}
+.btn-shine:hover::after {
+  transform: translateX(120%);
+}
+
+
+/* compact, gentle animations for Offers */
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(10px); }
+}
+.animate-float-slow   { animation: floatY 14s ease-in-out infinite; }
+.animate-float-slower { animation: floatY 20s ease-in-out infinite; }
+
+@keyframes gradient-pan-slow {
+  0%   { transform: translate3d(-1.5%, 0, 0); }
+  100% { transform: translate3d(1.5%, 0, 0); }
+}
+.animate-pan-slow { animation: gradient-pan-slow 16s ease-in-out infinite alternate; }
