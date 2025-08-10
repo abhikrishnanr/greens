@@ -79,8 +79,13 @@ export default function AdminClientLayout({ children }: { children: React.ReactN
   const [open, setOpen] = useState(false)
 
   const handleLogout = async () => {
-    await signOut({ redirect: false, callbackUrl: '/auth/signin' })
-    router.push('/auth/signin')
+    await fetch('/api/auth/set-role', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: '' }),
+    })
+    await signOut({ redirect: false, callbackUrl: '/login' })
+    router.push('/login')
   }
 
   return (
