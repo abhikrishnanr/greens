@@ -154,115 +154,139 @@ export default function HomePage() {
     <main className="bg-white min-h-screen font-sans text-gray-800 pb-12 md:pb-0">
       <Header />
 
-      {/* HERO SECTION */}
-      <section className="relative flex flex-col overflow-hidden min-h-[80vh] md:min-h-[80vh] bg-gray-800">
-        {heroLoading ? (
-          <div className="w-full h-full flex flex-col">
-            <div className="flex-1 bg-gray-200 animate-pulse flex items-center justify-center">
-              <div className="text-center space-y-4">
-                <div className="bg-gray-300 h-8 w-64 mx-auto rounded"></div>
-                <div className="bg-gray-300 h-4 w-96 mx-auto rounded"></div>
-                <div className="bg-gray-300 h-10 w-32 mx-auto rounded-full mt-4"></div>
-              </div>
-            </div>
+     {/* HERO SECTION */}
+<section className="relative flex flex-col overflow-hidden min-h-[80vh] md:min-h-[80vh] bg-emerald-950">
+  {heroLoading ? (
+  <>
+    {/* Media placeholder with emerald gradient, content anchored to bottom */}
+    <div className="relative flex-1 min-h-[70vh]">
+      {/* on-brand gradient + soft pattern */}
+      <div className="absolute inset-0 bg-gradient-to-b from-emerald-900 via-emerald-800 to-emerald-900" />
+      <div className="absolute inset-0 opacity-30 bg-[radial-gradient(1200px_600px_at_10%_-10%,rgba(16,185,129,.15),transparent_60%),radial-gradient(900px_500px_at_90%_110%,rgba(251,191,36,.12),transparent_60%)]" />
+
+      {/* bottom-aligned skeleton */}
+      <div className="absolute inset-0 flex flex-col">
+        <div className="flex-1" />
+        <div className="w-full px-6 pb-8">
+          <div className="mx-auto max-w-3xl text-center space-y-3">
+            <div className="h-7 md:h-9 w-3/4 mx-auto rounded skel-emerald" />
+            <div className="h-4 md:h-5 w-5/6 mx-auto rounded skel-emerald" />
+            <div className="h-9 w-40 mx-auto rounded-full skel-emerald-light" />
           </div>
-        ) : (
-          <>
-            {/* Hero media (no overlay) */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentHeroContent.id}
-                className="relative flex-1 w-full flex items-end justify-center p-8 text-center overflow-hidden pb-8"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.5 }}
+        </div>
+      </div>
+    </div>
+
+    {/* Tabs skeleton — matches white tabs bar */}
+    <div className="relative w-full bg-white shadow-sm">
+      <div className="flex gap-2 md:justify-center overflow-x-auto py-2 px-4 fancy-scroll scroll-px-4">
+        {Array.from({ length: 7 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-10 min-w-[100px] rounded-b-lg border border-emerald-200 bg-emerald-50 skel-tab"
+          />
+        ))}
+      </div>
+    </div>
+  </>
+) : (
+    <>
+      {/* Hero media (no overlay) */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentHeroContent.id}
+          className="relative flex-1 w-full flex items-end justify-center p-8 text-center overflow-hidden pb-8"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="absolute inset-0 z-0">
+            {currentHeroContent.videoSrc && selectedHeroCategory === "home" ? (
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover"
+                poster={currentHeroContent.backgroundUrl}
               >
-                <div className="absolute inset-0 z-0">
-                  {currentHeroContent.videoSrc && selectedHeroCategory === "home" ? (
-                    <video
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="w-full h-full object-cover"
-                      poster={currentHeroContent.backgroundUrl}
-                    >
-                      <source src={currentHeroContent.videoSrc} type="video/mp4" />
-                    </video>
-                  ) : (
-                    <img
-                      src={currentHeroContent.backgroundUrl || "/placeholder.svg"}
-                      alt={currentHeroContent.name || "Background"}
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                </div>
+                <source src={currentHeroContent.videoSrc} type="video/mp4" />
+              </video>
+            ) : (
+              <img
+                src={currentHeroContent.backgroundUrl || "/placeholder.svg"}
+                alt={currentHeroContent.name || "Background"}
+                className="w-full h-full object-cover"
+              />
+            )}
+          </div>
 
-                <div className="relative z-20 text-white max-w-3xl space-y-4">
-                  <h1 className="text-2xl md:text-3xl font-bold tracking-wide">
-                    {currentHeroContent.heroTitle}
-                  </h1>
-                  {selectedHeroCategory === "home" ? (
-                    <p className="text-base md:text-lg leading-relaxed text-white/90">
-                      {currentHeroContent.heroDescription}
-                    </p>
-                  ) : (
-                    <Link
-                      href={`/hero-tabs/${currentHeroContent.slug || currentHeroContent.id}`}
-                      className="inline-block px-8 py-3 font-semibold text-md shadow-lg transition-all duration-300 bg-transparent text-white border border-white hover:bg-white hover:text-emerald-600 hover:scale-105 rounded-none"
-                    >
-                      {currentHeroContent.buttonLabel || "Explore Now"}
-                    </Link>
-                  )}
-                </div>
-              </motion.div>
-            </AnimatePresence>
+          <div className="relative z-20 text-white max-w-3xl space-y-4">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-wide">
+              {currentHeroContent.heroTitle}
+            </h1>
+            {selectedHeroCategory === "home" ? (
+              <p className="text-base md:text-lg leading-relaxed text-white/90">
+                {currentHeroContent.heroDescription}
+              </p>
+            ) : (
+              <Link
+                href={`/hero-tabs/${currentHeroContent.slug || currentHeroContent.id}`}
+                className="inline-block px-8 py-3 font-semibold text-md shadow-lg transition-all duration-300 bg-transparent text-white border border-white hover:bg-white hover:text-emerald-600 hover:scale-105 rounded-none"
+              >
+                {currentHeroContent.buttonLabel || "Explore Now"}
+              </Link>
+            )}
+          </div>
+        </motion.div>
+      </AnimatePresence>
 
-            {/* TABS BAR (white, with swipe hint & fancy scrollbar) */}
-            <div className="relative w-full bg-white shadow-sm">
-              {/* edge fades on mobile */}
-              <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-white to-transparent md:hidden" />
-              <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white to-transparent md:hidden" />
+      {/* TABS BAR (white, with swipe hint & fancy scrollbar) */}
+      <div className="relative w-full bg-white shadow-sm">
+        {/* edge fades on mobile */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-white to-transparent md:hidden" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white to-transparent md:hidden" />
 
-              <div className="flex gap-0 justify-start md:justify-center overflow-x-auto py-2 px-4 fancy-scroll scroll-px-4">
-                {heroTabs
-                  .filter((cat) => cat.id !== "home")
-                  .map((cat, idx) => (
-                    <motion.button
-                      key={cat.id}
-                      onClick={() => setSelectedHeroCategory(cat.id)}
-                      className={`flex flex-col items-center justify-center p-3 min-w-[100px] text-center transition-colors duration-200
-                        ${
-                          selectedHeroCategory === cat.id
-                            ? "bg-white text-emerald-700 border-b-2 border-emerald-600 rounded-b-lg"
-                            : "bg-transparent text-gray-600 hover:bg-emerald-50"
-                        }
-                        ${idx === 0 ? "rounded-bl-lg" : ""} ${idx === heroTabs.length - 2 ? "rounded-br-lg" : ""}`}
-                      aria-pressed={selectedHeroCategory === cat.id}
-                      whileHover={{ scale: 1.05, y: -5 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <img
-                        src={cat.iconUrl || "/placeholder.svg"}
-                        alt={cat.name}
-                        width={32}
-                        height={32}
-                        className="w-8 h-8 mb-1"
-                      />
-                      <span className="text-xs font-medium whitespace-nowrap">{cat.name}</span>
-                    </motion.button>
-                  ))}
-              </div>
+        <div className="flex gap-0 justify-start md:justify-center overflow-x-auto py-2 px-4 fancy-scroll scroll-px-4">
+          {heroTabs
+            .filter((cat) => cat.id !== "home")
+            .map((cat, idx) => (
+              <motion.button
+                key={cat.id}
+                onClick={() => setSelectedHeroCategory(cat.id)}
+                className={`flex flex-col items-center justify-center p-3 min-w-[100px] text-center transition-colors duration-200
+                  ${
+                    selectedHeroCategory === cat.id
+                      ? "bg-white text-emerald-700 border-b-2 border-emerald-600 rounded-b-lg"
+                      : "bg-transparent text-gray-600 hover:bg-emerald-50"
+                  }
+                  ${idx === 0 ? "rounded-bl-lg" : ""} ${idx === heroTabs.length - 2 ? "rounded-br-lg" : ""}`}
+                aria-pressed={selectedHeroCategory === cat.id}
+                whileHover={{ scale: 1.05, y: -5 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <img
+                  src={cat.iconUrl || "/placeholder.svg"}
+                  alt={cat.name}
+                  width={32}
+                  height={32}
+                  className="w-8 h-8 mb-1"
+                />
+                <span className="text-xs font-medium whitespace-nowrap">{cat.name}</span>
+              </motion.button>
+            ))}
+        </div>
 
-              {/* swipe hint */}
-              <div className="md:hidden absolute bottom-2 left-1/2 -translate-x-1/2 text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full text-xs shadow swipe-hint">
-                Swipe →
-              </div>
-            </div>
-          </>
-        )}
-      </section>
+        {/* swipe hint */}
+        <div className="md:hidden absolute bottom-2 left-1/2 -translate-x-1/2 text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full text-xs shadow swipe-hint">
+          Swipe →
+        </div>
+      </div>
+    </>
+  )}
+</section>
+
 
 
 {/* OFFERS – Floral & Leaves (pure CSS, no images) */}
@@ -407,12 +431,10 @@ export default function HomePage() {
                 Start your beauty career with industry-led certification programs. Weekend and weekday batches available.
               </p>
               <div className="mt-5 flex gap-3">
-                <Link href="/academy" className="px-5 py-2 rounded-md border border-emerald-700 text-emerald-800">
+                <Link href="/academy" className="px-5 py-2 rounded-md bg-emerald-700 text-white">
                   Explore Courses
                 </Link>
-                <Link href="/contact" className="px-5 py-2 rounded-md bg-emerald-700 text-white">
-                  Ask Counsellor
-                </Link>
+         
               </div>
             </div>
             <div className="rounded-2xl overflow-hidden border border-emerald-200">

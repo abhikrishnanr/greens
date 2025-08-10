@@ -621,3 +621,34 @@
 @keyframes route-move {
   to { stroke-dashoffset: -200; }
 }
+
+
+
+
+
+/* Emerald shimmer skeletons */
+@keyframes emerald-shimmer {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+.skel-emerald,
+.skel-emerald-light,
+.skel-tab {
+  position: relative;
+  overflow: hidden;
+}
+.skel-emerald { background: rgba(6, 95, 70, 0.45); }          /* emerald-800 ~ */
+.skel-emerald-light { background: rgba(16, 185, 129, 0.45); }  /* emerald-500 ~ */
+.skel-tab { background: #ecfdf5; border: 1px solid #a7f3d0; }  /* emerald-50 + emerald-200 */
+
+.skel-emerald::after,
+.skel-emerald-light::after,
+.skel-tab::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.35) 50%, transparent 100%);
+  transform: translateX(-120%);
+  animation: emerald-shimmer 1.4s ease-in-out infinite;
+  mix-blend-mode: screen;
+}
