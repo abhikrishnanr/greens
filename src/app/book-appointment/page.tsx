@@ -56,12 +56,22 @@ export default function BookAppointmentPage() {
   const { data: session } = useSession()
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    setForm((prev) => ({
+      ...prev,
+      name: params.get("name") || "",
+      phone: params.get("phone") || "",
+      gender: params.get("gender") || "",
+    }))
+  }, [])
+
+  useEffect(() => {
     if (session?.user) {
       setForm((prev) => ({
         ...prev,
-        name: session.user.name || "",
-        phone: session.user.phone || "",
-        gender: session.user.gender || "",
+        name: prev.name || session.user.name || "",
+        phone: prev.phone || session.user.phone || "",
+        gender: prev.gender || session.user.gender || "",
       }))
     }
   }, [session])

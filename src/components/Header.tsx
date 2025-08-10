@@ -2,18 +2,16 @@
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Menu, X } from "lucide-react"
+import { Menu, X, LogOut } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useSession, signOut } from "next-auth/react"
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [accountMenuOpen, setAccountMenuOpen] = useState(false)
   const { data: session } = useSession()
 
   const closeMenus = () => {
     setIsMobileMenuOpen(false)
-    setAccountMenuOpen(false)
   }
 
   const navLinks = (
@@ -43,11 +41,8 @@ export default function Header() {
         Contact Us
       </Link>
       {session?.user ? (
-        <div className="relative" onMouseLeave={() => setAccountMenuOpen(false)}>
-          <button
-            onClick={() => setAccountMenuOpen(!accountMenuOpen)}
-            className="flex items-center gap-2 hover:text-green-400 transition-colors"
-          >
+        <>
+          <span className="flex items-center gap-2">
             {session.user.image ? (
               <Image
                 src={session.user.image}
@@ -62,33 +57,23 @@ export default function Header() {
               </span>
             )}
             <span>{session.user.name}</span>
+          </span>
+          <button
+            onClick={() => {
+              signOut()
+              closeMenus()
+            }}
+            className="hover:text-green-400 transition-colors"
+            aria-label="Logout"
+          >
+            <LogOut size={18} />
           </button>
-          {accountMenuOpen && (
-            <div className="absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded shadow-md z-50">
-              <button
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                onClick={() => {
-                  signOut()
-                  closeMenus()
-                }}
-              >
-                Logout
-              </button>
-            </div>
-          )}
-        </div>
+        </>
       ) : (
         <Link href="/login" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
           Login
         </Link>
       )}
-      <Link
-        href="/book-appointment"
-        className="hover:text-green-400 transition-colors"
-        onClick={closeMenus}
-      >
-        Book Appointment
-      </Link>
     </>
   )
 
