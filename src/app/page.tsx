@@ -191,11 +191,12 @@ export default function HomePage() {
 
   return (
     <main className="bg-white min-h-screen font-sans text-gray-800">
-      <Header />
-     
 
       {/* HERO SECTION (DARK) */}
-      <section className="relative flex flex-col overflow-hidden min-h-[60vh] md:min-h-[60vh] bg-gray-800">
+      <section className="relative flex flex-col overflow-hidden min-h-[80vh] md:min-h-[80vh] bg-gray-800 pt-20">
+        <div className="absolute inset-x-0 top-0 z-20">
+          <Header />
+        </div>
         {heroLoading ? (
           <div className="w-full h-full flex flex-col">
             <div className="flex-1 bg-gray-200 animate-pulse flex items-center justify-center">
@@ -331,7 +332,7 @@ export default function HomePage() {
                       <h3 className="text-xl font-bold mb-2">{service.name}</h3>
                       <p className="text-sm opacity-80 mb-4 line-clamp-2">{service.caption}</p>
                       <Link
-                        href={`/services/${service.slug}`}
+                        href={`/services/${service.slug || service.id}`}
                         className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-300 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:text-emerald-200"
                       >
                         Explore Service <FiArrowRight />
@@ -387,7 +388,7 @@ export default function HomePage() {
       {/* ALL SERVICES SECTION (DARK) */}
       <section id="services" className="py-12 sm:py-16 bg-emerald-950 text-white relative">
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-amber-300 to-transparent" />
-        <div className="px-4 sm:px-6 relative z-10">
+        <div className="px-6 sm:px-10 relative z-10">
           <motion.div
             className="text-center mb-8"
             initial={{ opacity: 0, y: 30 }}
@@ -480,7 +481,7 @@ export default function HomePage() {
                               {subServices.map((svc) => (
                                 <li key={svc.id}>
                                   <Link
-                                    href={`/services/${svc.slug}`}
+                                    href={`/services/${svc.slug || svc.id}`}
                                     onClick={() => {
                                       if (expandedCat) {
                                         sessionStorage.setItem('expandedCat', expandedCat)
@@ -489,8 +490,22 @@ export default function HomePage() {
                                     }}
                                     className="flex justify-between items-center p-3 rounded-md bg-emerald-900 hover:bg-emerald-800 transition-colors"
                                   >
-                                    <span className="font-semibold text-white text-sm">{svc.name}</span>
-                                    <FiArrowRight className="text-emerald-400" />
+                                    <div className="flex flex-col text-left">
+                                      <span className="font-semibold text-white text-sm">{svc.name}</span>
+                                      {(svc.minActualPrice || svc.minOfferPrice) && (
+                                        <span className="text-xs">
+                                          {svc.minOfferPrice && svc.minActualPrice && svc.minActualPrice > svc.minOfferPrice ? (
+                                            <>
+                                              <span className="line-through text-gray-400 mr-1">₹{svc.minActualPrice} onwards</span>
+                                              <span className="text-emerald-400">₹{svc.minOfferPrice} onwards</span>
+                                            </>
+                                          ) : (
+                                            <span className="text-emerald-400">₹{(svc.minOfferPrice ?? svc.minActualPrice)} onwards</span>
+                                          )}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <FiArrowRight className="text-emerald-400 ml-2" />
                                   </Link>
                                 </li>
                               ))}

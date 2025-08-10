@@ -19,9 +19,9 @@ export async function GET() {
     categories.map(async (cat) => {
       const services = await Promise.all(
         cat.servicesNew.map(async (svc) => {
-          const prices = await Promise.all(
+          const records = await Promise.all(
             svc.tiers.map(async (t) => {
-              const current = await prisma.serviceTierPriceHistory.findFirst({
+              return prisma.serviceTierPriceHistory.findFirst({
                 where: {
                   tierId: t.id,
                   startDate: { lte: now },
@@ -29,18 +29,25 @@ export async function GET() {
                 },
                 orderBy: { startDate: 'desc' },
               })
-              return current ? current.offerPrice ?? current.actualPrice : null
             })
           )
-          const valid = prices.filter((p) => p !== null) as number[]
-          const min = valid.length ? Math.min(...valid) : null
+          const offerPrices = records.map((r) => r?.offerPrice ?? null)
+          const actualPrices = records.map((r) => r?.actualPrice ?? null)
+          const validOffer = offerPrices.filter((p) => p !== null) as number[]
+          const validActual = actualPrices.filter((p) => p !== null) as number[]
+          const minOffer = validOffer.length ? Math.min(...validOffer) : null
+          const minActual = validActual.length ? Math.min(...validActual) : null
+          const minPrice = minOffer ?? minActual
           return {
             id: svc.id,
             name: svc.name,
-            slug: svc.slug,
+            // use slug when available, otherwise fall back to id so links remain valid
+            slug: svc.slug || svc.id,
             caption: svc.caption ?? '',
             imageUrl: svc.imageUrl ?? null,
-            minPrice: min,
+            minOfferPrice: minOffer,
+            minActualPrice: minActual,
+            minPrice,
           }
         })
       )
