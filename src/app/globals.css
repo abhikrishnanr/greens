@@ -370,56 +370,254 @@
 
 
 
+* ===========================
+   OFFERS — Background Effects
+   =========================== */
 
-/* Offers section animations */
-@keyframes floatY {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(12px); }
-}
-.animate-float-slow { animation: floatY 12s ease-in-out infinite; }
-.animate-float-slower { animation: floatY 18s ease-in-out infinite; }
-
-/* slow panning for radial gradient layer */
-@keyframes gradient-pan {
-  0%   { transform: translate3d(-2%, 0, 0); }
-  100% { transform: translate3d(2%, 0, 0); }
-}
-.animate-pan {
-  animation: gradient-pan 12s ease-in-out infinite alternate;
+/* Soft aurora mesh drifting behind cards */
+.offers-aurora {
+  position: absolute;
+  inset: -20% -10% -10% -10%;
+  background:
+    radial-gradient(40% 35% at 15% 85%, rgba(16,185,129,.14), transparent 60%),
+    radial-gradient(35% 30% at 85% 10%, rgba(251,191,36,.16), transparent 60%),
+    radial-gradient(25% 22% at 60% 50%, rgba(16,185,129,.10), transparent 65%);
+  filter: blur(8px);
+  animation: aurora-drift 18s ease-in-out infinite alternate;
+  pointer-events: none;
 }
 
-/* CTA shine */
-.btn-shine {
+/* A soft angled light beam sweeping across */
+.offers-beam {
+  position: absolute;
+  inset: -20% -10%;
+  background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.55) 50%, transparent 65%);
+  transform: rotate(-2deg) translateX(-6%);
+  mix-blend-mode: overlay;
+  animation: beam-sweep 12s ease-in-out infinite alternate;
+  pointer-events: none;
+  /* keep light in center, fade edges */
+  mask-image: radial-gradient(120% 80% at 50% 50%, #000 55%, transparent 72%);
+}
+
+/* Subtle dotted grid panning slowly */
+.offers-grid {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(0deg, rgba(16,185,129,.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(251,191,36,.06) 1px, transparent 1px);
+  background-size: 20px 20px, 20px 20px;
+  opacity: .35;
+  animation: grid-pan 22s linear infinite;
+  pointer-events: none;
+}
+
+/* =======================================
+   OFFERS — Conic Gradient Border (Ring)
+   Only the ring rotates; the card is still
+   ======================================= */
+
+.conic-border {
   position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: .5rem;
+  border-radius: 1rem; /* match rounded-2xl */
 }
+
+/* The rotating ring lives on ::before and is "hollowed" with masks */
+.conic-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px; /* ring thickness */
+  background: conic-gradient(
+    from 0deg,
+    rgba(251,191,36,0.95),
+    rgba(16,185,129,0.95),
+    rgba(251,191,36,0.95)
+  );
+
+  /* Carve out the center so only the border shows */
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+
+  animation: spin-ring 10s linear infinite;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* The actual card content sits above the ring */
+.offer-card {
+  position: relative;
+  border-radius: inherit;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(6px);
+}
+
+/* Speed up ring a touch on hover */
+.group:hover .conic-border::before {
+  animation-duration: 6s;
+}
+
+/* =========================================
+   OFFERS — Floral theme (pure CSS, no images)
+   ========================================= */
+
+/* soft botanical wash (aurora-like with floral hints) */
+.floral-aurora {
+  position: absolute;
+  inset: -10% -10% -15% -10%;
+  background:
+    radial-gradient(30% 25% at 15% 85%, rgba(16,185,129,.12), transparent 60%),
+    radial-gradient(28% 24% at 85% 18%, rgba(251,191,36,.14), transparent 62%),
+    radial-gradient(18% 16% at 60% 45%, rgba(16,185,129,.10), transparent 65%),
+    conic-gradient(from 0deg at 25% 70%, rgba(34,197,94,.07) 0 15deg, transparent 15deg 360deg),
+    conic-gradient(from 0deg at 80% 30%, rgba(251,191,36,.06) 0 20deg, transparent 20deg 360deg);
+  filter: blur(10px);
+  animation: floral-drift 20s ease-in-out infinite alternate;
+}
+
+/* decorative leaves (pure CSS leaf shape) */
+.leaf {
+  position: absolute;
+  width: 56px;
+  height: 34px;
+  border-radius: 60% 60% 60% 60% / 70% 70% 30% 30%; /* teardrop-ish */
+  background:
+    radial-gradient(100% 70% at 50% 40%, rgba(16,185,129,.92) 0 60%, transparent 61%),
+    radial-gradient(120% 90% at 50% 60%, rgba(34,197,94,.7) 0 55%, transparent 56%);
+  box-shadow: 0 8px 24px -12px rgba(16,185,129,.4);
+  transform-origin: 50% 80%;
+  /* central vein */
+  overflow: hidden;
+}
+.leaf::after {
+  content: "";
+  position: absolute;
+  left: 50%; top: 14%;
+  width: 2px; height: 72%;
+  transform: translateX(-50%);
+  background: linear-gradient(to bottom, rgba(255,255,255,.7), rgba(12,83,64,.4));
+  opacity: .8;
+  filter: blur(.2px);
+}
+/* placements + gentle sway */
+.leaf-a { top: 6%; left: -14px; transform: rotate(-18deg); animation: leaf-sway 7s ease-in-out infinite alternate; }
+.leaf-b { top: 12%; right: -18px; transform: rotate(22deg);  animation: leaf-sway 8s ease-in-out infinite alternate-reverse; }
+.leaf-c { bottom: 8%; left: 2%; transform: rotate(8deg);    animation: leaf-sway 9s ease-in-out infinite alternate; }
+.leaf-d { bottom: 5%; right: 1%; transform: rotate(-12deg); animation: leaf-sway 7.5s ease-in-out infinite alternate-reverse; }
+
+/* drifting petals (small tear-drop shapes that float up) */
+.petal {
+  --size: 14px;
+  position: absolute;
+  width: calc(var(--size) * .9);
+  height: calc(var(--size) * 1.2);
+  border-radius: 60% 60% 40% 40%;
+  background:
+    radial-gradient(110% 80% at 50% 35%, rgba(251,191,36,.95) 0 58%, transparent 60%),
+    radial-gradient(120% 90% at 50% 65%, rgba(255,241,200,.9) 0 48%, transparent 52%);
+  filter: drop-shadow(0 2px 8px rgba(251,191,36,.35));
+  opacity: .8;
+}
+.petal-1 { left: 14%; bottom: -6%; transform: rotate(-18deg); animation: petal-rise 10s linear infinite; }
+.petal-2 { left: 42%; bottom: -8%; transform: rotate(8deg);   animation: petal-rise 12s linear infinite .8s; }
+.petal-3 { right: 28%; bottom: -7%; transform: rotate(-10deg);animation: petal-rise 11s linear infinite .3s; }
+.petal-4 { right: 10%; bottom: -9%; transform: rotate(14deg); animation: petal-rise 13s linear infinite 1.2s; }
+
+/* card wrapper with vine border using mask (no rotation at all) */
+.offer-vine {
+  position: relative;
+  border-radius: 1rem;
+  border: 2px solid transparent;
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    linear-gradient(135deg, #fbbf24, #34d399) border-box; /* gold → green */
+  box-shadow: 0 8px 24px -16px rgba(16,185,129,.35);
+}
+.offer-card {
+  background: rgba(255,255,255,.96);
+  backdrop-filter: blur(6px);
+  border-radius: inherit;
+}
+
+/* blossom burst behind each card on hover (petal wheel) */
+.offer-wrap { position: relative; }
+.offer-wrap .burst {
+  position: absolute;
+  inset: -12px;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity .35s ease, transform .35s ease;
+  background:
+    repeating-conic-gradient(
+      from 0deg,
+      rgba(251,191,36,.35) 0 10deg,
+      rgba(16,185,129,.35) 10deg 20deg,
+      transparent 20deg 30deg
+    );
+  -webkit-mask: radial-gradient(circle at 50% 65%, #000 0 48%, transparent 55%);
+          mask: radial-gradient(circle at 50% 65%, #000 0 48%, transparent 55%);
+  filter: blur(10px);
+  transform: scale(.95);
+}
+.offer-wrap:hover .burst {
+  opacity: .8;
+  transform: scale(1.02);
+}
+
+/* CTA shine for the link */
+.btn-shine { position: relative; }
 .btn-shine::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(110deg, transparent 0%, rgba(255,255,255,.5) 20%, transparent 40%);
+  border-radius: .5rem;
+  background: linear-gradient(110deg, transparent 0%, rgba(255,255,255,.5) 18%, transparent 36%);
   transform: translateX(-120%);
   transition: transform .6s ease;
-  border-radius: .5rem;
   pointer-events: none;
 }
-.btn-shine:hover::after {
-  transform: translateX(120%);
+.btn-shine:hover::after { transform: translateX(120%); }
+
+/* ====== Keyframes ====== */
+@keyframes floral-drift {
+  0%   { transform: translate3d(-1%, 0, 0) scale(1); }
+  100% { transform: translate3d( 1%, 0, 0) scale(1.03); }
+}
+@keyframes leaf-sway {
+  0%   { transform: rotate(var(--rot-start, 0deg)) translateY(0); }
+  100% { transform: rotate(calc(var(--rot-start, 0deg) + 4deg)) translateY(2px); }
+}
+@keyframes petal-rise {
+  0%   { transform: translateY(0) rotate(var(--r, 0deg)); opacity: .0; }
+  10%  { opacity: .8; }
+  90%  { opacity: .8; }
+  100% { transform: translateY(-140px) rotate(calc(var(--r, 0deg) + 15deg)); opacity: 0; }
+}
+
+/* Respect motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .floral-aurora, .leaf, .petal, .offer-wrap .burst, .btn-shine::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Small polish for section spacing on very small screens */
+@media (max-width: 380px) {
+  .offers-floral { padding-top: 2.25rem; padding-bottom: 2.25rem; }
 }
 
 
-/* compact, gentle animations for Offers */
-@keyframes floatY {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(10px); }
+/* Animated dashed route in the contact SVG */
+.route-dash {
+  stroke-dasharray: 10 10;
+  animation: route-move 12s linear infinite;
 }
-.animate-float-slow   { animation: floatY 14s ease-in-out infinite; }
-.animate-float-slower { animation: floatY 20s ease-in-out infinite; }
-
-@keyframes gradient-pan-slow {
-  0%   { transform: translate3d(-1.5%, 0, 0); }
-  100% { transform: translate3d(1.5%, 0, 0); }
+@keyframes route-move {
+  to { stroke-dashoffset: -200; }
 }
-.animate-pan-slow { animation: gradient-pan-slow 16s ease-in-out infinite alternate; }

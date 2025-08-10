@@ -26,18 +26,12 @@ export default function Header() {
       </Link>
 
       {/* Anchor to sections in Home page */}
-      <Link href="#featured" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
+
+      <Link href="#services" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
         Explore Services
       </Link>
-      <Link href="#services" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
-        Service Rates
-      </Link>
-      <Link href="#offers" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
-        Current Offers
-      </Link>
-      <Link href="#booking" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
-        Schedule Visit
-      </Link>
+
+    
       <Link href="#academy" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
         Academy & Training
       </Link>

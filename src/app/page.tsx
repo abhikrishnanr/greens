@@ -1,10 +1,11 @@
 "use client"
 import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
-import { FiPhone, FiMapPin, FiMail, FiInstagram, FiArrowRight, FiSearch, FiX } from "react-icons/fi"
+import { FiPhone, FiArrowLeft, FiCalendar,  FiMapPin, FiMail, FiInstagram, FiArrowRight, FiSearch, FiX } from "react-icons/fi"
 import { ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Header from "@/components/Header"
+import { FaWhatsapp } from "react-icons/fa"
 
 const CACHE_DURATION = 1000 * 60 * 60 // 1 hour
 
@@ -150,7 +151,7 @@ export default function HomePage() {
   const clearSearch = () => setSearchQuery("")
 
   return (
-    <main className="bg-white min-h-screen font-sans text-gray-800">
+    <main className="bg-white min-h-screen font-sans text-gray-800 pb-12 md:pb-0">
       <Header />
 
       {/* HERO SECTION */}
@@ -264,53 +265,61 @@ export default function HomePage() {
       </section>
 
 
-{/* OFFERS (compact, gold+green, animated bg) */}
-<section id="offers" className="relative py-8 sm:py-10 overflow-hidden bg-white">
-  {/* background animation (subtle + compact) */}
-  <div aria-hidden className="absolute inset-0 -z-10">
-    {/* soft moving radial tint */}
-    <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_20%_120%,rgba(16,185,129,0.06),transparent_50%),radial-gradient(70%_50%_at_90%_-10%,rgba(251,191,36,0.08),transparent_45%)] animate-pan-slow" />
-    {/* small floating orbs */}
-    <div className="absolute -top-10 -left-10 h-32 w-32 rounded-full bg-emerald-200/40 blur-2xl animate-float-slow" />
-    <div className="absolute -bottom-12 -right-8 h-36 w-36 rounded-full bg-amber-200/50 blur-2xl animate-float-slower" />
-    {/* faint grid */}
-    <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(0deg,rgba(16,185,129,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(251,191,36,0.05)_1px,transparent_1px)] bg-[size:18px_18px]" />
+{/* OFFERS – Floral & Leaves (pure CSS, no images) */}
+<section id="offers" className="offers-floral relative overflow-hidden bg-white py-12 sm:py-14">
+  {/* decorative background (no interaction) */}
+  <div aria-hidden className="absolute inset-0 -z-10 pointer-events-none">
+    <div className="floral-aurora" />
+    {/* static decorative leaves around edges */}
+    <span className="leaf leaf-a" />
+    <span className="leaf leaf-b" />
+    <span className="leaf leaf-c" />
+    <span className="leaf leaf-d" />
+    {/* gently floating petals */}
+    <span className="petal petal-1" />
+    <span className="petal petal-2" />
+    <span className="petal petal-3" />
+    <span className="petal petal-4" />
   </div>
 
   <div className="container mx-auto px-6 relative z-10">
-    <div className="text-center mb-6">
-
+    <div className="text-center mb-8">
+ 
       <h2 className="mt-3 text-2xl md:text-3xl font-bold text-gray-900">Limited-Time Offers</h2>
       <p className="text-gray-600">Save more on popular treatments this month.</p>
       <div className="mx-auto mt-3 h-1 w-24 rounded-full bg-gradient-to-r from-amber-400 via-emerald-500 to-amber-400" />
     </div>
 
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="group">
-          {/* gold→green gradient border frame (compact) */}
-          <div className="rounded-xl p-[1.5px] bg-gradient-to-br from-amber-400 via-emerald-400 to-amber-400 transition-colors duration-300">
-            <div className="rounded-xl bg-white/95 backdrop-blur-sm border border-emerald-100 shadow-sm">
-              {/* top accent stripe */}
-              <div className="h-1 rounded-t-[10px] bg-gradient-to-r from-amber-400 via-emerald-500 to-amber-400" />
+        <div key={i} className="offer-wrap group relative">
+          {/* vine gradient border (no rotation) */}
+          <div className="offer-vine rounded-2xl">
+            <div className="offer-card rounded-2xl">
+              {/* top vine accent */}
+              <div className="h-1 rounded-t-[16px] bg-gradient-to-r from-amber-400 via-emerald-500 to-amber-400" />
               <div className="p-4">
                 <div className="text-xs text-emerald-700 font-semibold mb-1">Special {i}</div>
                 <h3 className="font-bold text-gray-900 mb-1.5">Flat 20% Off on Deluxe Facials</h3>
                 <p className="text-sm text-gray-700 mb-3">Weekdays 11am–4pm • By appointment only</p>
                 <Link
                   href="/book-appointment"
-                  className="inline-flex items-center gap-2 text-emerald-800 font-semibold hover:text-emerald-700 transition-colors"
+                  className="inline-flex items-center gap-2 text-emerald-800 font-semibold btn-shine"
                 >
                   Book now <FiArrowRight />
                 </Link>
               </div>
             </div>
           </div>
+
+          {/* blossom burst behind on hover */}
+          <span aria-hidden className="burst" />
         </div>
       ))}
     </div>
   </div>
 </section>
+
 
 
       {/* FEATURED / SIGNATURE (id="featured") */}
@@ -432,7 +441,7 @@ export default function HomePage() {
       viewport={{ once: true }}
     >
       <p className="text-2xl md:text-3xl font-bold text-white tracking-tight">
-        Our Service Rates
+        Explore Our services
       </p>
     </motion.div>
 
@@ -813,37 +822,183 @@ export default function HomePage() {
       </section>
 
 
-            {/* CONTACT (id="contact") */}
-      <section id="contact" className="py-14 bg-emerald-25">
-        <div className="container mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-8">
-            <div className="rounded-2xl overflow-hidden border border-emerald-200 bg-white">
-              {/* Map placeholder (keep it simple to avoid new APIs) */}
-              <img src="/map-placeholder.png" alt="Map" className="w-full h-72 object-cover" />
-            </div>
+         {/* CONTACT (id="contact") — directions-first with helper text + IG + WhatsApp */}
+<section id="contact" className="relative py-16 overflow-hidden bg-gradient-to-b from-emerald-50 via-white to-emerald-50">
+  {/* soft background accents */}
+  <div aria-hidden className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-emerald-300/25 blur-3xl" />
+  <div aria-hidden className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-amber-300/25 blur-3xl" />
+
+  <div className="container mx-auto px-6 relative z-10">
+    <div className="grid lg:grid-cols-2 gap-8 items-stretch">
+      {/* Directions card (animated route, no APIs) */}
+      <div className="relative rounded-2xl border border-emerald-200 bg-white shadow-sm">
+        <div className="h-1 rounded-t-2xl bg-gradient-to-r from-amber-400 via-emerald-500 to-amber-400" />
+        <div className="relative p-5">
+          <svg viewBox="0 0 420 240" className="w-full h-60">
+            <defs>
+              <pattern id="dotgrid" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="1" cy="1" r="1" className="fill-emerald-100/60" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#dotgrid)" />
+            <path
+              d="M30,210 C120,140 80,80 180,110 C280,140 240,70 330,90 C370,98 390,130 395,170"
+              className="fill-none stroke-emerald-500/80 route-dash"
+              strokeWidth="4"
+              strokeLinecap="round"
+            />
+            <g transform="translate(30,210)">
+              <circle r="6" className="fill-emerald-400" />
+              <circle r="12" className="fill-emerald-400/30 animate-ping" />
+            </g>
+            <g transform="translate(395,170)">
+              <circle r="8" className="fill-amber-400" />
+              <circle r="16" className="fill-amber-400/30 animate-ping" />
+            </g>
+            <text x="400" y="160" textAnchor="end" className="fill-emerald-900 font-semibold text-[12px]">
+              Greens Beauty Salon
+            </text>
+          </svg>
+
+          {/* Primary CTAs + helper text */}
+          <div className="mt-3 grid sm:grid-cols-2 gap-3">
             <div>
-              <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">Reach Us</h3>
-              <p className="text-gray-700">TC 45/215, Kunjalumood Junction, Karamana PO, Trivandrum</p>
-              <div className="mt-4 flex flex-col gap-2 text-gray-800">
-                <a href="tel:+918891467678" className="hover:text-emerald-700 inline-flex items-center gap-2">
-                  <FiPhone /> +91 8891 467 678
-                </a>
-                <a href="mailto:greensalon@gmail.com" className="hover:text-emerald-700 inline-flex items-center gap-2">
-                  <FiMail /> greensalon@gmail.com
-                </a>
-                <a
-                  href="https://instagram.com/greensbeautysalon"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-emerald-700 inline-flex items-center gap-2"
-                >
-                  <FiInstagram /> @greensbeautysalon
-                </a>
-              </div>
+              <a
+                href="https://www.google.com/maps/dir/?api=1&destination=TC%2045%2F215%2C%20Kunjalumood%20Junction%2C%20Karamana%20PO%2C%20Trivandrum"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 text-white font-semibold hover:bg-emerald-700 transition"
+                aria-label="Get directions to Greens Beauty Salon on Google Maps"
+              >
+                Get Directions
+              </a>
+              <p className="mt-1 text-xs text-gray-500">Opens Google Maps with our address prefilled.</p>
+            </div>
+
+            <div>
+              <a
+                href="https://maps.app.goo.gl/y5PBWRF4pL1pp9tA7"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-emerald-300 bg-emerald-50 px-4 py-2 text-emerald-800 hover:bg-emerald-100 transition"
+                aria-label="Open Greens Beauty Salon in Google Maps"
+              >
+                Open in Google Maps
+              </a>
+              <p className="mt-1 text-xs text-gray-500">Best on Android/Chrome; opens the map page in a new tab.</p>
+            </div>
+
+            <div className="sm:col-span-2">
+              <a
+                href="https://maps.apple.com/?q=TC%2045%2F215%20Kunjalumood%20Junction%2C%20Karamana%20PO%2C%20Trivandrum"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-4 py-2 text-amber-800 hover:bg-amber-100 transition"
+                aria-label="Open Greens Beauty Salon in Apple Maps"
+              >
+                Open in Apple Maps
+              </a>
+              <p className="mt-1 text-xs text-gray-500">On iPhone, this opens the Apple Maps app automatically.</p>
             </div>
           </div>
+
+          {/* Quick utils */}
+          <div className="mt-3 flex flex-wrap gap-2 text-sm text-emerald-700">
+            <button
+              onClick={() => navigator.clipboard?.writeText("TC 45/215, Kunjalumood Junction, Karamana PO, Trivandrum")}
+              className="rounded-full border border-emerald-200 bg-white px-3 py-1 hover:bg-emerald-50 transition"
+              aria-label="Copy address to clipboard"
+            >
+              Copy address
+            </button>
+            <a
+              href="https://maps.app.goo.gl/y5PBWRF4pL1pp9tA7"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full border border-emerald-200 bg-white px-3 py-1 hover:bg-emerald-50 transition"
+              aria-label="Share Google Maps link"
+            >
+              Share map link
+            </a>
+          </div>
         </div>
-      </section>
+      </div>
+
+      {/* Details + icons + helper text */}
+      <div>
+        <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">Reach Us</h3>
+        <p className="text-gray-700">TC 45/215, Kunjalumood Junction, Karamana PO, Trivandrum</p>
+
+        <div className="mt-5 grid sm:grid-cols-2 gap-3">
+          {/* Phone */}
+          <div>
+            <a
+              href="tel:+918891467678"
+              className="rounded-xl border border-emerald-200 bg-white px-4 py-3 hover:bg-emerald-50 transition inline-flex items-center gap-2"
+              aria-label="Call Greens Beauty Salon"
+            >
+              <FiPhone className="text-emerald-600" />
+              <span>+91 8891 467 678</span>
+            </a>
+            <p className="mt-1 text-xs text-gray-500">Tap to call us.</p>
+          </div>
+
+          {/* Email */}
+          <div>
+            <a
+              href="mailto:greensalon@gmail.com"
+              className="rounded-xl border border-emerald-200 bg-white px-4 py-3 hover:bg-emerald-50 transition inline-flex items-center gap-2"
+              aria-label="Email Greens Beauty Salon"
+            >
+              <FiMail className="text-amber-600" />
+              <span>greensalon@gmail.com</span>
+            </a>
+            <p className="mt-1 text-xs text-gray-500">We usually respond within business hours.</p>
+          </div>
+
+          {/* Instagram profile */}
+          <div>
+            <a
+              href="https://instagram.com/greensbeautysalon"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-xl border border-pink-200 bg-gradient-to-r from-pink-50 via-rose-50 to-pink-50 px-4 py-3 hover:from-pink-100 hover:to-pink-100 transition inline-flex items-center gap-2"
+              aria-label="Open our Instagram profile"
+            >
+              <FiInstagram className="text-pink-500" />
+              <span>@greensbeautysalon</span>
+            </a>
+            <p className="mt-1 text-xs text-gray-500">See photos, stories & updates.</p>
+          </div>
+
+          {/* WhatsApp */}
+          <div>
+            <a
+              href="https://wa.me/918891467678?text=Hi%20Greens%20Beauty%20Salon%2C%20I%27d%20like%20directions%20and%20to%20book.%20Map%20link%3A%20https%3A%2F%2Fmaps.app.goo.gl%2Fy5PBWRF4pL1pp9tA7"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-xl border border-emerald-200 bg-white px-4 py-3 hover:bg-emerald-50 transition inline-flex items-center gap-2"
+              aria-label="Chat with us on WhatsApp"
+            >
+              <FaWhatsapp className="text-emerald-600" />
+              <span>WhatsApp us</span>
+            </a>
+            <p className="mt-1 text-xs text-gray-500">Fast replies on WhatsApp.</p>
+          </div>
+        </div>
+
+        {/* helper notes */}
+        <ul className="mt-4 text-sm text-gray-600 space-y-1">
+          <li>• Landmark: Kunjalumood Junction</li>
+          <li>• Parking available nearby</li>
+          <li>• Tip: On mobile, “Get Directions” opens your Maps app for turn-by-turn navigation.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
 
       {/* FOOTER (DARK) */}
       <footer className="bg-gray-900 text-gray-400 py-12">
@@ -871,12 +1026,53 @@ export default function HomePage() {
           <p className="text-xs mt-2">TC 45/215, Kunjalumood Junction, Karamana PO, Trivandrum</p>
         </div>
       </footer>
-      <Link
-        href="/book-appointment"
-        className="fixed bottom-6 right-6 bg-green-600 text-white px-4 py-2 rounded-full shadow-lg"
-      >
-        Book Appointment
-      </Link>
+  <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-emerald-600 text-white border-t border-emerald-500 shadow-[0_-8px_24px_-12px_rgba(0,0,0,0.35)]">
+  <div className="grid grid-cols-4 text-center">
+    {/* Back */}
+    <button
+      onClick={() => (typeof window !== "undefined" ? window.history.back() : null)}
+      className="py-2.5 flex flex-col items-center justify-center gap-1 active:bg-emerald-700/40"
+      aria-label="Go back"
+    >
+      <FiArrowLeft className="text-xl" />
+      <span className="text-[11px] font-medium">Back</span>
+    </button>
+
+    {/* Call */}
+    <a
+      href="tel:+918891467678"
+      className="py-2.5 flex flex-col items-center justify-center gap-1 active:bg-emerald-700/40"
+      aria-label="Call us"
+    >
+      <FiPhone className="text-xl" />
+      <span className="text-[11px] font-medium">Call</span>
+    </a>
+
+    {/* WhatsApp */}
+    <a
+      href="https://wa.me/918891467678?text=Hi%20Greens%20Beauty%20Salon%2C%20I%27d%20like%20to%20book%20an%20appointment."
+      target="_blank"
+      rel="noopener noreferrer"
+      className="py-2.5 flex flex-col items-center justify-center gap-1 active:bg-emerald-700/40"
+      aria-label="Chat on WhatsApp"
+    >
+      <FaWhatsapp className="text-xl" />
+      <span className="text-[11px] font-medium">WhatsApp</span>
+    </a>
+
+    {/* Book */}
+    <Link
+      href="/book-appointment"
+      className="py-2.5 flex flex-col items-center justify-center gap-1 active:bg-emerald-700/40"
+      aria-label="Book appointment"
+    >
+      <FiCalendar className="text-xl" />
+      <span className="text-[11px] font-medium">Book</span>
+    </Link>
+  </div>
+  {/* iOS safe-area shim */}
+  <div className="h-[env(safe-area-inset-bottom)]" />
+</nav>
     </main>
   )
 }
