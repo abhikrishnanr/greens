@@ -260,3 +260,14 @@ model Enquiry {
   createdAt  DateTime @default(now()) @db.Timestamp(3)
   updatedAt  DateTime @default(now()) @updatedAt @db.Timestamp(3)
 }
+
+model Offer {
+  id          String   @id @default(uuid())
+  title       String
+  subTitle    String?  @db.VarChar(191)
+  category    String?  @db.VarChar(191)
+  description String?  @db.LongText
+  imageUrl    String?  @db.VarChar(191)
+  createdAt   DateTime @default(now()) @db.Timestamp(3)
+  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamp(3)
+}

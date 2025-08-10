@@ -22,6 +22,7 @@ import {
   MdMenu,
   MdViewCarousel,
   MdQuestionAnswer,
+  MdLocalOffer,
 } from 'react-icons/md'
 import type { IconType } from 'react-icons'
 
@@ -64,6 +65,7 @@ const sections: {
       { href: '/admin/service-categories', label: 'Categories', icon: MdCategory },
       { href: '/admin/services', label: 'Services', icon: MdDesignServices },
       { href: '/admin/featured-services', label: 'Featured Services', icon: MdStar },
+      { href: '/admin/limited-time-offers', label: 'Offers', icon: MdLocalOffer },
       { href: '/admin/variant-price-history', label: 'Price History', icon: MdHistory },
     ],
   },
