@@ -44,6 +44,7 @@ export default function HomePage() {
     male: [],
     children: [],
   })
+  const [offers, setOffers] = useState<any[]>([])
 
   // Search functionality
   const [searchQuery, setSearchQuery] = useState("")
@@ -68,6 +69,12 @@ export default function HomePage() {
         setLoading(false)
       })
       .catch(() => setLoading(false))
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/limited-time-offers')
+      .then((res) => res.json())
+      .then((data) => setOffers(Array.isArray(data) ? data : []))
   }, [])
 
   useEffect(() => {
@@ -315,31 +322,40 @@ export default function HomePage() {
     </div>
 
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {[1, 2, 3].map((i) => (
-        <div key={i} className="offer-wrap group relative">
-          {/* vine gradient border (no rotation) */}
-          <div className="offer-vine rounded-2xl">
-            <div className="offer-card rounded-2xl">
-              {/* top vine accent */}
-              <div className="h-1 rounded-t-[16px] bg-gradient-to-r from-amber-400 via-emerald-500 to-amber-400" />
-              <div className="p-4">
-                <div className="text-xs text-emerald-700 font-semibold mb-1">Special {i}</div>
-                <h3 className="font-bold text-gray-900 mb-1.5">Flat 20% Off on Deluxe Facials</h3>
-                <p className="text-sm text-gray-700 mb-3">Weekdays 11am–4pm • By appointment only</p>
-                <Link
-                  href="/book-appointment"
-                  className="inline-flex items-center gap-2 text-emerald-800 font-semibold btn-shine"
-                >
-                  Book now <FiArrowRight />
-                </Link>
+      {offers.length === 0 ? (
+        <p className="col-span-full text-center text-gray-500">No offers available</p>
+      ) : (
+        offers.map((offer) => (
+          <div key={offer.id} className="offer-wrap group relative">
+            <div className="offer-vine rounded-2xl">
+              <div className="offer-card rounded-2xl">
+                <div className="h-1 rounded-t-[16px] bg-gradient-to-r from-amber-400 via-emerald-500 to-amber-400" />
+                {offer.imageUrl && (
+                  <img
+                    src={offer.imageUrl}
+                    alt={offer.title}
+                    className="w-full h-40 object-cover rounded-t-[16px]"
+                  />
+                )}
+                <div className="p-4">
+                  {offer.category && (
+                    <div className="text-xs text-emerald-700 font-semibold mb-1">{offer.category}</div>
+                  )}
+                  <h3 className="font-bold text-gray-900 mb-1.5">{offer.title}</h3>
+                  {offer.subTitle && <p className="text-sm text-gray-700 mb-3">{offer.subTitle}</p>}
+                  <Link
+                    href={`/offers/${offer.id}`}
+                    className="inline-flex items-center gap-2 text-emerald-800 font-semibold btn-shine"
+                  >
+                    View details <FiArrowRight />
+                  </Link>
+                </div>
               </div>
             </div>
+            <span aria-hidden className="burst" />
           </div>
-
-          {/* blossom burst behind on hover */}
-          <span aria-hidden className="burst" />
-        </div>
-      ))}
+        ))
+      )}
     </div>
   </div>
 </section>
