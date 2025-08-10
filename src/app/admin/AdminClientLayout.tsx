@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import { signOut } from 'next-auth/react'
 import { LoadingProvider } from '@/contexts/LoadingContext'
@@ -75,7 +75,13 @@ const sections: {
 
 export default function AdminClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const router = useRouter()
   const [open, setOpen] = useState(false)
+
+  const handleLogout = async () => {
+    await signOut({ redirect: false, callbackUrl: '/auth/signin' })
+    router.push('/auth/signin')
+  }
 
   return (
     <LoadingProvider>
@@ -97,7 +103,7 @@ export default function AdminClientLayout({ children }: { children: React.ReactN
             </Link>
           </div>
           <button
-            onClick={() => signOut({ callbackUrl: '/auth/signin' })}
+            onClick={handleLogout}
             className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
           >
             <MdLogout className="text-lg" /> Logout
