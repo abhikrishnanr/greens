@@ -46,7 +46,6 @@ const sections: {
   {
     heading: 'People',
     items: [
-      { href: '/admin/users', label: 'Users', icon: MdPeople },
       { href: '/admin/staff', label: 'Staff', icon: MdPeople },
       { href: '/admin/customers', label: 'Customers', icon: MdPeople },
 
@@ -67,6 +66,10 @@ const sections: {
       { href: '/admin/featured-services', label: 'Featured Services', icon: MdStar },
       { href: '/admin/variant-price-history', label: 'Price History', icon: MdHistory },
     ],
+  },
+  {
+    heading: 'Settings',
+    items: [{ href: '/admin/users', label: 'Staff Roles', icon: MdPeople }],
   },
 ]
 

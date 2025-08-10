@@ -18,7 +18,12 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const { id, role, modules, password, removed } = await req.json()
-  const data: any = {}
+  const data: Partial<{
+    role: string
+    modules: string[]
+    password: string
+    removed: boolean
+  }> = {}
   if (role !== undefined) data.role = role
   if (modules !== undefined) data.modules = modules
   if (password !== undefined) data.password = password

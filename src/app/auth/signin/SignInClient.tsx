@@ -1,16 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { signIn } from 'next-auth/react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { signIn, getSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 export default function SignInClient() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const router = useRouter()
-  const params = useSearchParams()
-  const callbackUrl = params.get('callbackUrl') || '/'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -18,10 +16,31 @@ export default function SignInClient() {
       redirect: false,
       email,
       password,
-      callbackUrl,
     })
-    if (res?.error) setError('Invalid email or password')
-    else router.push(callbackUrl)
+    if (res?.error) {
+      setError('Invalid email or password')
+      return
+    }
+
+    const session = await getSession()
+    const modules = (session?.user as { modules?: string[] })?.modules || []
+    const moduleRoutes: Record<string, string> = {
+      dashboard: '/admin/dashboard',
+      staff: '/admin/staff',
+      customers: '/admin/customers',
+      branches: '/admin/branches',
+      services: '/admin/services',
+      billing: '/admin/billing',
+      'staff-roles': '/admin/users',
+    }
+
+    let destination = '/admin/dashboard'
+    if (!modules.includes('dashboard') && modules.length > 0) {
+      const first = modules[0]
+      destination = moduleRoutes[first] || destination
+    }
+
+    router.push(destination)
   }
 
   return (

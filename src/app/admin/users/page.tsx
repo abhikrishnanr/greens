@@ -21,6 +21,7 @@ interface User {
 
 const allModules = [
   'dashboard',
+  'staff-roles',
   'staff',
   'customers',
   'branches',
@@ -28,7 +29,7 @@ const allModules = [
   'billing',
 ]
 
-export default function UsersPage() {
+export default function StaffRolesPage() {
   const [users, setUsers] = useState<User[]>([])
 
   useEffect(() => {
@@ -57,7 +58,7 @@ export default function UsersPage() {
   return (
     <div className="p-4 max-w-5xl mx-auto">
       <h1 className="flex items-center text-3xl font-bold mb-6 text-green-800">
-        <Users className="w-8 h-8 mr-2" /> User Management
+        <Users className="w-8 h-8 mr-2" /> Staff Roles
       </h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
@@ -119,6 +120,7 @@ export default function UsersPage() {
                 <div className="flex flex-wrap gap-2">
                   {allModules.map((m) => {
                     const active = user.modules?.includes(m)
+                    const label = m.replace('-', ' ')
                     return (
                       <label key={m} className="flex items-center gap-1 text-sm">
                         <input
@@ -131,7 +133,7 @@ export default function UsersPage() {
                             updateUser(user.id, { modules })
                           }}
                         />
-                        {m}
+                        {label}
                       </label>
                     )
                   })}
