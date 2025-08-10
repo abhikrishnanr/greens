@@ -6,6 +6,29 @@ import { Users, Sparkles, Star, ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Header from "@/components/Header"
 
+const CACHE_DURATION = 1000 * 60 * 60 // 1 hour
+
+function getCache(key: string) {
+  if (typeof window === "undefined") return null
+  try {
+    const cached = localStorage.getItem(key)
+    if (!cached) return null
+    const parsed = JSON.parse(cached)
+    if (Date.now() - parsed.timestamp > CACHE_DURATION) {
+      localStorage.removeItem(key)
+      return null
+    }
+    return parsed.data
+  } catch {
+    return null
+  }
+}
+
+function setCache(key: string, data: any) {
+  if (typeof window === "undefined") return
+  localStorage.setItem(key, JSON.stringify({ data, timestamp: Date.now() }))
+}
+
 const TIER_LABELS = {
   deluxe: {
     label: "Deluxe",
@@ -52,13 +75,21 @@ export default function HomePage() {
 
   useEffect(() => {
     setLoading(true)
+    const cached = getCache("service-categories")
+    if (cached) {
+      setCategories(Array.isArray(cached) ? cached : [])
+      setLoading(false)
+      return
+    }
     fetch("/api/v2/service-categories")
       .then((res) => {
         if (!res.ok) throw new Error("API error")
         return res.json()
       })
       .then((data) => {
-        setCategories(Array.isArray(data) ? data : [])
+        const categories = Array.isArray(data) ? data : []
+        setCategories(categories)
+        setCache("service-categories", categories)
         setLoading(false)
       })
       .catch(() => {
@@ -67,21 +98,41 @@ export default function HomePage() {
   }, [])
 
   useEffect(() => {
+    const cached = getCache("hero-tabs")
+    if (cached) {
+      const tabs = Array.isArray(cached) ? cached : []
+      setHeroTabs(tabs)
+      if (tabs.length > 0) {
+        setSelectedHeroCategory(tabs[0].id)
+      }
+      setHeroLoading(false)
+      return
+    }
     fetch("/api/hero-tabs")
       .then((res) => res.json())
       .then((data) => {
-        setHeroTabs(Array.isArray(data) ? data : [])
-        if (Array.isArray(data) && data.length > 0) {
-          setSelectedHeroCategory(data[0].id)
+        const tabs = Array.isArray(data) ? data : []
+        setHeroTabs(tabs)
+        if (tabs.length > 0) {
+          setSelectedHeroCategory(tabs[0].id)
         }
+        setCache("hero-tabs", tabs)
       })
       .finally(() => setHeroLoading(false))
   }, [])
 
   useEffect(() => {
+    const cached = getCache("featured-services")
+    if (cached) {
+      setFeaturedServices(cached)
+      return
+    }
     fetch("/api/featured-services")
       .then((res) => res.json())
-      .then((data) => setFeaturedServices(data || {}))
+      .then((data) => {
+        setFeaturedServices(data || {})
+        setCache("featured-services", data || {})
+      })
   }, [])
 
   useEffect(() => {
