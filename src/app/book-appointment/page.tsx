@@ -103,7 +103,7 @@ export default function BookAppointmentPage() {
         : "",
       preferredTime: form.preferredTime
         ? format(form.preferredTime, "HH:mm")
-        : "",
+        : null,
     }
 
     const res = await fetch("/api/web-enquiries", {
@@ -226,7 +226,6 @@ export default function BookAppointmentPage() {
                   maxTime={maxTime}
                   placeholderText="Select time"
                   className="w-full mt-1 p-2 border rounded-md"
-                  required
                 />
               </div>
 

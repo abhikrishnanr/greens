@@ -173,7 +173,7 @@ export default function HomePage() {
 
                 </div>
                 <div className="relative z-20 text-white max-w-3xl space-y-4">
-                  <h1 className="text-3xl md:text-4xl font-bold tracking-wide text-white drop-shadow-lg">
+                  <h1 className="text-2xl md:text-3xl font-bold tracking-wide text-white drop-shadow-lg">
                     {currentHeroContent.heroTitle}
                   </h1>
                   {selectedHeroCategory === "home" ? (
@@ -235,7 +235,7 @@ export default function HomePage() {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <p className="text-3xl md:text-4xl font-bold text-white">Our Signature Treatments</p>
+            <p className="text-2xl md:text-3xl font-bold text-white">Our Signature Treatments</p>
           </motion.div>
           <div className="relative">
             {signatureServices.length === 0 ? (
@@ -295,7 +295,7 @@ export default function HomePage() {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <p className="text-3xl md:text-4xl font-bold text-gray-900">Tailored Experiences</p>
+            <p className="text-2xl md:text-3xl font-bold text-gray-900">Tailored Experiences</p>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {Object.entries(TIER_LABELS).map(([key, { label, icon, description }], idx) => (
@@ -329,7 +329,7 @@ export default function HomePage() {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <p className="text-3xl md:text-4xl font-bold text-white">Explore All Services</p>
+            <p className="text-2xl md:text-3xl font-bold text-white">Explore All Services</p>
           </motion.div>
           <motion.div
             className="max-w-2xl mx-auto mb-6"
@@ -454,7 +454,7 @@ export default function HomePage() {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl md:text-5xl font-bold mb-4 text-white">Your Escape Awaits</h2>
+            <h2 className="text-2xl md:text-4xl font-bold mb-4 text-white">Your Escape Awaits</h2>
             <p className="text-lg text-white/90 mb-6">
               Ready to indulge in a moment of pure bliss? Book your appointment today and let our experts pamper you.
             </p>

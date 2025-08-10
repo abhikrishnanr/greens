@@ -79,17 +79,12 @@ export default function Header() {
 
   return (
     <header
-      className="text-white py-4 px-6 flex items-center justify-between w-full relative z-50"
-      style={{
-        backgroundColor: '#052b1e',
-        backgroundImage: "url('/grass-texture.jpg')",
-        backgroundSize: 'cover',
-        backgroundRepeat: 'repeat',
-      }}
+      className="text-white py-4 px-6 flex items-center justify-between w-full relative z-50 bg-transparent"
+      style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}
     >
       <div className="flex items-center gap-4">
         <Link href="/" className="flex items-center">
-          <Image src="/logo.png" alt="Greens Beauty Salon Logo" width={100} height={40} />
+          <Image src="/logo.png" alt="Greens Beauty Salon Logo" width={150} height={60} />
         </Link>
       </div>
       <nav className="hidden md:flex items-center gap-6 text-sm font-medium">{navLinks}</nav>
@@ -110,9 +105,6 @@ export default function Header() {
             className="fixed inset-0 z-40 flex flex-col items-center justify-center gap-8 text-lg md:hidden"
             style={{
               backgroundColor: '#052b1e',
-              backgroundImage: "url('/grass-texture.jpg')",
-              backgroundSize: 'cover',
-              backgroundRepeat: 'repeat',
             }}
           >
             <button className="absolute top-4 right-4 text-white" onClick={() => setIsMobileMenuOpen(false)}>
