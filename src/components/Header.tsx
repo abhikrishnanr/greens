@@ -7,37 +7,66 @@ import { motion, AnimatePresence } from "framer-motion"
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false)
+
+  const closeMenus = () => {
+    setIsMobileMenuOpen(false)
+    setAccountMenuOpen(false)
+  }
 
   const navLinks = (
     <>
-     <Link href="/" className="hover:text-green-400 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+      <Link href="/" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
         Home {/* Added Home link */}
       </Link>
-      <Link href="#" className="hover:text-green-400 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+      <Link href="#" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
         Explore Services
       </Link>
-      <Link href="#" className="hover:text-green-400 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+      <Link href="#" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
         Service Rates
       </Link>
-      <Link href="#" className="hover:text-green-400 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+      <Link href="#" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
         Current Offers
       </Link>
-      <Link href="#" className="hover:text-green-400 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+      <Link href="#" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
         Schedule Visit
       </Link>
-      <Link href="#" className="hover:text-green-400 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+      <Link href="#" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
         Academy & Training
       </Link>
-      <Link href="#" className="hover:text-green-400 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+      <Link href="#" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
         About Greens
       </Link>
-      <Link href="#" className="hover:text-green-400 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+      <Link href="#" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
         Contact Us
       </Link>
-      <Link href="#" className="hover:text-green-400 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
-        My Account
-      </Link>
-      <Link href="/book-appointment" className="hover:text-green-400 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+      <div className="relative" onMouseLeave={() => setAccountMenuOpen(false)}>
+        <button
+          onClick={() => setAccountMenuOpen(!accountMenuOpen)}
+          className="hover:text-green-400 transition-colors"
+        >
+          My Account
+        </button>
+        {accountMenuOpen && (
+          <div className="absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded shadow-md z-50">
+            <Link
+              href="/auth/signin?type=staff"
+              className="block px-4 py-2 hover:bg-gray-100"
+              onClick={closeMenus}
+            >
+              Staff Login
+            </Link>
+            <Link
+              href="/auth/signin?type=customer"
+              className="block px-4 py-2 hover:bg-gray-100"
+              onClick={closeMenus}
+            >
+              Customer Login
+            </Link>
+          </div>
+        )}
+      </div>
+      <Link href="/book-appointment" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
         Book Appointment
       </Link>
     </>
