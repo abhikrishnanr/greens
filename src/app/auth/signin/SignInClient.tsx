@@ -1,11 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { signIn, getSession } from 'next-auth/react'
+import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Mail, Lock } from 'lucide-react'
 
-export default function SignInClient() {
+interface Props {
+  type?: string
+}
+
+export default function SignInClient({ type }: Props) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -23,9 +27,10 @@ export default function SignInClient() {
       return
     }
 
-    const session = await getSession()
-    const user = session?.user as { role?: string; modules?: unknown }
-    const modules = Array.isArray(user?.modules) ? (user!.modules as string[]) : []
+    const sessionRes = await fetch('/api/auth/session')
+    const session = await sessionRes.json()
+    const user = session?.user as { role?: string; modules?: string[] }
+    const modules = user?.modules ?? []
     const moduleRoutes: Record<string, string> = {
       dashboard: '/admin/dashboard',
       staff: '/admin/staff',
@@ -37,7 +42,9 @@ export default function SignInClient() {
     }
 
     let destination = '/admin/dashboard'
-    if (user?.role !== 'admin' && modules.length > 0 && !modules.includes('dashboard')) {
+    if (user?.role === 'customer') {
+      destination = '/customer'
+    } else if (user?.role !== 'admin' && modules.length > 0 && !modules.includes('dashboard')) {
       const first = modules[0]
       destination = moduleRoutes[first] || destination
     }
@@ -56,7 +63,9 @@ export default function SignInClient() {
       <div className="flex items-center justify-center bg-gray-50 p-6">
         <div className="w-full max-w-md space-y-6">
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-primary mb-2">Sign In</h1>
+            <h1 className="text-3xl font-bold text-primary mb-2">
+              {type === 'customer' ? 'Customer Sign In' : 'Staff Sign In'}
+            </h1>
             <p className="text-gray-500">Enter your credentials to access your account</p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-5">
