@@ -254,7 +254,7 @@ export default function AdminBooking() {
         duration,
         price,
         staffId: "",
-        start: "",
+         start: getDefaultSlot(), // default current rounded slot
       },
     ])
     setSelectedTier("")
@@ -270,25 +270,32 @@ export default function AdminBooking() {
     allTimes.push(format(new Date(base.getTime() + i * 15 * 60000), "HH:mm"))
   }
 
-  const timeOptionsFor = (duration: number) => {
-    const slots: string[] = []
-    const startBase = new Date(date)
-    startBase.setHours(9, 0, 0, 0)
-    const endBase = new Date(date)
-    endBase.setHours(21, 0, 0, 0)
-    const todayStr = format(new Date(), "yyyy-MM-dd")
-    const now = new Date()
+const timeOptionsFor = (duration: number) => {
+  const slots: string[] = [];
+  const startBase = new Date(date);
+  startBase.setHours(9, 0, 0, 0);
+  const endBase = new Date(date);
+  endBase.setHours(21, 0, 0, 0);
 
-    for (
-      let t = new Date(startBase);
-      t.getTime() + duration * 60000 <= endBase.getTime();
-      t = new Date(t.getTime() + 15 * 60000)
-    ) {
-      if (date === todayStr && t < now) continue
-      slots.push(format(t, "HH:mm"))
-    }
-    return slots
+  const todayStr = format(new Date(), "yyyy-MM-dd");
+  const now = new Date();
+  now.setSeconds(0, 0);
+  const nowRounded = getRoundedDownSlot(date); // "HH:mm"
+
+  for (
+    let t = new Date(startBase);
+    t.getTime() + duration * 60000 <= endBase.getTime();
+    t = new Date(t.getTime() + 15 * 60000)
+  ) {
+    const slot = format(t, "HH:mm");
+
+    // For today: skip past slots EXCEPT the rounded‑down current slot
+    if (date === todayStr && t < now && slot !== nowRounded) continue;
+
+    slots.push(slot);
   }
+  return slots;
+}
 
   const toMin = (s: string) => {
     const [h, m] = s.split(":").map(Number)
@@ -340,6 +347,53 @@ export default function AdminBooking() {
     return false
   }
 
+const getDefaultSlot = () => {
+  const now = new Date();
+  now.setSeconds(0, 0); // Clear seconds/milliseconds
+  const minutes = now.getMinutes();
+  const roundedMinutes = Math.floor(minutes / 15) * 15; // round down to nearest 15 min
+  now.setMinutes(roundedMinutes);
+  return format(now, "HH:mm");
+};
+// Round "now" down to nearest 15-min slot, clamped to opening hour (09:00)
+const getRoundedDownSlot = (dateStr: string) => {
+  const d = new Date();
+  const todayStr = format(d, "yyyy-MM-dd");
+  d.setSeconds(0, 0);
+  const rounded = Math.floor(d.getMinutes() / 15) * 15;
+  d.setMinutes(rounded);
+
+  // clamp to salon hours for today
+  if (dateStr === todayStr) {
+    const open = new Date();
+    open.setHours(9, 0, 0, 0);
+    if (d < open) return "09:00";
+  }
+  return format(d, "HH:mm");
+};
+
+// Find the best default: prefer current rounded slot; if busy, move forward by 15 mins.
+const getBestDefaultSlot = (
+  dateStr: string,
+  staffId: string,
+  duration: number,
+  busy: Set<string>,
+  allTimesForDuration: string[],
+) => {
+  const preferred = getRoundedDownSlot(dateStr);
+  const canUsePreferred = !busy || !hasBusyRange(busy, preferred, duration);
+  if (allTimesForDuration.includes(preferred) && canUsePreferred) {
+    return preferred;
+  }
+  // fallback: first future free slot
+  for (const t of allTimesForDuration) {
+    if (!busy || !hasBusyRange(busy, t, duration)) return t;
+  }
+  return ""; // nothing free
+};
+
+
+  
   const lookupCustomer = async () => {
     if (phone.length !== 10) {
       setResult({ success: false, message: "Phone number must be exactly 10 digits." })
@@ -772,9 +826,20 @@ export default function AdminBooking() {
                             <Label className="text-xs text-gray-600">Staff</Label>
                             <Select
                               value={item.staffId}
-                              onValueChange={(value) =>
-                                setItems(items.map((it, i) => (i === idx ? { ...it, staffId: value, start: "" } : it)))
-                              }
+                              onValueChange={(value) => {
+  const it = items[idx];
+  const options = timeOptionsFor(it.duration);
+  const busy = value ? busySlots(value, idx) : new Set<string>();
+  const defaultStart = value
+    ? getBestDefaultSlot(date, value, it.duration, busy, options)
+    : "";
+
+  setItems(items.map((row, i) =>
+    i === idx ? { ...row, staffId: value, start: defaultStart } : row
+  ));
+}}
+
+
                               required
                               className={`h-8 text-xs ${attemptSubmit && !item.staffId ? "border-red-500 focus:ring-red-500" : ""}`}
                             >
