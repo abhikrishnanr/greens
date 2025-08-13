@@ -133,7 +133,7 @@ export default function AdminBooking() {
     const v = searchParams.get('variants')
     if (n) setCustomer(n)
     if (p) setPhone(p)
-    if (g) setGender(g)
+    if (g) setGender(g.toLowerCase())
     if (v) {
       const ids = v.split(',')
       fetch('/api/admin/service-variants/all')
@@ -223,7 +223,7 @@ export default function AdminBooking() {
       setEditItemStart(editItem.start)
       setEditCustomer(editItem.customer || "")
       setEditPhone(editItem.phone || "")
-      setEditGender(editItem.gender || "")
+      setEditGender(editItem.gender?.toLowerCase() || "")
       setEditAge(editItem.age ? String(editItem.age) : "")
     }
   }, [editItem])
@@ -405,7 +405,7 @@ const getBestDefaultSlot = (
         const data = await res.json()
         if (data.customer) {
           setCustomer(data.customer.name || "")
-          setGender(data.customer.gender || "")
+          setGender(data.customer.gender?.toLowerCase() || "")
           setCustomerStats({ totalAmount: data.totalAmount, billCount: data.billCount })
         } else {
           setCustomer("")
