@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
-import { FiPhone, FiArrowLeft, FiCalendar, FiArrowUp, FiMapPin, FiMail, FiInstagram, FiArrowRight, FiSearch, FiX } from "react-icons/fi"
+import { FiPhone,FiFacebookF, FiYoutube, FiArrowLeft, FiCalendar, FiArrowUp, FiMapPin, FiMail, FiInstagram, FiArrowRight, FiSearch, FiX } from "react-icons/fi"
 import { ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Header from "@/components/Header"
@@ -316,7 +316,7 @@ export default function HomePage() {
   <div className="container mx-auto px-6 relative z-10">
     <div className="text-center mb-8">
  
-      <h2 className="mt-3 text-2xl md:text-3xl font-bold text-gray-900">Limited-Time Offers</h2>
+      <h2 className="mt-3 text-2xl md:text-3xl font-bold text-gray-900">Special Offers</h2>
       <p className="text-gray-600">Save more on popular treatments this month.</p>
       <div className="mx-auto mt-3 h-1 w-24 rounded-full bg-gradient-to-r from-amber-400 via-emerald-500 to-amber-400" />
     </div>
@@ -376,7 +376,7 @@ export default function HomePage() {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <p className="text-2xl md:text-3xl font-bold text-white">Our Featured Services</p>
+            <p className="text-2xl md:text-3xl font-bold text-white">Hot Picks</p>
           </motion.div>
 
           <div className="relative">
@@ -442,7 +442,7 @@ export default function HomePage() {
         <div className="container mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-8 items-center">
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold text-emerald-900">Greens Academy & Training</h2>
+              <h2 className="text-2xl md:text-3xl font-bold text-emerald-900">Beauty Education</h2>
               <p className="mt-3 text-emerald-800">
                 Start your beauty career with industry-led certification programs. Weekend and weekday batches available.
               </p>
@@ -845,10 +845,7 @@ export default function HomePage() {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-2xl md:text-4xl font-bold mb-4 text-white">Your Escape Awaits</h2>
-            <p className="text-lg text-white/90 mb-6">
-              Ready to indulge in a moment of pure bliss? Book your appointment today and let our experts pamper you.
-            </p>
+    
             <a
               href="/book-appointment"
               className="bg-emerald-600 text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-emerald-700 transition-colors shadow-lg hover:shadow-emerald-500/30"
@@ -964,74 +961,105 @@ export default function HomePage() {
 
       {/* Details + icons + helper text */}
       <div>
-        <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">Reach Us</h3>
-        <p className="text-gray-700">TC 45/215, Kunjalumood Junction, Karamana PO, Trivandrum</p>
+  <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">Reach Us</h3>
+  <p className="text-gray-700">TC 45/215, Kunjalumood Junction, Karamana PO, Trivandrum</p>
 
-        <div className="mt-5 grid sm:grid-cols-2 gap-3">
-          {/* Phone */}
-          <div>
-            <a
-              href="tel:+918891467678"
-              className="rounded-xl border border-emerald-200 bg-white px-4 py-3 hover:bg-emerald-50 transition inline-flex items-center gap-2"
-              aria-label="Call Greens Beauty Salon"
-            >
-              <FiPhone className="text-emerald-600" />
-              <span>+91 8891 467 678</span>
-            </a>
-            <p className="mt-1 text-xs text-gray-500">Tap to call us.</p>
-          </div>
+  <div className="mt-5 grid sm:grid-cols-2 gap-3">
+    {/* Phone */}
+    <div>
+      <a
+        href="tel:+918891467678"
+        className="rounded-xl border border-emerald-200 bg-white px-4 py-3 hover:bg-emerald-50 transition inline-flex items-center gap-2"
+        aria-label="Call Greens Beauty Salon"
+      >
+        <FiPhone className="text-emerald-600" />
+        <span>+91 8891 467 678</span>
+      </a>
+      <p className="mt-1 text-xs text-gray-500">Tap to call us.</p>
+    </div>
 
-          {/* Email */}
-          <div>
-            <a
-              href="mailto:greensalon@gmail.com"
-              className="rounded-xl border border-emerald-200 bg-white px-4 py-3 hover:bg-emerald-50 transition inline-flex items-center gap-2"
-              aria-label="Email Greens Beauty Salon"
-            >
-              <FiMail className="text-amber-600" />
-              <span>greensalon@gmail.com</span>
-            </a>
-            <p className="mt-1 text-xs text-gray-500">We usually respond within business hours.</p>
-          </div>
+    {/* Email */}
+    <div>
+      <a
+        href="mailto:thegreensbeautysalon@gmail.com"
+        className="rounded-xl border border-emerald-200 bg-white px-4 py-3 hover:bg-emerald-50 transition inline-flex items-center gap-2"
+        aria-label="Email Greens Beauty Salon"
+      >
+        <FiMail className="text-amber-600" />
+        <span>thegreensbeautysalon@gmail.com</span>
+      </a>
+      <p className="mt-1 text-xs text-gray-500">We usually respond within business hours.</p>
+    </div>
 
-          {/* Instagram profile */}
-          <div>
-            <a
-              href="https://instagram.com/greensbeautysalon"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-xl border border-pink-200 bg-gradient-to-r from-pink-50 via-rose-50 to-pink-50 px-4 py-3 hover:from-pink-100 hover:to-pink-100 transition inline-flex items-center gap-2"
-              aria-label="Open our Instagram profile"
-            >
-              <FiInstagram className="text-pink-500" />
-              <span>@greensbeautysalon</span>
-            </a>
-            <p className="mt-1 text-xs text-gray-500">See photos, stories & updates.</p>
-          </div>
+    {/* Instagram */}
+    <div>
+      <a
+        href="https://instagram.com/greensbeautysalon"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="rounded-xl border border-pink-200 bg-gradient-to-r from-pink-50 via-rose-50 to-pink-50 px-4 py-3 hover:from-pink-100 hover:to-pink-100 transition inline-flex items-center gap-2"
+        aria-label="Open our Instagram profile"
+      >
+        <FiInstagram className="text-pink-500" />
+        <span>@greensbeautysalon</span>
+      </a>
+      <p className="mt-1 text-xs text-gray-500">See photos, stories & updates.</p>
+    </div>
 
-          {/* WhatsApp */}
-          <div>
-            <a
-              href="https://wa.me/918891467678?text=Hi%20Greens%20Beauty%20Salon%2C%20I%27d%20like%20directions%20and%20to%20book.%20Map%20link%3A%20https%3A%2F%2Fmaps.app.goo.gl%2Fy5PBWRF4pL1pp9tA7"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-xl border border-emerald-200 bg-white px-4 py-3 hover:bg-emerald-50 transition inline-flex items-center gap-2"
-              aria-label="Chat with us on WhatsApp"
-            >
-              <FaWhatsapp className="text-emerald-600" />
-              <span>WhatsApp us</span>
-            </a>
-            <p className="mt-1 text-xs text-gray-500">Fast replies on WhatsApp.</p>
-          </div>
-        </div>
+    {/* WhatsApp */}
+    <div>
+      <a
+        href="https://wa.me/918891467678?text=Hi%20Greens%20Beauty%20Salon%2C%20I%27d%20like%20directions%20and%20to%20book.%20Map%20link%3A%20https%3A%2F%2Fmaps.app.goo.gl%2Fy5PBWRF4pL1pp9tA7"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="rounded-xl border border-emerald-200 bg-white px-4 py-3 hover:bg-emerald-50 transition inline-flex items-center gap-2"
+        aria-label="Chat with us on WhatsApp"
+      >
+        <FaWhatsapp className="text-emerald-600" />
+        <span>WhatsApp us</span>
+      </a>
+      <p className="mt-1 text-xs text-gray-500">Fast replies on WhatsApp.</p>
+    </div>
 
-        {/* helper notes */}
-        <ul className="mt-4 text-sm text-gray-600 space-y-1">
-          <li>• Landmark: Kunjalumood Junction</li>
-          <li>• Parking available nearby</li>
-          <li>• Tip: On mobile, “Get Directions” opens your Maps app for turn-by-turn navigation.</li>
-        </ul>
-      </div>
+    {/* Facebook */}
+    <div>
+      <a
+        href="https://www.facebook.com/thegreensbeautysalon"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 via-sky-50 to-blue-50 px-4 py-3 hover:from-blue-100 hover:to-blue-100 transition inline-flex items-center gap-2"
+        aria-label="Visit our Facebook page"
+      >
+        <FiFacebookF className="text-blue-600" />
+        <span>Facebook</span>
+      </a>
+      <p className="mt-1 text-xs text-gray-500">Follow us for updates & offers.</p>
+    </div>
+
+    {/* YouTube */}
+    <div>
+      <a
+        href="#"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="rounded-xl border border-red-200 bg-gradient-to-r from-red-50 via-rose-50 to-red-50 px-4 py-3 hover:from-red-100 hover:to-red-100 transition inline-flex items-center gap-2"
+        aria-label="Visit our YouTube channel"
+      >
+        <FiYoutube className="text-red-600" />
+        <span>YouTube</span>
+      </a>
+      <p className="mt-1 text-xs text-gray-500">Watch our latest videos.</p>
+    </div>
+  </div>
+
+  {/* helper notes */}
+  <ul className="mt-4 text-sm text-gray-600 space-y-1">
+    <li>• Landmark: Kunjalumood Junction</li>
+    <li>• Parking available nearby</li>
+    <li>• Tip: On mobile, “Get Directions” opens your Maps app for turn-by-turn navigation.</li>
+  </ul>
+</div>
+
     </div>
   </div>
 </section>
@@ -1045,7 +1073,7 @@ export default function HomePage() {
             <a href="tel:+918891467678" className="hover:text-emerald-400 transition-colors">
               <FiPhone />
             </a>
-            <a href="mailto:greensalon@gmail.com" className="hover:text-emerald-400 transition-colors">
+            <a href="mailto:thegreensbeautysalon@gmail.com" className="hover:text-emerald-400 transition-colors">
               <FiMail />
             </a>
             <a

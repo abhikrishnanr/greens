@@ -33,11 +33,20 @@ export default function Header() {
 
     
       <Link href="#academy" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
-        Academy & Training
+        Beauty Education
       </Link>
       <Link href="#about" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
         About Greens
       </Link>
+
+        <Link href="#" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
+        Jobs @ Greens
+      </Link>
+
+        <Link href="#" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
+        Gallery
+      </Link>
+
       <Link href="#contact" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
         Contact Us
       </Link>
