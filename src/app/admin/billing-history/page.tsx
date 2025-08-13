@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { createRoot } from "react-dom/client"
 import { format } from "date-fns"
 import {
   History,
@@ -18,6 +19,7 @@ import {
   X,
   Hash,
   MapPin,
+  ImageDown,
 } from "lucide-react"
 
 const SALON_INFO = {
@@ -52,6 +54,103 @@ interface Bill {
   totalAfter: number
   createdAt: string
   items: BillItem[]
+}
+
+function BillView({ bill }: { bill: Bill }) {
+  return (
+    <>
+      <img src={SALON_INFO.logo} className="h-12 mx-auto my-4" alt="Salon Logo" />
+      <div className="flex flex-col space-y-1.5 text-center sm:text-left">
+        <h3 className="text-lg font-semibold leading-none tracking-tight">Billing Details</h3>
+      </div>
+      <div className="p-4 space-y-2 text-sm">
+        <div className="flex items-center gap-2">
+          <Hash className="h-4 w-4 text-primary" />
+          <strong>Bill ID:</strong> {bill.id}
+        </div>
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-primary" />
+          <strong>Date:</strong> {format(new Date(bill.createdAt), "yyyy-MM-dd HH:mm")}
+        </div>
+        <div className="flex items-center gap-2">
+          <Phone className="h-4 w-4 text-primary" />
+          <strong>Phones:</strong> {bill.phones.join(", ")}
+        </div>
+        <div className="flex items-center gap-2">
+          <User className="h-4 w-4 text-primary" />
+          <strong>Name:</strong> {bill.billingName || "N/A"}
+        </div>
+        <div className="flex items-center gap-2">
+          <MapPin className="h-4 w-4 text-primary" />
+          <strong>Address:</strong> {bill.billingAddress || "N/A"}
+        </div>
+        <div className="mt-4 mb-2 font-semibold text-foreground">Services:</div>
+        <table className="w-full text-sm mb-2">
+          <thead>
+            <tr>
+              <th className="text-left">Service</th>
+              <th className="text-right">Actual</th>
+              <th className="text-right">Offer</th>
+            </tr>
+          </thead>
+          <tbody>
+            {bill.items.map((it, idx) => (
+              <tr key={idx}>
+                <td>{it.service} - {it.variant}</td>
+                <td className="text-right">
+                  <IndianRupee className="inline-block h-3 w-3 mr-0.5" />
+                  {it.amountBefore.toFixed(2)}
+                </td>
+                <td className="text-right">
+                  <IndianRupee className="inline-block h-3 w-3 mr-0.5" />
+                  {it.amountAfter.toFixed(2)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="mt-4 space-y-1">
+          <div className="flex justify-between items-center">
+            <strong>Amount Before:</strong>{" "}
+            <span className="font-medium text-foreground">
+              <IndianRupee className="inline-block h-3 w-3 mr-0.5" />
+              {bill.totalBefore.toFixed(2)}
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <strong>Voucher:</strong> {bill.voucherCode || "N/A"}
+          </div>
+          <div className="flex justify-between items-center">
+            <strong>Payment:</strong> {bill.paymentMethod}
+          </div>
+          <div className="flex justify-between items-center">
+            <strong>GST (18%):</strong>{" "}
+            <span className="font-medium text-foreground">
+              <IndianRupee className="inline-block h-3 w-3 mr-0.5" />
+              {(bill.totalAfter * 0.18).toFixed(2)}
+            </span>
+          </div>
+          <div className="flex justify-between items-center text-lg font-bold text-primary">
+            <strong>Amount After:</strong>{" "}
+            <span>
+              <IndianRupee className="inline-block h-4 w-4 mr-0.5" />
+              {bill.totalAfter.toFixed(2)}
+            </span>
+          </div>
+          <div className="text-center text-lg font-bold text-green-600 mt-4">
+            You saved Rs {(bill.totalBefore - bill.totalAfter).toFixed(2)} on offer
+          </div>
+        </div>
+        <div className="mt-4 pt-4 border-t border-border text-xs text-center space-y-1">
+          <div>{SALON_INFO.address}</div>
+          <div>
+            {SALON_INFO.phone} | {SALON_INFO.email}
+          </div>
+          <div>{SALON_INFO.website}</div>
+        </div>
+      </div>
+    </>
+  )
 }
 
 export default function BillingHistoryPage() {
@@ -387,6 +486,26 @@ export default function BillingHistoryPage() {
     URL.revokeObjectURL(url)
   }
 
+  const downloadJpeg = async (b: Bill) => {
+    const html2canvas = (await import("html2canvas")).default
+    const container = document.createElement("div")
+    container.className =
+      "relative z-50 w-full max-w-md rounded-lg border bg-white text-black p-6 shadow-lg text-sm"
+    container.style.position = "fixed"
+    container.style.left = "-10000px"
+    document.body.appendChild(container)
+    const root = createRoot(container)
+    root.render(<BillView bill={b} />)
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    const canvas = await html2canvas(container, { backgroundColor: "#ffffff", scale: 2 })
+    const link = document.createElement("a")
+    link.href = canvas.toDataURL("image/jpeg", 1)
+    link.download = `bill-${b.id}.jpeg`
+    link.click()
+    root.unmount()
+    document.body.removeChild(container)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 to-white text-foreground">
       <div className="container mx-auto py-8 px-4">
@@ -537,17 +656,24 @@ export default function BillingHistoryPage() {
                       >
                         <Printer className="h-4 w-4 mr-1" /> Print
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => downloadPdf(b)}
-                        className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-9 px-3"
-                      >
-                        <Download className="h-4 w-4 mr-1" /> PDF
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+                        <button
+                          type="button"
+                          onClick={() => downloadPdf(b)}
+                          className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-9 px-3"
+                        >
+                          <Download className="h-4 w-4 mr-1" /> PDF
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => downloadJpeg(b)}
+                          className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-9 px-3"
+                        >
+                          <ImageDown className="h-4 w-4 mr-1" /> JPEG
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
             </table>
           </div>
         </div>
@@ -562,97 +688,8 @@ export default function BillingHistoryPage() {
               className="relative z-50 w-full max-w-md rounded-lg border bg-white text-black p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg"
               onClick={(e) => e.stopPropagation()}
             >
-              <img src={SALON_INFO.logo} className="h-12 mx-auto my-4" alt="Salon Logo" />
-              <div className="flex flex-col space-y-1.5 text-center sm:text-left">
-                <h3 className="text-lg font-semibold leading-none tracking-tight">Billing Details</h3>
-              </div>
-              <div className="p-4 space-y-2 text-sm">
-                <div className="flex items-center gap-2">
-                  <Hash className="h-4 w-4 text-primary" />
-                  <strong>Bill ID:</strong> {viewBill.id}
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-primary" />
-                  <strong>Date:</strong> {format(new Date(viewBill.createdAt), "yyyy-MM-dd HH:mm")}
-                </div>
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-primary" />
-                  <strong>Phones:</strong> {viewBill.phones.join(", ")}
-                </div>
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-primary" />
-                  <strong>Name:</strong> {viewBill.billingName || "N/A"}
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  <strong>Address:</strong> {viewBill.billingAddress || "N/A"}
-                </div>
-                <div className="mt-4 mb-2 font-semibold text-foreground">Services:</div>
-                <table className="w-full text-sm mb-2">
-                  <thead>
-                    <tr>
-                      <th className="text-left">Service</th>
-                      <th className="text-right">Actual</th>
-                      <th className="text-right">Offer</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {viewBill.items.map((it, idx) => (
-                      <tr key={idx}>
-                        <td>{it.service} - {it.variant}</td>
-                        <td className="text-right">
-                          <IndianRupee className="inline-block h-3 w-3 mr-0.5" />
-                          {it.amountBefore.toFixed(2)}
-                        </td>
-                        <td className="text-right">
-                          <IndianRupee className="inline-block h-3 w-3 mr-0.5" />
-                          {it.amountAfter.toFixed(2)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <div className="mt-4 space-y-1">
-                  <div className="flex justify-between items-center">
-                    <strong>Amount Before:</strong>{" "}
-                    <span className="font-medium text-foreground">
-                      <IndianRupee className="inline-block h-3 w-3 mr-0.5" />
-                      {viewBill.totalBefore.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <strong>Voucher:</strong> {viewBill.voucherCode || "N/A"}
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <strong>Payment:</strong> {viewBill.paymentMethod}
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <strong>GST (18%):</strong>{" "}
-                    <span className="font-medium text-foreground">
-                      <IndianRupee className="inline-block h-3 w-3 mr-0.5" />
-                      {(viewBill.totalAfter * 0.18).toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-lg font-bold text-primary">
-                    <strong>Amount After:</strong>{" "}
-                    <span>
-                      <IndianRupee className="inline-block h-4 w-4 mr-0.5" />
-                      {viewBill.totalAfter.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="text-center text-lg font-bold text-green-600 mt-4">
-                    You saved Rs {(viewBill.totalBefore - viewBill.totalAfter).toFixed(2)} on offer
-                  </div>
-                </div>
-                <div className="mt-4 pt-4 border-t border-border text-xs text-center space-y-1">
-                  <div>{SALON_INFO.address}</div>
-                  <div>
-                    {SALON_INFO.phone} | {SALON_INFO.email}
-                  </div>
-                  <div>{SALON_INFO.website}</div>
-                </div>
-              </div>
-              <div className="flex justify-end p-4">
+                <BillView bill={viewBill} />
+                <div className="flex justify-end p-4">
                 <button
                   type="button"
                   onClick={() => setViewBill(null)}
