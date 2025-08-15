@@ -3,9 +3,10 @@
 
 import { useEffect, useState } from 'react'
 import { Pencil, Trash2, Plus, X } from 'lucide-react'
+import Select, { SingleValue } from 'react-select'
 
 interface ServiceOption {
-  id: string
+  value: string
   label: string
   currentPrice: number
   offerPrice?: number | null
@@ -41,12 +42,14 @@ export default function PremiumServicesAdmin() {
     const planData = await planRes.json()
     const variantData = await variantRes.json()
     setPlans(planData)
-    const opts: ServiceOption[] = variantData.map((v: any) => ({
-      id: v.id,
-      label: `${v.serviceName} - ${v.variantName}`,
-      currentPrice: v.current?.actualPrice ?? 0,
-      offerPrice: v.current?.offerPrice ?? null,
-    }))
+    const opts: ServiceOption[] = variantData
+      .map((v: any) => ({
+        value: v.id,
+        label: `${v.serviceName} - ${v.variantName}`,
+        currentPrice: v.current?.actualPrice ?? 0,
+        offerPrice: v.current?.offerPrice ?? null,
+      }))
+      .sort((a: ServiceOption, b: ServiceOption) => a.label.localeCompare(b.label))
     setOptions(opts)
   }
 
@@ -69,15 +72,15 @@ export default function PremiumServicesAdmin() {
     })
   }
 
-  const updateItem = (idx: number, tierId: string) => {
-    const variant = options.find((o) => o.id === tierId)
+  const updateItem = (idx: number, option: SingleValue<ServiceOption>) => {
+    if (!option) return
     const items = [...form.items]
     items[idx] = {
       id: items[idx].id,
-      serviceTierId: tierId,
-      name: variant?.label || '',
-      currentPrice: variant?.currentPrice || 0,
-      offerPrice: variant?.offerPrice ?? null,
+      serviceTierId: option.value,
+      name: option.label,
+      currentPrice: option.currentPrice,
+      offerPrice: option.offerPrice ?? null,
     }
     setForm({ ...form, items })
   }
@@ -144,19 +147,14 @@ export default function PremiumServicesAdmin() {
           <div className="space-y-2">
             {form.items.map((item, idx) => (
               <div key={item.id} className="flex gap-2 items-center">
-                <select
-                  className="flex-1 p-2 rounded border"
-                  value={item.serviceTierId}
-                  onChange={(e) => updateItem(idx, e.target.value)}
-                  required
-                >
-                  <option value="">Select service</option>
-                  {options.map((o) => (
-                    <option key={o.id} value={o.id}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
+                <Select<ServiceOption>
+                  className="flex-1"
+                  classNamePrefix="rs"
+                  options={options}
+                  value={options.find((o) => o.value === item.serviceTierId) || null}
+                  onChange={(option) => updateItem(idx, option)}
+                  isSearchable
+                />
                 <div className="w-32 text-right">
                   {item.offerPrice && item.offerPrice < item.currentPrice ? (
                     <>
