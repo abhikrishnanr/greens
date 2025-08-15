@@ -66,6 +66,7 @@ export default function SignInClient() {
     await selectRole(role)
   }
 
+
   const selectRole = async (role: 'staff' | 'customer' | 'admin') => {
     await fetch('/api/auth/set-role', {
       method: 'POST',
@@ -129,6 +130,7 @@ export default function SignInClient() {
                       <Shield /> Admin
                     </>
                   )}
+
                 </button>
               )}
               {roles.staff && (
@@ -146,6 +148,7 @@ export default function SignInClient() {
                       <Users /> Staff
                     </>
                   )}
+
                 </button>
               )}
               {roles.customer && (
@@ -163,6 +166,7 @@ export default function SignInClient() {
                       <User /> Customer
                     </>
                   )}
+
                 </button>
               )}
             </div>
