@@ -81,22 +81,11 @@ const staffSections: {
   items: { href: string; label: string; icon: IconType }[]
 }[] = [
   {
-    heading: 'Dashboard',
-    items: [{ href: '/admin/staff', label: 'Dashboard', icon: MdDashboard }],
-  },
-  {
-    heading: 'Appointments & Billing',
+    heading: 'Staff',
     items: [
-      { href: '/admin/enquiries', label: 'Enquiries', icon: MdQuestionAnswer },
-      { href: '/admin/walk-in', label: 'Walk-In Booking', icon: MdEvent },
-      { href: '/admin/billing', label: 'New Billing', icon: MdReceipt },
-      { href: '/admin/billing-history', label: 'Billing History', icon: MdHistory },
-      { href: '/admin/paylater-bills', label: 'Pay Later', icon: MdPayment },
+      { href: '/admin/staff/assignments', label: 'Assignments', icon: MdEvent },
+      { href: '/admin/staff/reports', label: 'Reports', icon: MdHistory },
     ],
-  },
-  {
-    heading: 'Customers',
-    items: [{ href: '/admin/customers', label: 'Customers', icon: MdPeople }],
   },
 ]
 
@@ -132,7 +121,7 @@ export default function AdminClientLayout({ children }: { children: React.ReactN
             >
               <MdMenu className="text-2xl" />
             </button>
-            <Link href={role === 'admin' ? '/admin/dashboard' : '/admin/staff'} className="flex items-center gap-2">
+            <Link href={role === 'admin' ? '/admin/dashboard' : '/admin/staff/assignments'} className="flex items-center gap-2">
               <img src="/logo.png" alt="Greens" className="h-8 w-auto" />
               <span className="font-bold">{role === 'admin' ? 'Admin' : 'Staff'}</span>
             </Link>
