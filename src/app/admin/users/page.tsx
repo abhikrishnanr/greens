@@ -16,21 +16,10 @@ interface User {
   email: string | null
   phone: string | null
   role: string
-  modules: string[] | null
   designation: string | null
   imageUrl: string | null
   removed: boolean
 }
-
-const allModules = [
-  'dashboard',
-  'staff-roles',
-  'staff',
-  'customers',
-  'branches',
-  'services',
-  'billing',
-]
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([])
@@ -43,7 +32,7 @@ export default function UsersPage() {
 
   const updateUser = async (
     id: string,
-    updates: Partial<Pick<User, 'role' | 'modules' | 'removed'>> & {
+    updates: Partial<Pick<User, 'role' | 'removed'>> & {
       password?: string
     },
   ) => {
@@ -103,7 +92,6 @@ export default function UsersPage() {
             <th className="p-3">Mobile</th>
             <th className="p-3">Designation</th>
             <th className="p-3">Role</th>
-            <th className="p-3">Modules</th>
             <th className="p-3 text-center">Active</th>
             <th className="p-3 text-center">Actions</th>
           </tr>
@@ -138,31 +126,6 @@ export default function UsersPage() {
                   <option value="admin">admin</option>
                   <option value="staff">staff</option>
                 </select>
-              </td>
-              <td className="p-3">
-                <div className="flex flex-wrap gap-2">
-                  {allModules.map((m) => {
-                    const active = user.role === 'admin' || user.modules?.includes(m)
-                    const label = m.replace('-', ' ')
-                    return (
-                      <label key={m} className="flex items-center gap-1 text-sm">
-                        <input
-                          type="checkbox"
-                          checked={active}
-                          disabled={user.role === 'admin'}
-                          onChange={() => {
-                            if (user.role === 'admin') return
-                            const modules = active
-                              ? (user.modules ?? []).filter((x) => x !== m)
-                              : [...(user.modules ?? []), m]
-                            updateUser(user.id, { modules })
-                          }}
-                        />
-                        {label}
-                      </label>
-                    )
-                  })}
-                </div>
               </td>
               <td className="p-3 text-center">
                 <button

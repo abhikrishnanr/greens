@@ -71,25 +71,11 @@ export default function SignInClient() {
       router.push('/customer')
       return
     }
-    const sessionRes = await fetch('/api/auth/session', { credentials: 'include' })
-    const session = await sessionRes.json()
-    const user = session?.user as { role?: string; modules?: string[] }
-    const modules = user?.modules ?? []
-    const moduleRoutes: Record<string, string> = {
-      dashboard: '/admin/dashboard',
-      staff: '/admin/staff',
-      customers: '/admin/customers',
-      branches: '/admin/branches',
-      services: '/admin/services',
-      billing: '/admin/billing',
-      'staff-roles': '/admin/users',
+    if (role === 'staff') {
+      router.push('/admin/staff')
+      return
     }
-    let destination = '/admin/dashboard'
-    if (user?.role !== 'admin' && modules.length > 0 && !modules.includes('dashboard')) {
-      const first = modules[0]
-      destination = moduleRoutes[first] || destination
-    }
-    router.push(destination)
+    router.push('/admin/dashboard')
   }
 
   // --- Role chooser (styled) ---
