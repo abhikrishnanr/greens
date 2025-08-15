@@ -72,7 +72,7 @@ export default function SignInClient() {
       return
     }
     if (role === 'staff') {
-      router.push('/admin/staff')
+      router.push('/admin/staff/dashboard')
       return
     }
     router.push('/admin/dashboard')

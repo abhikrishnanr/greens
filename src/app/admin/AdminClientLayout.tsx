@@ -82,7 +82,7 @@ const staffSections: {
 }[] = [
   {
     heading: 'Dashboard',
-    items: [{ href: '/admin/staff', label: 'Dashboard', icon: MdDashboard }],
+    items: [{ href: '/admin/staff/dashboard', label: 'Dashboard', icon: MdDashboard }],
   },
   {
     heading: 'Appointments & Billing',
@@ -132,7 +132,7 @@ export default function AdminClientLayout({ children }: { children: React.ReactN
             >
               <MdMenu className="text-2xl" />
             </button>
-            <Link href={role === 'admin' ? '/admin/dashboard' : '/admin/staff'} className="flex items-center gap-2">
+            <Link href={role === 'admin' ? '/admin/dashboard' : '/admin/staff/dashboard'} className="flex items-center gap-2">
               <img src="/logo.png" alt="Greens" className="h-8 w-auto" />
               <span className="font-bold">{role === 'admin' ? 'Admin' : 'Staff'}</span>
             </Link>
