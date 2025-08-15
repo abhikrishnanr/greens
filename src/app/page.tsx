@@ -269,7 +269,7 @@ export default function HomePage() {
             )}
           </div>
 
-          <div className="relative z-20 text-white max-w-3xl space-y-4">
+          <div className="relative z-20 text-white max-w-3xl space-y-4 pb-14">
             <h1 className="text-2xl md:text-3xl font-bold tracking-wide">
               {currentHeroContent.heroTitle}
             </h1>
