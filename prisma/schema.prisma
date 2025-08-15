@@ -202,6 +202,7 @@ model Booking {
   date      String        @db.VarChar(10)
   start     String        @db.VarChar(5)
   color     String        @db.VarChar(191)
+  status    String        @default("pending") @db.VarChar(191)
   createdAt DateTime      @default(now()) @db.Timestamp(3)
   items     BookingItem[]
 }

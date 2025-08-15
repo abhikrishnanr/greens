@@ -2,6 +2,28 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '@/lib/prisma'
 import { randomUUID } from 'crypto'
 
+interface BillGroup {
+  id: string
+  billingName: string | null
+  billingAddress: string | null
+  voucherCode: string | null
+  paymentMethod: string
+  paidAt: Date | null
+  createdAt: Date
+  items: {
+    phone: string | null
+    category: string
+    service: string
+    variant: string
+    amountBefore: number
+    amountAfter: number
+    scheduledAt: Date
+  }[]
+  phones: Set<string>
+  totalBefore: number
+  totalAfter: number
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
     const date = req.query.date as string | undefined
@@ -18,21 +40,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         },
         orderBy: { createdAt: 'desc' },
       })
-      const bills: Record<string, any> = {}
+        const bills: Record<string, BillGroup> = {}
       for (const it of items) {
-      const b = bills[it.billId] || {
-        id: it.billId,
-        billingName: it.billingName,
-        billingAddress: it.billingAddress,
-        voucherCode: it.voucherCode,
-        paymentMethod: it.paymentMethod,
-        paidAt: it.paidAt,
-        createdAt: it.createdAt,
-        items: [] as any[],
-        phones: new Set<string>(),
-        totalBefore: 0,
-        totalAfter: 0,
-        }
+        const b = bills[it.billId] || {
+          id: it.billId,
+          billingName: it.billingName,
+          billingAddress: it.billingAddress,
+          voucherCode: it.voucherCode,
+          paymentMethod: it.paymentMethod,
+          paidAt: it.paidAt,
+          createdAt: it.createdAt,
+          items: [],
+          phones: new Set<string>(),
+          totalBefore: 0,
+          totalAfter: 0,
+          }
         b.items.push({
           phone: it.phone,
           category: it.category,
@@ -81,6 +103,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }[]
   }
   try {
+    for (const s of data.services) {
+      const dt = new Date(s.scheduledAt)
+      const dateStr = dt.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
+      const timeStr = dt.toLocaleTimeString('en-GB', {
+        timeZone: 'Asia/Kolkata',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      })
+      const booking = await prisma.booking.findFirst({
+        where: { date: dateStr, items: { some: { start: timeStr } } },
+        select: { status: true },
+      })
+      if (booking?.status === 'cancelled') {
+        return res.status(400).json({ error: 'Cannot bill a cancelled booking' })
+      }
+    }
     const billId = randomUUID()
     for (const s of data.services) {
       await prisma.billing.create({
