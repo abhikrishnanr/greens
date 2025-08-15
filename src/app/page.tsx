@@ -1,11 +1,23 @@
 "use client"
 import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
-import { FiPhone,FiFacebookF, FiYoutube, FiArrowLeft, FiCalendar, FiArrowUp, FiMapPin, FiMail, FiInstagram, FiArrowRight, FiSearch, FiX } from "react-icons/fi"
+import {
+  FiPhone,
+  FiYoutube,
+  FiArrowLeft,
+  FiCalendar,
+  FiArrowUp,
+  FiMapPin,
+  FiMail,
+  FiInstagram,
+  FiArrowRight,
+  FiSearch,
+  FiX,
+} from "react-icons/fi"
 import { ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Header from "@/components/Header"
-import { FaWhatsapp } from "react-icons/fa"
+import { FaWhatsapp, FaFacebookF } from "react-icons/fa"
 
 const CACHE_DURATION = 1000 * 60 * 60 // 1 hour
 
@@ -1014,7 +1026,7 @@ export default function HomePage() {
         className="rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 via-sky-50 to-blue-50 px-4 py-3 hover:from-blue-100 hover:to-blue-100 transition inline-flex items-center gap-2"
         aria-label="Visit our Facebook page"
       >
-        <FiFacebookF className="text-blue-600" />
+        <FaFacebookF className="text-blue-600" />
         <span>Facebook</span>
       </a>
       <p className="mt-1 text-xs text-gray-500">Follow us for updates & offers.</p>
