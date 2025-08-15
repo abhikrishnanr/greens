@@ -17,7 +17,7 @@ model User {
   email       String?   @unique @db.VarChar(191)
   role        String    @default("customer") @db.VarChar(191)
   password    String?   @db.VarChar(191)
-  modules     Json?    @default("[]")
+  modules     Json?     @default("[]")
   branchId    String?   @db.VarChar(191)
   branch      Branch?   @relation(fields: [branchId], references: [id])
   phone       String?   @unique @db.VarChar(191)
@@ -146,6 +146,7 @@ model ServiceTier {
   duration     Int?
   priceHistory ServiceTierPriceHistory[]
   heroTabs     HeroTabVariant[]
+  premiumItems PremiumServiceItem[]
 }
 
 model ServiceTierPriceHistory {
@@ -172,22 +173,21 @@ model FeaturedService {
 }
 
 model PremiumService {
-  id        String   @id @default(uuid())
+  id        String               @id @default(uuid())
   title     String
   imageUrl  String?
-  order     Int      @default(0)
+  order     Int                  @default(0)
   items     PremiumServiceItem[]
-  createdAt DateTime @default(now()) @db.Timestamp(3)
-  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(3)
+  createdAt DateTime             @default(now()) @db.Timestamp(3)
+  updatedAt DateTime             @default(now()) @updatedAt @db.Timestamp(3)
 }
 
 model PremiumServiceItem {
   id               String         @id @default(uuid())
   premiumService   PremiumService @relation(fields: [premiumServiceId], references: [id], onDelete: Cascade)
   premiumServiceId String
-  name             String
-  currentPrice     Float
-  offerPrice       Float?
+  serviceTier      ServiceTier    @relation(fields: [serviceTierId], references: [id])
+  serviceTierId    String
   order            Int            @default(0)
 }
 
@@ -263,22 +263,22 @@ model HeroTabVariant {
 }
 
 model Enquiry {
-  id         String   @id @default(uuid()) @db.VarChar(191)
-  customerId String?  @db.VarChar(191)
-  customer   User?    @relation(fields: [customerId], references: [id])
-  name       String?  @db.VarChar(191)
-  phone      String?  @db.VarChar(191)
-  gender     String?  @db.VarChar(191)
-  enquiry    String?  @db.LongText
-  variantIds String?  @db.Text
-  status     String   @default("new") @db.VarChar(191)
-  remark     String?  @db.Text
-  source     String   @default("admin") @db.VarChar(191)
+  id            String    @id @default(uuid()) @db.VarChar(191)
+  customerId    String?   @db.VarChar(191)
+  customer      User?     @relation(fields: [customerId], references: [id])
+  name          String?   @db.VarChar(191)
+  phone         String?   @db.VarChar(191)
+  gender        String?   @db.VarChar(191)
+  enquiry       String?   @db.LongText
+  variantIds    String?   @db.Text
+  status        String    @default("new") @db.VarChar(191)
+  remark        String?   @db.Text
+  source        String    @default("admin") @db.VarChar(191)
   preferredDate DateTime? @db.Date
-  preferredTime String?  @db.VarChar(191)
+  preferredTime String?   @db.VarChar(191)
 
-  createdAt  DateTime @default(now()) @db.Timestamp(3)
-  updatedAt  DateTime @default(now()) @updatedAt @db.Timestamp(3)
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(3)
 }
 
 model Offer {
