@@ -1,13 +1,22 @@
 'use client'
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useEffect, useState } from 'react'
 import { Pencil, Trash2, Plus, X } from 'lucide-react'
 
+interface ServiceOption {
+  id: string
+  label: string
+  currentPrice: number
+  offerPrice?: number | null
+}
+
 interface PlanItem {
   id: string
+  serviceTierId: string
   name: string
   currentPrice: number
-  offerPrice?: number
+  offerPrice?: number | null
 }
 
 interface Plan {
@@ -22,11 +31,23 @@ export default function PremiumServicesAdmin() {
   const [plans, setPlans] = useState<Plan[]>([])
   const [form, setForm] = useState<Plan>(emptyPlan)
   const [editing, setEditing] = useState(false)
+  const [options, setOptions] = useState<ServiceOption[]>([])
 
   const load = async () => {
-    const res = await fetch('/api/admin/premium-services')
-    const data = await res.json()
-    setPlans(data)
+    const [planRes, variantRes] = await Promise.all([
+      fetch('/api/admin/premium-services'),
+      fetch('/api/admin/service-variants/all'),
+    ])
+    const planData = await planRes.json()
+    const variantData = await variantRes.json()
+    setPlans(planData)
+    const opts: ServiceOption[] = variantData.map((v: any) => ({
+      id: v.id,
+      label: `${v.serviceName} - ${v.variantName}`,
+      currentPrice: v.current?.actualPrice ?? 0,
+      offerPrice: v.current?.offerPrice ?? null,
+    }))
+    setOptions(opts)
   }
 
   useEffect(() => { load() }, [])
@@ -42,12 +63,22 @@ export default function PremiumServicesAdmin() {
   }
 
   const addItem = () => {
-    setForm({ ...form, items: [...form.items, { id: crypto.randomUUID(), name: '', currentPrice: 0, offerPrice: 0 }] })
+    setForm({
+      ...form,
+      items: [...form.items, { id: crypto.randomUUID(), serviceTierId: '', name: '', currentPrice: 0, offerPrice: null }],
+    })
   }
 
-  const updateItem = (idx: number, field: keyof PlanItem, value: string | number) => {
+  const updateItem = (idx: number, tierId: string) => {
+    const variant = options.find((o) => o.id === tierId)
     const items = [...form.items]
-    items[idx] = { ...items[idx], [field]: value }
+    items[idx] = {
+      id: items[idx].id,
+      serviceTierId: tierId,
+      name: variant?.label || '',
+      currentPrice: variant?.currentPrice || 0,
+      offerPrice: variant?.offerPrice ?? null,
+    }
     setForm({ ...form, items })
   }
 
@@ -63,7 +94,12 @@ export default function PremiumServicesAdmin() {
     await fetch('/api/admin/premium-services', {
       method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify({
+        id: form.id,
+        title: form.title,
+        imageUrl: form.imageUrl,
+        items: form.items.map((i) => ({ serviceTierId: i.serviceTierId })),
+      }),
     })
     setForm(emptyPlan)
     setEditing(false)
@@ -107,29 +143,30 @@ export default function PremiumServicesAdmin() {
           <label className="block font-medium mb-2">Services</label>
           <div className="space-y-2">
             {form.items.map((item, idx) => (
-              <div key={item.id} className="flex gap-2 items-end">
-                <input
+              <div key={item.id} className="flex gap-2 items-center">
+                <select
                   className="flex-1 p-2 rounded border"
-                  placeholder="Service name"
-                  value={item.name}
-                  onChange={(e) => updateItem(idx, 'name', e.target.value)}
+                  value={item.serviceTierId}
+                  onChange={(e) => updateItem(idx, e.target.value)}
                   required
-                />
-                <input
-                  type="number"
-                  className="w-24 p-2 rounded border"
-                  placeholder="Current"
-                  value={item.currentPrice}
-                  onChange={(e) => updateItem(idx, 'currentPrice', parseFloat(e.target.value))}
-                  required
-                />
-                <input
-                  type="number"
-                  className="w-24 p-2 rounded border"
-                  placeholder="Offer"
-                  value={item.offerPrice ?? ''}
-                  onChange={(e) => updateItem(idx, 'offerPrice', parseFloat(e.target.value))}
-                />
+                >
+                  <option value="">Select service</option>
+                  {options.map((o) => (
+                    <option key={o.id} value={o.id}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+                <div className="w-32 text-right">
+                  {item.offerPrice && item.offerPrice < item.currentPrice ? (
+                    <>
+                      <span className="line-through mr-1">₹{item.currentPrice}</span>
+                      <span>₹{item.offerPrice}</span>
+                    </>
+                  ) : (
+                    <span>₹{item.currentPrice}</span>
+                  )}
+                </div>
                 <button type="button" onClick={() => removeItem(idx)} className="p-2 text-red-600">
                   <X className="h-4 w-4" />
                 </button>
