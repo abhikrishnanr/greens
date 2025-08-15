@@ -3,14 +3,14 @@
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { Phone, Lock, Users, User, CheckCircle2, Sparkles, Loader2 } from 'lucide-react'
+import { Phone, Lock, Users, User, CheckCircle2, Sparkles, Loader2, Shield } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 export default function SignInClient() {
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [roles, setRoles] = useState<{ staff: boolean; customer: boolean } | null>(null)
+  const [roles, setRoles] = useState<{ admin: boolean; staff: boolean; customer: boolean } | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
@@ -40,9 +40,12 @@ export default function SignInClient() {
     try {
       const rolesRes = await fetch('/api/auth/role-options', { credentials: 'include' })
       const data = await rolesRes.json()
-      if (data.staff && data.customer) {
+      const count = (data.admin ? 1 : 0) + (data.staff ? 1 : 0) + (data.customer ? 1 : 0)
+      if (count > 1) {
         setRoles(data)
         setLoading(false)
+      } else if (data.admin) {
+        await selectRole('admin')
       } else if (data.staff) {
         await selectRole('staff')
       } else if (data.customer) {
@@ -57,7 +60,7 @@ export default function SignInClient() {
     }
   }
 
-  const selectRole = async (role: 'staff' | 'customer') => {
+  const selectRole = async (role: 'staff' | 'customer' | 'admin') => {
     await fetch('/api/auth/set-role', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -90,7 +93,7 @@ export default function SignInClient() {
   }
 
   // --- Role chooser (styled) ---
-  if (roles && roles.staff && roles.customer) {
+  if (roles) {
     return (
       <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-emerald-900 via-emerald-950 to-emerald-900 text-emerald-50">
         <div aria-hidden className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-emerald-400/20 blur-3xl" />
@@ -105,18 +108,30 @@ export default function SignInClient() {
             <h1 className="text-3xl md:text-4xl font-extrabold text-emerald-100">Choose Role</h1>
             <p className="text-emerald-200/85">Select how you want to continue</p>
             <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center mt-2">
-              <button
-                onClick={() => selectRole('staff')}
-                className="flex-1 inline-flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-emerald-600 text-white font-semibold shadow hover:bg-emerald-700 transition-colors"
-              >
-                <Users /> Staff
-              </button>
-              <button
-                onClick={() => selectRole('customer')}
-                className="flex-1 inline-flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-emerald-50 text-emerald-900 font-semibold shadow hover:bg-emerald-100 transition-colors"
-              >
-                <User /> Customer
-              </button>
+              {roles.admin && (
+                <button
+                  onClick={() => selectRole('admin')}
+                  className="flex-1 inline-flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-emerald-600 text-white font-semibold shadow hover:bg-emerald-700 transition-colors"
+                >
+                  <Shield /> Admin
+                </button>
+              )}
+              {roles.staff && (
+                <button
+                  onClick={() => selectRole('staff')}
+                  className="flex-1 inline-flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-emerald-600 text-white font-semibold shadow hover:bg-emerald-700 transition-colors"
+                >
+                  <Users /> Staff
+                </button>
+              )}
+              {roles.customer && (
+                <button
+                  onClick={() => selectRole('customer')}
+                  className="flex-1 inline-flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-emerald-50 text-emerald-900 font-semibold shadow hover:bg-emerald-100 transition-colors"
+                >
+                  <User /> Customer
+                </button>
+              )}
             </div>
           </motion.div>
         </div>
