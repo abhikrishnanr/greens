@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import React, { useState } from 'react'
-import { signOut } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { LoadingProvider } from '@/contexts/LoadingContext'
 import Loader from '@/components/Loader'
 
@@ -27,7 +27,7 @@ import {
 } from 'react-icons/md'
 import type { IconType } from 'react-icons'
 
-const sections: {
+const adminSections: {
   heading: string
   items: { href: string; label: string; icon: IconType }[]
 }[] = [
@@ -38,7 +38,7 @@ const sections: {
   {
     heading: 'Appointments & Billing',
     items: [
-         { href: '/admin/enquiries', label: 'Enquiries', icon: MdQuestionAnswer },
+      { href: '/admin/enquiries', label: 'Enquiries', icon: MdQuestionAnswer },
       { href: '/admin/walk-in', label: 'Walk-In Booking', icon: MdEvent },
       { href: '/admin/billing', label: 'New Billing', icon: MdReceipt },
       { href: '/admin/billing-history', label: 'Billing History', icon: MdHistory },
@@ -50,7 +50,6 @@ const sections: {
     items: [
       { href: '/admin/staff', label: 'Staff', icon: MdPeople },
       { href: '/admin/customers', label: 'Customers', icon: MdPeople },
-
     ],
   },
   {
@@ -77,10 +76,37 @@ const sections: {
   },
 ]
 
+const staffSections: {
+  heading: string
+  items: { href: string; label: string; icon: IconType }[]
+}[] = [
+  {
+    heading: 'Dashboard',
+    items: [{ href: '/admin/staff', label: 'Dashboard', icon: MdDashboard }],
+  },
+  {
+    heading: 'Appointments & Billing',
+    items: [
+      { href: '/admin/enquiries', label: 'Enquiries', icon: MdQuestionAnswer },
+      { href: '/admin/walk-in', label: 'Walk-In Booking', icon: MdEvent },
+      { href: '/admin/billing', label: 'New Billing', icon: MdReceipt },
+      { href: '/admin/billing-history', label: 'Billing History', icon: MdHistory },
+      { href: '/admin/paylater-bills', label: 'Pay Later', icon: MdPayment },
+    ],
+  },
+  {
+    heading: 'Customers',
+    items: [{ href: '/admin/customers', label: 'Customers', icon: MdPeople }],
+  },
+]
+
 export default function AdminClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const [open, setOpen] = useState(false)
+  const { data: session } = useSession()
+  const role = session?.user?.role
+  const sections = role === 'admin' ? adminSections : staffSections
 
   const handleLogout = async () => {
     await fetch('/api/auth/set-role', {
@@ -106,9 +132,9 @@ export default function AdminClientLayout({ children }: { children: React.ReactN
             >
               <MdMenu className="text-2xl" />
             </button>
-            <Link href="/admin/dashboard" className="flex items-center gap-2">
+            <Link href={role === 'admin' ? '/admin/dashboard' : '/admin/staff'} className="flex items-center gap-2">
               <img src="/logo.png" alt="Greens" className="h-8 w-auto" />
-              <span className="font-bold">Admin</span>
+              <span className="font-bold">{role === 'admin' ? 'Admin' : 'Staff'}</span>
             </Link>
           </div>
           <button
