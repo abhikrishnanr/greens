@@ -57,6 +57,19 @@ export default function HomePage() {
     children: [],
   })
   const [offers, setOffers] = useState<any[]>([])
+  interface PremiumServiceItem {
+    id: string
+    name: string
+    currentPrice: number
+    offerPrice?: number | null
+  }
+  interface PremiumServicePlan {
+    id: string
+    title: string
+    imageUrl?: string | null
+    items: PremiumServiceItem[]
+  }
+  const [premiumPlans, setPremiumPlans] = useState<PremiumServicePlan[]>([])
 
   // Search functionality
   const [searchQuery, setSearchQuery] = useState("")
@@ -87,6 +100,21 @@ export default function HomePage() {
     fetch('/api/limited-time-offers')
       .then((res) => res.json())
       .then((data) => setOffers(Array.isArray(data) ? data : []))
+  }, [])
+
+  useEffect(() => {
+    const cached = getCache('premium-services')
+    if (cached) {
+      setPremiumPlans(Array.isArray(cached) ? cached : [])
+      return
+    }
+    fetch('/api/premium-services')
+      .then((res) => res.json())
+      .then((data: unknown) => {
+        const plans = Array.isArray(data) ? (data as PremiumServicePlan[]) : []
+        setPremiumPlans(plans)
+        setCache('premium-services', plans)
+      })
   }, [])
 
   useEffect(() => {
@@ -353,6 +381,45 @@ export default function HomePage() {
         ))
       )}
     </div>
+  </div>
+</section>
+<section id="premium-services" className="bg-white py-12 sm:py-16">
+  <div className="container mx-auto px-6">
+    <div className="text-center mb-8">
+      <h2 className="mt-3 text-2xl md:text-3xl font-bold text-amber-600">Our Premium Services</h2>
+      <div className="mx-auto mt-3 h-1 w-24 rounded-full bg-gradient-to-r from-amber-400 via-emerald-500 to-amber-400" />
+    </div>
+    {premiumPlans.length === 0 ? (
+      <p className="text-center text-gray-500">No premium services available</p>
+    ) : (
+      <div className="grid md:grid-cols-2 gap-8">
+        {premiumPlans.map((plan: PremiumServicePlan) => (
+          <div key={plan.id} className="border-2 border-amber-400 rounded-lg p-4 text-amber-700">
+            {plan.imageUrl && (
+              <img src={plan.imageUrl} alt={plan.title} className="w-full h-40 object-cover rounded mb-4" />
+            )}
+            <h3 className="text-xl font-bold mb-4 text-center">{plan.title}</h3>
+            <ul className="divide-y divide-amber-400 divide-dashed">
+              {plan.items.map((item: PremiumServiceItem) => (
+                <li key={item.id} className="py-2 flex justify-between">
+                  <span>{item.name}</span>
+                  <span className="font-semibold">
+                    {item.offerPrice && item.offerPrice < item.currentPrice ? (
+                      <>
+                        <span className="line-through mr-2">₹{item.currentPrice}</span>
+                        <span>₹{item.offerPrice}</span>
+                      </>
+                    ) : (
+                      <span>₹{item.currentPrice}</span>
+                    )}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    )}
   </div>
 </section>
 
