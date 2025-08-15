@@ -6,7 +6,9 @@ import AdminClientLayout from './AdminClientLayout'
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions)
-  if (!session || session.user?.role !== 'admin') {
+  const role = session?.user?.role
+  const allowed = ['admin', 'staff', 'customer_staff']
+  if (!session || !role || !allowed.includes(role)) {
     redirect('/login')
   }
   return <AdminClientLayout>{children}</AdminClientLayout>
