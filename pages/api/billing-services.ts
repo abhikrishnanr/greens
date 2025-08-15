@@ -10,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!date) return res.status(400).json({ error: 'Missing date' })
   try {
     const bookings = await prisma.booking.findMany({
-      where: { date },
+      where: { date, status: { not: 'cancelled' } },
       include: { items: true },
       orderBy: { start: 'asc' },
     })
