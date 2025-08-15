@@ -6,7 +6,7 @@ import StaffManagement from './StaffManagement'
 export default async function StaffPage() {
   const session = await getServerSession(authOptions)
   if (session?.user?.role !== 'admin') {
-    redirect('/admin/staff/dashboard')
+    redirect('/admin/staff/assignments')
   }
   return <StaffManagement />
 }
