@@ -106,7 +106,6 @@ export default function HomePage() {
     const cached = getCache('premium-services')
     if (cached) {
       setPremiumPlans(Array.isArray(cached) ? cached : [])
-      return
     }
     fetch('/api/premium-services')
       .then((res) => res.json())
