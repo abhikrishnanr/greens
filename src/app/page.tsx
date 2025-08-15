@@ -1,11 +1,23 @@
 "use client"
 import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
-import { FiPhone,FiFacebookF, FiYoutube, FiArrowLeft, FiCalendar, FiArrowUp, FiMapPin, FiMail, FiInstagram, FiArrowRight, FiSearch, FiX } from "react-icons/fi"
+import {
+  FiPhone,
+  FiYoutube,
+  FiArrowLeft,
+  FiCalendar,
+  FiArrowUp,
+  FiMapPin,
+  FiMail,
+  FiInstagram,
+  FiArrowRight,
+  FiSearch,
+  FiX,
+} from "react-icons/fi"
 import { ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Header from "@/components/Header"
-import { FaWhatsapp } from "react-icons/fa"
+import { FaWhatsapp, FaFacebookF } from "react-icons/fa"
 
 const CACHE_DURATION = 1000 * 60 * 60 // 1 hour
 
@@ -161,12 +173,12 @@ export default function HomePage() {
     <main className="bg-white min-h-screen font-sans text-gray-800 pb-12 md:pb-0">
       <Header />
 
-     {/* HERO SECTION */}
-<section className="relative flex flex-col overflow-hidden min-h-[80vh] md:min-h-[80vh] bg-emerald-950">
-  {heroLoading ? (
-  <>
-    {/* Media placeholder with emerald gradient, content anchored to bottom */}
-    <div className="relative flex-1 min-h-[70vh]">
+      {/* HERO SECTION */}
+      <section className="relative flex flex-col overflow-hidden min-h-screen bg-emerald-950">
+        {heroLoading ? (
+          <>
+            {/* Media placeholder with emerald gradient, content anchored to bottom */}
+            <div className="relative flex-1 min-h-screen">
       {/* on-brand gradient + soft pattern */}
       <div className="absolute inset-0 bg-gradient-to-b from-emerald-900 via-emerald-800 to-emerald-900" />
       <div className="absolute inset-0 opacity-30 bg-[radial-gradient(1200px_600px_at_10%_-10%,rgba(16,185,129,.15),transparent_60%),radial-gradient(900px_500px_at_90%_110%,rgba(251,191,36,.12),transparent_60%)]" />
@@ -184,20 +196,20 @@ export default function HomePage() {
       </div>
     </div>
 
-    {/* Tabs skeleton — matches white tabs bar */}
-    <div className="relative w-full bg-white shadow-sm">
-      <div className="flex gap-2 md:justify-center overflow-x-auto py-2 px-4 fancy-scroll scroll-px-4">
-        {Array.from({ length: 7 }).map((_, i) => (
-          <div
-            key={i}
-            className="h-10 min-w-[100px] rounded-b-lg border border-emerald-200 bg-emerald-50 skel-tab"
-          />
-        ))}
-      </div>
-    </div>
-  </>
-) : (
-    <>
+            {/* Tabs skeleton – overlay at bottom */}
+            <div className="absolute bottom-0 left-0 w-full bg-emerald-900/60">
+              <div className="flex gap-2 md:justify-center overflow-x-auto py-2 px-4 fancy-scroll scroll-px-4">
+                {Array.from({ length: 7 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-10 min-w-[100px] rounded skel-tab bg-emerald-700/40"
+                  />
+                ))}
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
       {/* Hero media (no overlay) */}
       <AnimatePresence mode="wait">
         <motion.div
@@ -249,50 +261,34 @@ export default function HomePage() {
         </motion.div>
       </AnimatePresence>
 
-      {/* TABS BAR (white, with swipe hint & fancy scrollbar) */}
-      <div className="relative w-full bg-white shadow-sm">
-        {/* edge fades on mobile */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-white to-transparent md:hidden" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white to-transparent md:hidden" />
-
-        <div className="flex gap-0 justify-start md:justify-center overflow-x-auto py-2 px-4 fancy-scroll scroll-px-4">
-          {heroTabs
-            .filter((cat) => cat.id !== "home")
-            .map((cat, idx) => (
-              <motion.button
-                key={cat.id}
-                onClick={() => setSelectedHeroCategory(cat.id)}
-                className={`flex flex-col items-center justify-center p-3 min-w-[100px] text-center transition-colors duration-200
-                  ${
-                    selectedHeroCategory === cat.id
-                      ? "bg-white text-emerald-700 border-b-2 border-emerald-600 rounded-b-lg"
-                      : "bg-transparent text-gray-600 hover:bg-emerald-50"
-                  }
-                  ${idx === 0 ? "rounded-bl-lg" : ""} ${idx === heroTabs.length - 2 ? "rounded-br-lg" : ""}`}
-                aria-pressed={selectedHeroCategory === cat.id}
-                whileHover={{ scale: 1.05, y: -5 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <img
-                  src={cat.iconUrl || "/placeholder.svg"}
-                  alt={cat.name}
-                  width={32}
-                  height={32}
-                  className="w-8 h-8 mb-1"
-                />
-                <span className="text-xs font-medium whitespace-nowrap">{cat.name}</span>
-              </motion.button>
-            ))}
-        </div>
-
-        {/* swipe hint */}
-        <div className="md:hidden absolute bottom-2 left-1/2 -translate-x-1/2 text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full text-xs shadow swipe-hint">
-          Swipe →
-        </div>
-      </div>
-    </>
-  )}
-</section>
+            {/* TABS BAR – overlaid at bottom without white background */}
+            <div className="absolute bottom-0 left-0 w-full bg-emerald-900/70 backdrop-blur-sm">
+              <div className="flex gap-0 justify-start md:justify-center overflow-x-auto py-2 px-4 fancy-scroll scroll-px-4">
+                {heroTabs
+                  .filter((cat) => cat.id !== "home")
+                  .map((cat) => (
+                    <motion.button
+                      key={cat.id}
+                      onClick={() => setSelectedHeroCategory(cat.id)}
+                      className={`px-4 py-2 min-w-[100px] text-center text-sm font-medium transition-colors duration-200
+                        ${
+                          selectedHeroCategory === cat.id
+                            ? "text-emerald-200 border-b-2 border-emerald-400"
+                            : "text-white/80 hover:text-white hover:bg-emerald-800/50"
+                        }
+                      `}
+                      aria-pressed={selectedHeroCategory === cat.id}
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <span className="whitespace-nowrap">{cat.name}</span>
+                    </motion.button>
+                  ))}
+              </div>
+            </div>
+          </>
+        )}
+      </section>
 
 
 
@@ -1030,7 +1026,7 @@ export default function HomePage() {
         className="rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 via-sky-50 to-blue-50 px-4 py-3 hover:from-blue-100 hover:to-blue-100 transition inline-flex items-center gap-2"
         aria-label="Visit our Facebook page"
       >
-        <FiFacebookF className="text-blue-600" />
+        <FaFacebookF className="text-blue-600" />
         <span>Facebook</span>
       </a>
       <p className="mt-1 text-xs text-gray-500">Follow us for updates & offers.</p>
