@@ -165,6 +165,62 @@ export default function HomePage() {
     }
   }, [loading])
 
+
+  useEffect(() => {
+  const setStickyVar = () => {
+    // Your mobile sticky bar has the id below (we'll add it in step 3)
+    const el = document.getElementById("mobile-sticky");
+    const isVisible = el ? getComputedStyle(el).display !== "none" : false;
+    const h = isVisible ? el!.offsetHeight : 0; // includes the safe-area shim you added
+    document.documentElement.style.setProperty("--sticky-nav-h", `${h}px`);
+  };
+
+  setStickyVar();
+  window.addEventListener("resize", setStickyVar);
+  window.addEventListener("orientationchange", setStickyVar);
+
+  return () => {
+    window.removeEventListener("resize", setStickyVar);
+    window.removeEventListener("orientationchange", setStickyVar);
+  };
+}, []);
+
+
+// put these near the top of the component
+const heroTabsRef = useRef<HTMLDivElement | null>(null);
+
+useEffect(() => {
+  const setVars = () => {
+    // sticky (mobile CTA bar)
+    const sticky = document.getElementById("mobile-sticky");
+    const isStickyVisible = sticky ? getComputedStyle(sticky).display !== "none" : false;
+    const stickyH = isStickyVisible ? sticky!.offsetHeight : 0;
+    document.documentElement.style.setProperty("--sticky-nav-h", `${stickyH}px`);
+
+    // hero tabs height (visible on all viewports, but we only offset on mobile)
+    const tabsH = heroTabsRef.current ? heroTabsRef.current.offsetHeight : 0;
+    document.documentElement.style.setProperty("--hero-tabs-h", `${tabsH}px`);
+  };
+
+  setVars();
+  const ro = new ResizeObserver(setVars);
+  if (heroTabsRef.current) ro.observe(heroTabsRef.current);
+  // observe sticky too; safe if null
+  const sticky = document.getElementById("mobile-sticky");
+  if (sticky) ro.observe(sticky);
+
+  window.addEventListener("resize", setVars);
+  window.addEventListener("orientationchange", setVars);
+
+  return () => {
+    ro.disconnect();
+    window.removeEventListener("resize", setVars);
+    window.removeEventListener("orientationchange", setVars);
+  };
+}, []);
+
+
+
   const filteredCategories = useMemo(() => {
     if (!searchQuery.trim()) return categories
     return categories
@@ -211,9 +267,9 @@ export default function HomePage() {
       <div className="absolute inset-0 opacity-30 bg-[radial-gradient(1200px_600px_at_10%_-10%,rgba(16,185,129,.15),transparent_60%),radial-gradient(900px_500px_at_90%_110%,rgba(251,191,36,.12),transparent_60%)]" />
 
       {/* bottom-aligned skeleton */}
-      <div className="absolute inset-0 flex flex-col">
+      <div className="absolute inset-0 flex flex-col" style={{paddingBottom: "calc(var(--hero-tabs-h, 56px) + var(--sticky-nav-h, 0px) + 12px)",}}>
         <div className="flex-1" />
-        <div className="w-full px-6 pb-8">
+        <div className="w-full px-6">
           <div className="mx-auto max-w-3xl text-center space-y-3">
             <div className="h-7 md:h-9 w-3/4 mx-auto rounded skel-emerald" />
             <div className="h-4 md:h-5 w-5/6 mx-auto rounded skel-emerald" />
@@ -224,7 +280,7 @@ export default function HomePage() {
     </div>
 
             {/* Tabs skeleton – overlay at bottom */}
-            <div className="absolute bottom-0 left-0 w-full bg-emerald-900/60">
+            <div ref={heroTabsRef} className="absolute left-0 w-full bg-emerald-900/60" style={{ bottom: "var(--sticky-nav-h, 0px)" }}>
               <div className="flex gap-2 md:justify-center overflow-x-auto py-2 px-4 fancy-scroll scroll-px-4">
                 {Array.from({ length: 7 }).map((_, i) => (
                   <div
@@ -268,7 +324,7 @@ export default function HomePage() {
             )}
           </div>
 
-          <div className="relative z-20 text-white max-w-3xl space-y-4 pb-14">
+          <div className="relative z-20 text-white max-w-3xl space-y-4" style={{paddingBottom: "calc(var(--hero-tabs-h, 56px) + var(--sticky-nav-h, 0px) + 12px)",}}>
             <h1 className="text-2xl md:text-3xl font-bold tracking-wide">
               {currentHeroContent.heroTitle}
             </h1>
@@ -289,7 +345,7 @@ export default function HomePage() {
       </AnimatePresence>
 
             {/* TABS BAR – overlaid at bottom without white background */}
-            <div className="absolute bottom-0 left-0 w-full bg-emerald-900/70 backdrop-blur-sm">
+            <div ref={heroTabsRef} className="absolute left-0 w-full bg-emerald-900/70 backdrop-blur-sm" style={{ bottom: "var(--sticky-nav-h, 0px)" }}>
               <div className="flex gap-0 justify-start md:justify-center overflow-x-auto py-2 px-4 fancy-scroll scroll-px-4">
                 {heroTabs
                   .filter((cat) => cat.id !== "home")
@@ -382,30 +438,54 @@ export default function HomePage() {
     </div>
   </div>
 </section>
-<section id="premium-services" className="bg-white py-12 sm:py-16">
+<section
+  id="premium-services"
+  className="py-12 sm:py-16"
+  style={{
+    background: "linear-gradient(180deg, #3b2b19 0%, #5a4528 30%, #2e1e0e 100%)",
+  }}
+>
   <div className="container mx-auto px-6">
     <div className="text-center mb-8">
-      <h2 className="mt-3 text-2xl md:text-3xl font-bold text-amber-600">Our Premium Services</h2>
-      <div className="mx-auto mt-3 h-1 w-24 rounded-full bg-gradient-to-r from-amber-400 via-emerald-500 to-amber-400" />
+      <h2 className="mt-3 text-2xl md:text-3xl font-bold text-[#FFD86B]">
+        Our Premium Services
+      </h2>
+      <div className="mx-auto mt-3 h-1 w-24 rounded-full bg-gradient-to-r from-[#FFD86B] via-[#FFC94A] to-[#FFD86B]" />
     </div>
     {premiumPlans.length === 0 ? (
-      <p className="text-center text-gray-500">No premium services available</p>
+      <p className="text-center text-[#FFEAA7]">
+        No premium services available
+      </p>
     ) : (
       <div className="grid md:grid-cols-2 gap-8">
         {premiumPlans.map((plan: PremiumServicePlan) => (
-          <div key={plan.id} className="border-2 border-amber-400 rounded-lg p-4 text-amber-700">
+          <div
+            key={plan.id}
+            className="border-2 border-[#FFD86B] rounded-lg p-4 text-[#FFDF80] bg-black/20 shadow-lg"
+          >
             {plan.imageUrl && (
-              <img src={plan.imageUrl} alt={plan.title} className="w-full h-40 object-cover rounded mb-4" />
+              <img
+                src={plan.imageUrl}
+                alt={plan.title}
+                className="w-full h-40 object-cover rounded mb-4"
+              />
             )}
-            <h3 className="text-xl font-bold mb-4 text-center">{plan.title}</h3>
-            <ul className="divide-y divide-amber-400 divide-dashed">
+            <h3 className="text-xl font-bold mb-4 text-center text-[#FFD86B]">
+              {plan.title}
+            </h3>
+            <ul className="divide-y divide-[#FFD86B] divide-dashed">
               {plan.items.map((item: PremiumServiceItem) => (
-                <li key={item.id} className="py-2 flex justify-between">
+                <li
+                  key={item.id}
+                  className="py-2 flex justify-between text-[#FFEAA7]"
+                >
                   <span>{item.name}</span>
-                  <span className="font-semibold">
+                  <span className="font-semibold text-[#FFD86B]">
                     {item.offerPrice && item.offerPrice < item.currentPrice ? (
                       <>
-                        <span className="line-through mr-2">₹{item.currentPrice}</span>
+                        <span className="line-through mr-2 opacity-80">
+                          ₹{item.currentPrice}
+                        </span>
                         <span>₹{item.offerPrice}</span>
                       </>
                     ) : (
@@ -421,6 +501,7 @@ export default function HomePage() {
     )}
   </div>
 </section>
+
 
 
 
@@ -1154,7 +1235,7 @@ export default function HomePage() {
           <p className="text-xs mt-2">TC 45/215, Kunjalumood Junction, Karamana PO, Trivandrum</p>
         </div>
       </footer>
-  <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-emerald-600 text-white border-t border-emerald-500 shadow-[0_-8px_24px_-12px_rgba(0,0,0,0.35)]">
+  <nav id="mobile-sticky" className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-emerald-600 text-white border-t border-emerald-500 shadow-[0_-8px_24px_-12px_rgba(0,0,0,0.35)]">
   <div className="grid grid-cols-4 text-center">
     {/* Back */}
     <button
