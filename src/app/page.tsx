@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import Link from "next/link"
 import {
   FiPhone,
@@ -345,7 +345,7 @@ useEffect(() => {
       </AnimatePresence>
 
             {/* TABS BAR – overlaid at bottom without white background */}
-            <div ref={heroTabsRef} className="absolute left-0 w-full bg-emerald-900/70 backdrop-blur-sm" style={{ bottom: "var(--sticky-nav-h, 0px)" }}>
+            <div ref={heroTabsRef} className="absolute left-0 w-full bg-emerald-900/70 backdrop-blur-sm z-30" style={{ bottom: "var(--sticky-nav-h, 0px)" }}>
               <div className="flex gap-0 justify-start md:justify-center overflow-x-auto py-2 px-4 fancy-scroll scroll-px-4">
                 {heroTabs
                   .filter((cat) => cat.id !== "home")
