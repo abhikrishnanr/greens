@@ -171,6 +171,26 @@ model FeaturedService {
   updatedAt    DateTime   @default(now()) @updatedAt @db.Timestamp(3)
 }
 
+model PremiumService {
+  id        String   @id @default(uuid())
+  title     String
+  imageUrl  String?
+  order     Int      @default(0)
+  items     PremiumServiceItem[]
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(3)
+}
+
+model PremiumServiceItem {
+  id               String         @id @default(uuid())
+  premiumService   PremiumService @relation(fields: [premiumServiceId], references: [id], onDelete: Cascade)
+  premiumServiceId String
+  name             String
+  currentPrice     Float
+  offerPrice       Float?
+  order            Int            @default(0)
+}
+
 model Booking {
   id        String        @id @default(uuid())
   customer  String?       @db.VarChar(191)
