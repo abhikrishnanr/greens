@@ -1,5 +1,152 @@
-import StaticPageForm from '../components/StaticPageForm'
+'use client'
+import { useEffect, useState } from 'react'
+import WysiwygEditor from '@/app/components/WysiwygEditor'
+
+interface Section {
+  title: string
+  content: string
+  imageUrl?: string
+}
 
 export default function AdminAboutPage() {
-  return <StaticPageForm slug="about-greens" heading="About Greens" />
+  const [pageTitle, setPageTitle] = useState('')
+  const [sections, setSections] = useState<Section[]>([
+    { title: '', content: '', imageUrl: '' }
+  ])
+  const [exists, setExists] = useState(false)
+
+  const load = async () => {
+    const res = await fetch('/api/admin/static-pages?slug=about-greens')
+    if (res.ok) {
+      const data = await res.json()
+      if (data) {
+        setPageTitle(data.title || '')
+        try {
+          const parsed = JSON.parse(data.content || '[]')
+          if (Array.isArray(parsed) && parsed.length) setSections(parsed)
+        } catch {
+          if (data.content)
+            setSections([{ title: '', content: data.content, imageUrl: '' }])
+        }
+        setExists(true)
+      }
+    }
+  }
+
+  useEffect(() => {
+    load()
+  }, [])
+
+  const addSection = () =>
+    setSections([...sections, { title: '', content: '', imageUrl: '' }])
+  const updateSection = (
+    idx: number,
+    field: keyof Section,
+    value: string
+  ) => {
+    const copy = [...sections]
+    copy[idx] = { ...copy[idx], [field]: value }
+    setSections(copy)
+  }
+  const removeSection = (idx: number) =>
+    setSections(sections.filter((_, i) => i !== idx))
+
+  const handleImage = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    idx: number
+  ) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const fd = new FormData()
+    fd.append('file', file)
+    const res = await fetch('/api/upload', { method: 'POST', body: fd })
+    const data = await res.json()
+    updateSection(idx, 'imageUrl', data.url)
+  }
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const method = exists ? 'PUT' : 'POST'
+    await fetch('/api/admin/static-pages', {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        slug: 'about-greens',
+        title: pageTitle,
+        content: JSON.stringify(sections)
+      })
+    })
+    setExists(true)
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4 text-green-700">About Greens</h1>
+      <form onSubmit={save} className="space-y-4 bg-white p-6 rounded shadow border">
+        <div>
+          <label className="block font-medium mb-1">Page Title</label>
+          <input
+            className="w-full p-2 rounded border"
+            value={pageTitle}
+            onChange={e => setPageTitle(e.target.value)}
+            required
+          />
+        </div>
+        {sections.map((sec, idx) => (
+          <div key={idx} className="border rounded p-4 space-y-2">
+            <div className="flex justify-between items-center">
+              <label className="font-medium">Section {idx + 1}</label>
+              {sections.length > 1 && (
+                <button
+                  type="button"
+                  className="text-red-600 text-sm"
+                  onClick={() => removeSection(idx)}
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+            <input
+              className="w-full p-2 rounded border"
+              value={sec.title}
+              onChange={e => updateSection(idx, 'title', e.target.value)}
+              placeholder="Title"
+              required
+            />
+            <WysiwygEditor
+              value={sec.content}
+              onChange={v => updateSection(idx, 'content', v)}
+            />
+            <div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={e => handleImage(e, idx)}
+              />
+              {sec.imageUrl && (
+                <img
+                  src={sec.imageUrl}
+                  alt="preview"
+                  className="h-32 object-cover mt-2"
+                />
+              )}
+            </div>
+          </div>
+        ))}
+        <button
+          type="button"
+          className="bg-blue-600 text-white px-3 py-1 rounded"
+          onClick={addSection}
+        >
+          Add Section
+        </button>
+        <button
+          className="bg-green-600 px-4 py-2 rounded text-white"
+          type="submit"
+        >
+          Save
+        </button>
+      </form>
+    </div>
+  )
 }

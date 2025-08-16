@@ -49,18 +49,24 @@ export default function GalleryAdminPage() {
     load()
   }
 
-  const handlePhoto = async (e: React.ChangeEvent<HTMLInputElement>, galleryId: string) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const fd = new FormData()
-    fd.append('file', file)
-    const up = await fetch('/api/upload', { method: 'POST', body: fd })
-    const { url } = await up.json()
-    await fetch('/api/admin/gallery-images', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ galleryId, imageUrl: url })
-    })
+  const handlePhoto = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    galleryId: string
+  ) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+    for (const file of Array.from(files)) {
+      const fd = new FormData()
+      fd.append('file', file)
+      const up = await fetch('/api/upload', { method: 'POST', body: fd })
+      const { url } = await up.json()
+      await fetch('/api/admin/gallery-images', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ galleryId, imageUrl: url })
+      })
+    }
+    e.target.value = ''
     load()
   }
 
@@ -98,7 +104,12 @@ export default function GalleryAdminPage() {
             </div>
             <div className="mb-4">
               <label className="block font-medium mb-1">Add Photo</label>
-              <input type="file" accept="image/*" onChange={e => handlePhoto(e, g.id)} />
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={e => handlePhoto(e, g.id)}
+              />
             </div>
             {g.images.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
