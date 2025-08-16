@@ -103,6 +103,7 @@ export default function GalleryAdminPage() {
     }
   }
 
+<<<<<<< .mine
   const uploadAndAttach = async (file: File, galleryId: string) => {
     const fd = new FormData()
     fd.append('file', file)
@@ -114,6 +115,33 @@ export default function GalleryAdminPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ galleryId, imageUrl: url }),
     })
+
+
+
+
+
+
+
+=======
+  const handlePhoto = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    galleryId: string
+  ) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+    for (const file of Array.from(files)) {
+      const fd = new FormData()
+      fd.append('file', file)
+      const up = await fetch('/api/upload', { method: 'POST', body: fd })
+      const { url } = await up.json()
+      await fetch('/api/admin/gallery-images', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ galleryId, imageUrl: url })
+      })
+    }
+    e.target.value = ''
+>>>>>>> .theirs
     if (!link.ok) throw new Error('Attach failed')
   }
 
@@ -216,6 +244,7 @@ export default function GalleryAdminPage() {
               <Images className="h-6 w-6" />
               <span className="uppercase tracking-wider text-xs">Media</span>
             </div>
+<<<<<<< .mine
             <h1 className="mt-1 text-3xl sm:text-4xl font-extrabold text-white">
               Gallery Manager
             </h1>
@@ -228,6 +257,20 @@ export default function GalleryAdminPage() {
             <div className="rounded-xl bg-white/10 backdrop-blur px-4 py-3">
               <div className="text-xs">Galleries</div>
               <div className="text-2xl font-bold">{galleries.length}</div>
+=======
+            <div className="mb-4">
+              <label className="block font-medium mb-1">Add Photo</label>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={e => handlePhoto(e, g.id)}
+              />
+
+
+
+
+>>>>>>> .theirs
             </div>
             <div className="rounded-xl bg-white/10 backdrop-blur px-4 py-3">
               <div className="text-xs">Total Images</div>
@@ -276,7 +319,7 @@ export default function GalleryAdminPage() {
                       ? 'border-red-300 focus:ring-red-200'
                       : 'border-gray-300 focus:ring-emerald-200'
                   }`}
-                  placeholder="e.g., Bridal Looks ‚Ä¢ May 2025"
+                  placeholder="e.g., Bridal Looks ï May 2025"
                   value={title}
                   maxLength={120}
                   onChange={(e) => setTitle(e.target.value)}
@@ -466,9 +509,9 @@ export default function GalleryAdminPage() {
           <div>
             <h4 className="font-semibold text-gray-900">Pro tips</h4>
             <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-gray-600">
-              <li>Use short, meaningful gallery names (e.g., ‚ÄúBridal ‚Ä¢ May 2025‚Äù).</li>
+              <li>Use short, meaningful gallery names (e.g., ìBridal ï May 2025î).</li>
               <li>Drag &amp; drop multiple images at once for faster uploads.</li>
-              <li>Use the ‚ÄúMove‚Äù control on each photo to reorganize quickly.</li>
+              <li>Use the ìMoveî control on each photo to reorganize quickly.</li>
               <li>Click the copy icon to grab a photo URL for sharing or embedding.</li>
             </ul>
           </div>
@@ -484,7 +527,7 @@ export default function GalleryAdminPage() {
                 <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v4A4 4 0 008 12H4z"></path>
               </svg>
-              <span className="text-sm text-gray-800">Processing‚Ä¶</span>
+              <span className="text-sm text-gray-800">ProcessingÖ</span>
             </div>
           </div>
         </div>
