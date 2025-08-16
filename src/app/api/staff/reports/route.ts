@@ -16,24 +16,19 @@ export async function GET(req: Request) {
     return Response.json({ success: false, error: 'Missing date range' }, { status: 400 })
   }
 
-  const startDate = new Date(start)
-  const endDate = new Date(end)
-  endDate.setHours(23, 59, 59, 999)
-
   const items = await prisma.bookingItem.findMany({
     where: {
       staffId,
-      booking: { date: { gte: startDate, lte: endDate } },
+      booking: { date: { gte: start, lte: end } },
     },
     include: { booking: true, service: true },
     orderBy: { start: 'asc' },
   })
 
   const data = items.map((i) => ({
-    date: i.booking.date,
+    dateTime: `${i.booking.date} ${i.start}`,
     service: i.name,
     category: i.service?.costCategory || null,
-    price: i.price,
   }))
 
   return Response.json({ success: true, items: data })
