@@ -149,7 +149,7 @@ export default function AssignmentsPage() {
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-gradient-to-br from-emerald-800 to-yellow-600 rounded-xl text-white shadow-lg">
+              <div className="p-3 bg-gradient-to-br from-emerald-800 to-green-600 rounded-xl text-white shadow-lg">
                 <ClipboardList className="h-6 w-6" />
               </div>
               <div>
@@ -240,8 +240,8 @@ export default function AssignmentsPage() {
   className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-visible"
 >
 
-              <div className="bg-gradient-to-r from-emerald-800 to-yellow-600 p-6 text-white">
-                <div className="flex items-center gap-3">
+              <div className="bg-gradient-to-r from-emerald-800 to-green-600 p-6 text-white">
+                <div className="flex items-center gap-1">
                   <div className="p-2 bg-white/20 rounded-lg">
                     <User className="h-5 w-5" />
                   </div>
