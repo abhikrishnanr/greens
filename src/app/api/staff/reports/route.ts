@@ -22,14 +22,22 @@ export async function GET(req: Request) {
       status: 'completed',
       booking: { date: { gte: start, lte: end } },
     },
-    include: { booking: true, service: true },
+    include: { booking: true },
     orderBy: { start: 'asc' },
   })
+
+  const serviceIds = items.map((i) => i.serviceId)
+  const services = await prisma.service.findMany({
+    where: { id: { in: serviceIds } },
+    select: { id: true, costCategory: true },
+  })
+  const serviceMap = new Map(services.map((s) => [s.id, s.costCategory]))
 
   const data = items.map((i) => ({
     dateTime: `${i.booking.date} ${i.start}`,
     service: i.name,
-    category: i.service?.costCategory || null,
+    category: serviceMap.get(i.serviceId) || null,
+
   }))
 
   return Response.json({ success: true, items: data })
