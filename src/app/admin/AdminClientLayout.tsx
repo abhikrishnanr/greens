@@ -77,9 +77,9 @@ const adminSections: {
       items: [
         { href: '/admin/service-categories', label: 'Categories', icon: MdCategory },
         { href: '/admin/services', label: 'Services', icon: MdDesignServices },
-      { href: '/admin/featured-services', label: 'Featured Services', icon: MdStar },
+      { href: '/admin/featured-services', label: 'Hot Picks', icon: MdStar },
       { href: '/admin/limited-time-offers', label: 'Offers', icon: MdLocalOffer },
-      { href: '/admin/premium-services', label: 'Premium Services', icon: MdWorkspacePremium },
+      { href: '/admin/premium-services', label: 'Signature Services', icon: MdWorkspacePremium },
       { href: '/admin/variant-price-history', label: 'Price History', icon: MdHistory },
     ],
   },
