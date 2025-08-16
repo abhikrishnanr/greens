@@ -91,6 +91,32 @@ function currency(n: number) {
   return `₹${n.toFixed(2)}`
 }
 
+function maskAlternateX(str: string) {
+  let result = ""
+  let mask = true
+  for (const ch of str) {
+    if (/\s/.test(ch)) {
+      result += ch
+      continue
+    }
+    if (/[0-9A-Za-z]/.test(ch)) {
+      result += mask ? "X" : ch
+      mask = !mask
+    } else {
+      result += ch
+    }
+  }
+  return result
+}
+
+function maskBill(b: Bill): Bill {
+  return {
+    ...b,
+    billingName: b.billingName ? maskAlternateX(b.billingName) : b.billingName,
+    phones: b.phones.map((p) => maskAlternateX(p)),
+  }
+}
+
 function BillView({ bill }: { bill: Bill }) {
   const gst = bill.totalAfter * 0.18
   const saved = bill.totalBefore - bill.totalAfter
@@ -228,6 +254,10 @@ export default function BillingHistoryPage() {
   const printBill = (b: Bill) => {
     const win = window.open("", "print", "height=700,width=520")
     if (!win) return
+    const masked = maskBill(b)
+    const customer = masked.phones.length
+      ? `${masked.billingName || "N/A"} (${masked.phones.join(", ")})`
+      : masked.billingName || "N/A"
     const printContent = `
       <!DOCTYPE html>
       <html>
@@ -265,7 +295,7 @@ export default function BillingHistoryPage() {
 
           <div class="row"><strong>Bill ID</strong><span>${b.id}</span></div>
           <div class="row"><strong>Date</strong><span>${format(new Date(b.createdAt), "yyyy-MM-dd HH:mm")}</span></div>
-          <div class="row"><strong>Customer</strong><span>${b.billingName || "N/A"} (${b.phones.join(", ")})</span></div>
+          <div class="row"><strong>Customer</strong><span>${customer}</span></div>
           <div class="row"><strong>Address</strong><span>${b.billingAddress || "N/A"}</span></div>
           <div class="row"><strong>Voucher</strong><span>${b.voucherCode || "N/A"}</span></div>
           <div class="row"><strong>Payment</strong><span>${b.paymentMethod}</span></div>
@@ -315,6 +345,10 @@ export default function BillingHistoryPage() {
     const font = await pdf.embedFont(StandardFonts.Helvetica)
     const boldFont = await pdf.embedFont(StandardFonts.HelveticaBold)
     const png = await pdf.embedPng(logoBytes)
+    const masked = maskBill(b)
+    const customer = masked.phones.length
+      ? `${masked.billingName || "N/A"} (${masked.phones.join(", ")})`
+      : masked.billingName || "N/A"
 
     const pageWidth = 595
     const pageHeight = 842
@@ -346,7 +380,7 @@ export default function BillingHistoryPage() {
 
     line("Bill ID", b.id)
     line("Date", format(new Date(b.createdAt), "yyyy-MM-dd HH:mm"))
-    line("Customer", `${b.billingName || "N/A"} (${b.phones.join(", ")})`)
+    line("Customer", customer)
     line("Address", b.billingAddress || "N/A")
     line("Voucher", b.voucherCode || "N/A")
     line("Payment", b.paymentMethod)
@@ -413,7 +447,8 @@ export default function BillingHistoryPage() {
     container.style.left = "-10000px"
     document.body.appendChild(container)
     const root = createRoot(container)
-    root.render(<BillView bill={b} />)
+    const masked = maskBill(b)
+    root.render(<BillView bill={masked} />)
     await new Promise((resolve) => setTimeout(resolve, 120))
     const canvas = await html2canvas(container, { backgroundColor: "#ffffff", scale: 2 })
     const link = document.createElement("a")
