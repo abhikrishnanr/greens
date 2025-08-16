@@ -59,6 +59,11 @@ export default function AssignmentsPage() {
   const [stats, setStats] = useState({ total: 0, pending: 0, completed: 0, cancelled: 0 })
   const [search, setSearch] = useState('')
 
+  const maskPhone = (phone: string | null) => {
+    if (!phone) return 'No Phone'
+    return `XXXXXX${phone.slice(-4)}`
+  }
+
   const load = async () => {
     const res = await fetch(`/api/staff/assignments?date=${date}`)
     const data = await res.json()
@@ -204,139 +209,145 @@ export default function AssignmentsPage() {
         </Card>
       </div>
 
-      {filteredGroups.map((g, idx) => (
-        <Card key={idx} className="shadow">
-          <CardHeader>
-            <CardTitle className="text-lg">
-              {g.customer || 'No Name'} - {g.phone || 'No Phone'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {g.bookings.map(b => (
-              <div key={b.id} className="p-4 border rounded bg-gray-50 space-y-4">
-                <div className="font-medium">{b.start}</div>
-                <ul className="space-y-2">
-                  {b.items.map(it => (
-                    <li
-                      key={it.id}
-                      className="flex items-center justify-between bg-white p-2 rounded shadow-sm"
-                    >
-                      <div className="flex items-center gap-2">
-                        {it.status === 'completed' && (
-                          <CheckCircle className="h-4 w-4 text-green-600" />
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {filteredGroups.map((g, idx) => (
+          <Card key={idx} className="shadow">
+            <CardHeader>
+              <CardTitle className="text-lg">
+                {g.customer || 'No Name'} - {maskPhone(g.phone)}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {g.bookings.map(b => (
+                <div key={b.id} className="p-4 border rounded bg-gray-50">
+                  <div className="grid grid-cols-[4rem,1fr] gap-4">
+                    <div className="font-medium">{b.start}</div>
+                    <div className="space-y-4">
+                      <ul className="space-y-2">
+                        {b.items.map(it => (
+                          <li
+                            key={it.id}
+                            className="flex items-center justify-between bg-white p-2 rounded shadow-sm"
+                          >
+                            <div className="flex items-center gap-2">
+                              {it.status === 'completed' && (
+                                <CheckCircle className="h-4 w-4 text-green-600" />
+                              )}
+                              {it.status === 'cancelled' && (
+                                <XCircle className="h-4 w-4 text-red-600" />
+                              )}
+                              {it.status === 'pending' && (
+                                <Clock className="h-4 w-4 text-yellow-600" />
+                              )}
+                              <span className="text-sm">{it.name}</span>
+                            </div>
+                            {it.status === 'pending' && (
+                              <div className="space-x-2">
+                                <Button
+                                  size="sm"
+                                  onClick={() => updateItemStatus(it.id, 'completed')}
+                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                >
+                                  Complete
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={() => updateItemStatus(it.id, 'cancelled')}
+                                  className="bg-red-600 hover:bg-red-700 text-white"
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="space-y-2">
+                        <p className="text-xs text-gray-500">Add extra service</p>
+                        <ReactSelect<ServiceSelectOption>
+                          className="text-sm"
+                          options={services.map(s => ({ value: s.id, label: `${s.categoryName} - ${s.name}` }))}
+                          value={
+                            selectedService[b.id]
+                              ? {
+                                  value: selectedService[b.id],
+                                  label: `${services.find(s => s.id === selectedService[b.id])?.categoryName} - ${
+                                    services.find(s => s.id === selectedService[b.id])?.name
+                                  }`,
+                                }
+                              : null
+                          }
+                          onChange={opt => {
+                            const val = opt?.value || ''
+                            setSelectedService(prev => ({ ...prev, [b.id]: val }))
+                            setSelectedVariant(prev => ({ ...prev, [b.id]: '' }))
+                          }}
+                          placeholder="Select service"
+                          isSearchable
+                        />
+                        {selectedService[b.id] && (
+                          <div className="flex gap-2">
+                            <Select
+                              value={selectedVariant[b.id] || ''}
+                              onValueChange={val => setSelectedVariant(prev => ({ ...prev, [b.id]: val }))}
+                              className="flex-1"
+                            >
+                              <SelectTrigger className="h-9">
+                                <SelectValue placeholder="Select variant" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {services
+                                  .find(s => s.id === selectedService[b.id])
+                                  ?.variants.map(v => (
+                                    <SelectItem key={v.id} value={v.id}>
+                                      {v.name} ({v.duration}m) - ₹
+                                      {v.currentPrice?.offerPrice ?? v.currentPrice?.actualPrice}
+                                    </SelectItem>
+                                  ))}
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              onClick={() => addService(b.id)}
+                              className="bg-green-600 hover:bg-green-700"
+                              disabled={!selectedVariant[b.id]}
+                            >
+                              Add
+                            </Button>
+                          </div>
                         )}
-                        {it.status === 'cancelled' && (
-                          <XCircle className="h-4 w-4 text-red-600" />
-                        )}
-                        {it.status === 'pending' && (
-                          <Clock className="h-4 w-4 text-yellow-600" />
-                        )}
-                        <span className="text-sm">{it.name}</span>
                       </div>
-                      {it.status === 'pending' && (
-                        <div className="space-x-2">
+                      {(!b.customer || !b.phone) && (
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <Input
+                            placeholder="Name"
+                            defaultValue={b.customer || ''}
+                            id={`name-${b.id}`}
+                          />
+                          <Input
+                            placeholder="Phone"
+                            defaultValue={b.phone || ''}
+                            id={`phone-${b.id}`}
+                          />
                           <Button
-                            size="sm"
-                            onClick={() => updateItemStatus(it.id, 'completed')}
-                            className="bg-green-600 hover:bg-green-700 text-white"
+                            onClick={() => {
+                              const customer = (document.getElementById(`name-${b.id}`) as HTMLInputElement).value
+                              const phone = (document.getElementById(`phone-${b.id}`) as HTMLInputElement).value
+                              updateCustomer(b.id, customer, phone)
+                            }}
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
                           >
-                            Complete
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => updateItemStatus(it.id, 'cancelled')}
-                            className="bg-red-600 hover:bg-red-700 text-white"
-                          >
-                            Cancel
+                            Save
                           </Button>
                         </div>
                       )}
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-4 space-y-2">
-                  <p className="text-xs text-gray-500">Add extra service</p>
-                  <ReactSelect<ServiceSelectOption>
-                    className="text-sm"
-                    options={services.map(s => ({ value: s.id, label: `${s.categoryName} - ${s.name}` }))}
-                    value={
-                      selectedService[b.id]
-                        ? {
-                            value: selectedService[b.id],
-                            label: `${services.find(s => s.id === selectedService[b.id])?.categoryName} - ${
-                              services.find(s => s.id === selectedService[b.id])?.name
-                            }`,
-                          }
-                        : null
-                    }
-                    onChange={opt => {
-                      const val = opt?.value || ''
-                      setSelectedService(prev => ({ ...prev, [b.id]: val }))
-                      setSelectedVariant(prev => ({ ...prev, [b.id]: '' }))
-                    }}
-                    placeholder="Select service"
-                    isSearchable
-                  />
-                  {selectedService[b.id] && (
-                    <div className="flex gap-2">
-                      <Select
-                        value={selectedVariant[b.id] || ''}
-                        onValueChange={val => setSelectedVariant(prev => ({ ...prev, [b.id]: val }))}
-                        className="flex-1"
-                      >
-                        <SelectTrigger className="h-9">
-                          <SelectValue placeholder="Select variant" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {services
-                            .find(s => s.id === selectedService[b.id])
-                            ?.variants.map(v => (
-                              <SelectItem key={v.id} value={v.id}>
-                                {v.name} ({v.duration}m) - ₹
-                                {v.currentPrice?.offerPrice ?? v.currentPrice?.actualPrice}
-                              </SelectItem>
-                            ))}
-                        </SelectContent>
-                      </Select>
-                      <Button
-                        onClick={() => addService(b.id)}
-                        className="bg-green-600 hover:bg-green-700"
-                        disabled={!selectedVariant[b.id]}
-                      >
-                        Add
-                      </Button>
                     </div>
-                  )}
-                </div>
-                {(!b.customer || !b.phone) && (
-                  <div className="mt-4 flex flex-col sm:flex-row gap-2">
-                    <Input
-                      placeholder="Name"
-                      defaultValue={b.customer || ''}
-                      id={`name-${b.id}`}
-                    />
-                    <Input
-                      placeholder="Phone"
-                      defaultValue={b.phone || ''}
-                      id={`phone-${b.id}`}
-                    />
-                    <Button
-                      onClick={() => {
-                        const customer = (document.getElementById(`name-${b.id}`) as HTMLInputElement).value
-                        const phone = (document.getElementById(`phone-${b.id}`) as HTMLInputElement).value
-                        updateCustomer(b.id, customer, phone)
-                      }}
-                      className="bg-blue-600 hover:bg-blue-700 text-white"
-                    >
-                      Save
-                    </Button>
                   </div>
-                )}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      ))}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   )
 }
