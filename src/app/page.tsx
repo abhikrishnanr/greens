@@ -74,6 +74,10 @@ export default function HomePage() {
   // Search functionality
   const [searchQuery, setSearchQuery] = useState("")
 
+  // Sticky mobile actions & hero tabs
+  const heroTabsRef = useRef<HTMLDivElement | null>(null)
+  const [showSticky, setShowSticky] = useState(false)
+
   useEffect(() => {
     setLoading(true)
     const cached = getCache("service-categories")
@@ -164,62 +168,46 @@ export default function HomePage() {
       sessionStorage.removeItem("scrollPos")
     }
   }, [loading])
+  useEffect(() => {
+    const setVars = () => {
+      const sticky = document.getElementById("mobile-sticky")
+      const stickyH = sticky && showSticky ? sticky.offsetHeight : 0
+      document.documentElement.style.setProperty("--sticky-nav-h", `${stickyH}px`)
 
+      const tabsH = heroTabsRef.current ? heroTabsRef.current.offsetHeight : 0
+      document.documentElement.style.setProperty("--hero-tabs-h", `${tabsH}px`)
+    }
+
+    setVars()
+    const ro = new ResizeObserver(setVars)
+    if (heroTabsRef.current) ro.observe(heroTabsRef.current)
+    const sticky = document.getElementById("mobile-sticky")
+    if (sticky) ro.observe(sticky)
+
+    window.addEventListener("resize", setVars)
+    window.addEventListener("orientationchange", setVars)
+
+    return () => {
+      ro.disconnect()
+      window.removeEventListener("resize", setVars)
+      window.removeEventListener("orientationchange", setVars)
+    }
+  }, [showSticky, heroLoading])
 
   useEffect(() => {
-  const setStickyVar = () => {
-    // Your mobile sticky bar has the id below (we'll add it in step 3)
-    const el = document.getElementById("mobile-sticky");
-    const isVisible = el ? getComputedStyle(el).display !== "none" : false;
-    const h = isVisible ? el!.offsetHeight : 0; // includes the safe-area shim you added
-    document.documentElement.style.setProperty("--sticky-nav-h", `${h}px`);
-  };
+    const handleScroll = () => {
+      const current = window.scrollY
 
-  setStickyVar();
-  window.addEventListener("resize", setStickyVar);
-  window.addEventListener("orientationchange", setStickyVar);
+      if (current > 100) {
+        setShowSticky(true)
+      } else if (current === 0) {
+        setShowSticky(false)
+      }
+    }
 
-  return () => {
-    window.removeEventListener("resize", setStickyVar);
-    window.removeEventListener("orientationchange", setStickyVar);
-  };
-}, []);
-
-
-// put these near the top of the component
-const heroTabsRef = useRef<HTMLDivElement | null>(null);
-
-useEffect(() => {
-  const setVars = () => {
-    // sticky (mobile CTA bar)
-    const sticky = document.getElementById("mobile-sticky");
-    const isStickyVisible = sticky ? getComputedStyle(sticky).display !== "none" : false;
-    const stickyH = isStickyVisible ? sticky!.offsetHeight : 0;
-    document.documentElement.style.setProperty("--sticky-nav-h", `${stickyH}px`);
-
-    // hero tabs height (visible on all viewports, but we only offset on mobile)
-    const tabsH = heroTabsRef.current ? heroTabsRef.current.offsetHeight : 0;
-    document.documentElement.style.setProperty("--hero-tabs-h", `${tabsH}px`);
-  };
-
-  setVars();
-  const ro = new ResizeObserver(setVars);
-  if (heroTabsRef.current) ro.observe(heroTabsRef.current);
-  // observe sticky too; safe if null
-  const sticky = document.getElementById("mobile-sticky");
-  if (sticky) ro.observe(sticky);
-
-  window.addEventListener("resize", setVars);
-  window.addEventListener("orientationchange", setVars);
-
-  return () => {
-    ro.disconnect();
-    window.removeEventListener("resize", setVars);
-    window.removeEventListener("orientationchange", setVars);
-  };
-}, []);
-
-
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   const filteredCategories = useMemo(() => {
     if (!searchQuery.trim()) return categories
@@ -280,12 +268,16 @@ useEffect(() => {
     </div>
 
             {/* Tabs skeleton – overlay at bottom */}
-            <div ref={heroTabsRef} className="absolute left-0 w-full bg-emerald-900/60" style={{ bottom: "var(--sticky-nav-h, 0px)" }}>
-              <div className="flex gap-2 md:justify-center overflow-x-auto py-2 px-4 fancy-scroll scroll-px-4">
+            <div
+              ref={heroTabsRef}
+              className="absolute left-0 w-full bg-emerald-900/60"
+              style={{ bottom: showSticky ? "var(--sticky-nav-h, 0px)" : 0 }}
+            >
+              <div className="flex gap-3 md:justify-center overflow-x-auto py-2 px-4 fancy-scroll scroll-px-4">
                 {Array.from({ length: 7 }).map((_, i) => (
                   <div
                     key={i}
-                    className="h-10 min-w-[100px] rounded skel-tab bg-emerald-700/40"
+                    className="h-10 min-w-[80px] rounded-md skel-tab bg-emerald-700/40"
                   />
                 ))}
               </div>
@@ -345,25 +337,36 @@ useEffect(() => {
       </AnimatePresence>
 
             {/* TABS BAR – overlaid at bottom without white background */}
-            <div ref={heroTabsRef} className="absolute left-0 w-full bg-emerald-900/70 backdrop-blur-sm z-30" style={{ bottom: "var(--sticky-nav-h, 0px)" }}>
-              <div className="flex gap-0 justify-start md:justify-center overflow-x-auto py-2 px-4 fancy-scroll scroll-px-4">
+            <div
+              ref={heroTabsRef}
+              className="absolute left-0 w-full bg-emerald-900/70 backdrop-blur-sm z-30"
+              style={{ bottom: showSticky ? "var(--sticky-nav-h, 0px)" : 0 }}
+            >
+              <div className="flex gap-3 justify-start md:justify-center overflow-x-auto py-2 px-4 fancy-scroll scroll-px-4">
                 {heroTabs
                   .filter((cat) => cat.id !== "home")
                   .map((cat) => (
                     <motion.button
                       key={cat.id}
                       onClick={() => setSelectedHeroCategory(cat.id)}
-                      className={`px-4 py-2 min-w-[100px] text-center text-sm font-medium transition-colors duration-200
-                        ${
-                          selectedHeroCategory === cat.id
-                            ? "text-emerald-200 border-b-2 border-emerald-400"
-                            : "text-white/80 hover:text-white hover:bg-emerald-800/50"
-                        }
+                        className={`flex flex-col items-center flex-shrink-0 px-4 py-2 rounded-md min-w-[80px] text-center text-xs font-medium transition-colors duration-200
+                          ${
+                            selectedHeroCategory === cat.id
+                              ? "bg-emerald-700 text-emerald-100"
+                              : "bg-emerald-800/40 text-white/80 hover:bg-emerald-800/60"
+                          }
                       `}
                       aria-pressed={selectedHeroCategory === cat.id}
-                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
+                      {cat.iconUrl && (
+                        <img
+                          src={cat.iconUrl}
+                          alt={cat.name}
+                          className="w-6 h-6 mb-1 object-contain"
+                        />
+                      )}
                       <span className="whitespace-nowrap">{cat.name}</span>
                     </motion.button>
                   ))}
@@ -1235,7 +1238,10 @@ useEffect(() => {
           <p className="text-xs mt-2">TC 45/215, Kunjalumood Junction, Karamana PO, Trivandrum</p>
         </div>
       </footer>
-  <nav id="mobile-sticky" className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-emerald-600 text-white border-t border-emerald-500 shadow-[0_-8px_24px_-12px_rgba(0,0,0,0.35)]">
+  <nav
+    id="mobile-sticky"
+    className={`md:hidden fixed bottom-0 left-0 right-0 z-50 bg-emerald-600 text-white border-t border-emerald-500 shadow-[0_-8px_24px_-12px_rgba(0,0,0,0.35)] transition-transform duration-300 ${showSticky ? "translate-y-0" : "translate-y-full pointer-events-none"}`}
+  >
   <div className="grid grid-cols-4 text-center">
     {/* Back */}
     <button
