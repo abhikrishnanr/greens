@@ -236,9 +236,10 @@ export default function AssignmentsPage() {
         <div className="grid gap-8 lg:grid-cols-1 xl:grid-cols-1">
           {filteredGroups.map((g, idx) => (
             <div
-              key={idx}
-              className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden"
-            >
+  key={idx}
+  className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-visible"
+>
+
               <div className="bg-gradient-to-r from-emerald-800 to-yellow-600 p-6 text-white">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-white/20 rounded-lg">
@@ -317,34 +318,47 @@ export default function AssignmentsPage() {
 
                       <div className="space-y-3">
                         <ReactSelect<ServiceSelectOption>
-                          className="text-sm"
-                          options={services.map((s) => ({ value: s.id, label: `${s.categoryName} - ${s.name}` }))}
-                          value={
-                            selectedService[b.id]
-                              ? {
-                                  value: selectedService[b.id],
-                                  label: `${services.find((s) => s.id === selectedService[b.id])?.categoryName} - ${
-                                    services.find((s) => s.id === selectedService[b.id])?.name
-                                  }`,
-                                }
-                              : null
-                          }
-                          onChange={(opt) => {
-                            const val = opt?.value || ""
-                            setSelectedService((prev) => ({ ...prev, [b.id]: val }))
-                            setSelectedVariant((prev) => ({ ...prev, [b.id]: "" }))
-                          }}
-                          placeholder="Select service..."
-                          isSearchable
-                          styles={{
-                            control: (base) => ({
-                              ...base,
-                              border: "1px solid #e5e7eb",
-                              borderRadius: "0.75rem",
-                              padding: "0.25rem",
-                            }),
-                          }}
-                        />
+  className="text-sm"
+  classNamePrefix="rs"
+  options={services.map((s) => ({ value: s.id, label: `${s.categoryName} - ${s.name}` }))}
+
+  value={
+    selectedService[b.id]
+      ? {
+          value: selectedService[b.id],
+          label: `${services.find((s) => s.id === selectedService[b.id])?.categoryName} - ${
+            services.find((s) => s.id === selectedService[b.id])?.name
+          }`,
+        }
+      : null
+  }
+
+  onChange={(opt) => {
+    const val = opt?.value || ""
+    setSelectedService((prev) => ({ ...prev, [b.id]: val }))
+    setSelectedVariant((prev) => ({ ...prev, [b.id]: "" }))
+  }}
+  placeholder="Select service..."
+  isSearchable
+
+  /** 👇 mount the menu to <body> so parents can't clip it */
+  menuPortalTarget={typeof window !== "undefined" ? document.body : null}
+
+  /** 👇 make sure it floats on top */
+  styles={{
+    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+    menu: (base) => ({ ...base, zIndex: 9999 }),
+    control: (base) => ({
+      ...base,
+      border: "1px solid #e5e7eb",
+      borderRadius: "0.75rem",
+      padding: "0.25rem",
+      boxShadow: "none",
+      "&:hover": { borderColor: "#e5e7eb" },
+    }),
+  }}
+/>
+
 
                         {selectedService[b.id] && (
                           <div className="flex gap-3">
