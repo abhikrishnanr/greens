@@ -13,18 +13,22 @@ import {
   MdStore,
   MdCategory,
   MdDesignServices,
-  MdStar,
-  MdHistory,
-  MdPayment,
-  MdLogout,
-  MdEvent,
-  MdReceipt,
-  MdMenu,
-  MdViewCarousel,
-  MdQuestionAnswer,
-  MdLocalOffer,
-  MdWorkspacePremium,
-} from 'react-icons/md'
+    MdStar,
+    MdHistory,
+    MdPayment,
+    MdLogout,
+    MdEvent,
+    MdReceipt,
+    MdMenu,
+    MdViewCarousel,
+    MdQuestionAnswer,
+    MdLocalOffer,
+    MdWorkspacePremium,
+    MdInfo,
+    MdWork,
+    MdSchool,
+    MdPhoto,
+  } from 'react-icons/md'
 import type { IconType } from 'react-icons'
 
 const adminSections: {
@@ -52,18 +56,27 @@ const adminSections: {
       { href: '/admin/customers', label: 'Customers', icon: MdPeople },
     ],
   },
-  {
-    heading: 'Location & Setup',
-    items: [
-      { href: '/admin/branches', label: 'Branches', icon: MdStore },
-      { href: '/admin/hero-tabs', label: 'Hero Banners', icon: MdViewCarousel },
-    ],
-  },
-  {
-    heading: 'Services',
-    items: [
-      { href: '/admin/service-categories', label: 'Categories', icon: MdCategory },
-      { href: '/admin/services', label: 'Services', icon: MdDesignServices },
+    {
+      heading: 'Location & Setup',
+      items: [
+        { href: '/admin/branches', label: 'Branches', icon: MdStore },
+        { href: '/admin/hero-tabs', label: 'Hero Banners', icon: MdViewCarousel },
+      ],
+    },
+    {
+      heading: 'Website',
+      items: [
+        { href: '/admin/about', label: 'About Greens', icon: MdInfo },
+        { href: '/admin/jobs', label: 'Jobs @ Greens', icon: MdWork },
+        { href: '/admin/beauty-education', label: 'Beauty Education', icon: MdSchool },
+        { href: '/admin/gallery', label: 'Gallery', icon: MdPhoto },
+      ],
+    },
+    {
+      heading: 'Services',
+      items: [
+        { href: '/admin/service-categories', label: 'Categories', icon: MdCategory },
+        { href: '/admin/services', label: 'Services', icon: MdDesignServices },
       { href: '/admin/featured-services', label: 'Featured Services', icon: MdStar },
       { href: '/admin/limited-time-offers', label: 'Offers', icon: MdLocalOffer },
       { href: '/admin/premium-services', label: 'Premium Services', icon: MdWorkspacePremium },
