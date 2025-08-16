@@ -26,13 +26,19 @@ export async function GET(req: Request) {
     orderBy: { start: 'asc' },
   })
 
-  const serviceIds = items.map((i) => i.serviceId)
-  const services = await prisma.service.findMany({
-    where: { id: { in: serviceIds } },
-    select: { id: true, category: { select: { name: true } } },
-  })
+  const serviceIds = Array.from(new Set(items.map((i) => i.serviceId)))
+  const [legacyServices, newServices] = await Promise.all([
+    prisma.service.findMany({
+      where: { id: { in: serviceIds } },
+      select: { id: true, category: { select: { name: true } } },
+    }),
+    prisma.serviceNew.findMany({
+      where: { id: { in: serviceIds } },
+      select: { id: true, category: { select: { name: true } } },
+    }),
+  ])
   const serviceMap = new Map(
-    services.map((s) => [s.id, s.category?.name || null])
+    [...legacyServices, ...newServices].map((s) => [s.id, s.category?.name || null])
   )
 
 
