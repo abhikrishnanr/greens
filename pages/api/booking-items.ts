@@ -33,6 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           price,
           staffId: userId!,
           start,
+          status: 'pending',
         },
       })
       return res.status(200).json(item)

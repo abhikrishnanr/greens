@@ -26,7 +26,7 @@ export async function POST(
   const time = start.toTimeString().slice(0, 5)
 
   await prisma.bookingItem.create({
-    data: { bookingId: params.id, serviceId, name, price, duration, staffId, start: time },
+    data: { bookingId: params.id, serviceId, name, price, duration, staffId, start: time, status: 'pending' },
   })
 
   return Response.json({ success: true })

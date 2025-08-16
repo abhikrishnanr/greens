@@ -218,6 +218,7 @@ model BookingItem {
   price     Float
   staffId   String  @db.VarChar(191)
   start     String  @db.VarChar(5)
+  status    String  @default("pending") @db.VarChar(191)
 }
 
 model Billing {
