@@ -10,6 +10,12 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const { data: session } = useSession()
+  const dashboardLink =
+    session?.user?.role === "customer"
+      ? "/customer"
+      : session?.user?.role === "staff" || session?.user?.role === "customer_staff"
+      ? "/admin/staff/assignments"
+      : "/admin/dashboard"
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 0)
@@ -53,7 +59,11 @@ export default function Header() {
 
       {session?.user ? (
         <>
-          <span className="flex items-center gap-2">
+          <Link
+            href={dashboardLink}
+            className="flex items-center gap-2"
+            onClick={closeMenus}
+          >
             {session.user.image ? (
               <Image
                 src={session.user.image}
@@ -68,16 +78,17 @@ export default function Header() {
               </span>
             )}
             <span>{session.user.name}</span>
-          </span>
+          </Link>
           <button
             onClick={() => {
               signOut()
               closeMenus()
             }}
-            className="hover:text-green-400 transition-colors"
+            className="flex items-center gap-1 hover:text-green-400 transition-colors"
             aria-label="Logout"
           >
             <LogOut size={18} />
+            <span>Logout</span>
           </button>
         </>
       ) : (

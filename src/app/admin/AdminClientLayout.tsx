@@ -96,6 +96,8 @@ export default function AdminClientLayout({ children }: { children: React.ReactN
   const { data: session } = useSession()
   const role = session?.user?.role
   const sections = role === 'admin' ? adminSections : staffSections
+  const formatRole = (r?: string) =>
+    r ? r.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : ''
 
   const handleLogout = async () => {
     await fetch('/api/auth/set-role', {
@@ -126,12 +128,33 @@ export default function AdminClientLayout({ children }: { children: React.ReactN
               <span className="font-bold">{role === 'admin' ? 'Admin' : 'Staff'}</span>
             </Link>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
-          >
-            <MdLogout className="text-lg" /> Logout
-          </button>
+          <div className="flex items-center gap-4">
+            {session?.user && (
+              <div className="flex items-center gap-2 bg-green-700/40 px-2 py-1 rounded">
+                {session.user.image ? (
+                  <img
+                    src={session.user.image}
+                    alt={session.user.name || 'avatar'}
+                    className="h-8 w-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="h-8 w-8 rounded-full bg-green-600 flex items-center justify-center text-sm">
+                    {session.user.name?.[0] || 'U'}
+                  </span>
+                )}
+                <div className="leading-tight">
+                  <div className="font-semibold">{session.user.name}</div>
+                  <div className="text-xs text-green-200">{formatRole(session.user.role)}</div>
+                </div>
+              </div>
+            )}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
+            >
+              <MdLogout className="text-lg" /> Logout
+            </button>
+          </div>
         </header>
 
         {/* Body */}
