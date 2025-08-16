@@ -16,24 +16,29 @@ export async function GET(req: Request) {
     return Response.json({ success: false, error: 'Missing date range' }, { status: 400 })
   }
 
-  const startDate = new Date(start)
-  const endDate = new Date(end)
-  endDate.setHours(23, 59, 59, 999)
-
   const items = await prisma.bookingItem.findMany({
     where: {
       staffId,
-      booking: { date: { gte: startDate, lte: endDate } },
+      status: 'completed',
+      booking: { date: { gte: start, lte: end } },
     },
-    include: { booking: true, service: true },
+    include: { booking: true },
     orderBy: { start: 'asc' },
   })
 
+  const serviceIds = Array.from(new Set(items.map((i) => i.serviceId)))
+  const services = await prisma.serviceNew.findMany({
+    where: { id: { in: serviceIds } },
+    select: { id: true, name: true, category: { select: { name: true } } },
+  })
+  const serviceMap = new Map(
+    services.map((s) => [s.id, { name: s.name, category: s.category?.name || null }])
+  )
+
   const data = items.map((i) => ({
-    date: i.booking.date,
-    service: i.name,
-    category: i.service?.costCategory || null,
-    price: i.price,
+    dateTime: `${i.booking.date} ${i.start}`,
+    service: serviceMap.get(i.serviceId)?.name || '',
+    category: serviceMap.get(i.serviceId)?.category || null,
   }))
 
   return Response.json({ success: true, items: data })
