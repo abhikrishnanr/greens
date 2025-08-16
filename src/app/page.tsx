@@ -277,7 +277,7 @@ export default function HomePage() {
                 {Array.from({ length: 7 }).map((_, i) => (
                   <div
                     key={i}
-                    className="h-10 min-w-[80px] rounded-full skel-tab bg-emerald-700/40"
+                    className="h-10 min-w-[80px] rounded-md skel-tab bg-emerald-700/40"
                   />
                 ))}
               </div>
@@ -349,12 +349,12 @@ export default function HomePage() {
                     <motion.button
                       key={cat.id}
                       onClick={() => setSelectedHeroCategory(cat.id)}
-                      className={`flex flex-col items-center flex-shrink-0 px-4 py-2 rounded-full min-w-[80px] text-center text-xs font-medium transition-colors duration-200
-                        ${
-                          selectedHeroCategory === cat.id
-                            ? "bg-emerald-700 text-emerald-100"
-                            : "bg-emerald-800/40 text-white/80 hover:bg-emerald-800/60"
-                        }
+                        className={`flex flex-col items-center flex-shrink-0 px-4 py-2 rounded-md min-w-[80px] text-center text-xs font-medium transition-colors duration-200
+                          ${
+                            selectedHeroCategory === cat.id
+                              ? "bg-emerald-700 text-emerald-100"
+                              : "bg-emerald-800/40 text-white/80 hover:bg-emerald-800/60"
+                          }
                       `}
                       aria-pressed={selectedHeroCategory === cat.id}
                       whileHover={{ scale: 1.05 }}
