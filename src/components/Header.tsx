@@ -41,17 +41,19 @@ export default function Header() {
         <Link href="/beauty-education" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
           Beauty Education
         </Link>
+        
+        <Link href="/jobs" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
+          Jobs @ Greens
+        </Link>
+        
+        <Link href="/gallery" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
+          Gallery
+        </Link>
         <Link href="/about" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
           About Greens
         </Link>
 
-        <Link href="/jobs" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
-          Jobs @ Greens
-        </Link>
 
-        <Link href="/gallery" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
-          Gallery
-        </Link>
 
       <Link href="#contact" className="hover:text-green-400 transition-colors" onClick={closeMenus}>
         Contact Us

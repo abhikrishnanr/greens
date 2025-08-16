@@ -460,7 +460,7 @@ export default function HomePage() {
   <div className="container mx-auto px-6">
     <div className="text-center mb-8">
       <h2 className="mt-3 text-2xl md:text-3xl font-bold text-[#FFD86B]">
-        Our Premium Services
+        Our Signature Services
       </h2>
       <div className="mx-auto mt-3 h-1 w-24 rounded-full bg-gradient-to-r from-[#FFD86B] via-[#FFC94A] to-[#FFD86B]" />
     </div>
