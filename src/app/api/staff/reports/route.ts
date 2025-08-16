@@ -35,10 +35,12 @@ export async function GET(req: Request) {
     services.map((s) => [s.id, s.category?.name || null])
   )
 
+
   const data = items.map((i) => ({
     dateTime: `${i.booking.date} ${i.start}`,
     service: i.name,
     category: serviceMap.get(i.serviceId) || null,
+
   }))
 
   return Response.json({ success: true, items: data })
