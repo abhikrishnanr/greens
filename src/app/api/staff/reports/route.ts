@@ -39,6 +39,7 @@ export async function GET(req: Request) {
     dateTime: `${i.booking.date} ${i.start}`,
     service: serviceMap.get(i.serviceId)?.name || '',
     category: serviceMap.get(i.serviceId)?.category || null,
+
   }))
 
   return Response.json({ success: true, items: data })
