@@ -29,9 +29,12 @@ export async function GET(req: Request) {
   const serviceIds = items.map((i) => i.serviceId)
   const services = await prisma.service.findMany({
     where: { id: { in: serviceIds } },
-    select: { id: true, costCategory: true },
+    select: { id: true, category: { select: { name: true } } },
   })
-  const serviceMap = new Map(services.map((s) => [s.id, s.costCategory]))
+  const serviceMap = new Map(
+    services.map((s) => [s.id, s.category?.name || null])
+  )
+
 
   const data = items.map((i) => ({
     dateTime: `${i.booking.date} ${i.start}`,
