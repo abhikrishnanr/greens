@@ -293,3 +293,30 @@ model Offer {
   createdAt   DateTime @default(now()) @db.Timestamp(3)
   updatedAt   DateTime @default(now()) @updatedAt @db.Timestamp(3)
 }
+
+model StaticPage {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  title     String
+  content   String?  @db.LongText
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(3)
+}
+
+model Gallery {
+  id        String         @id @default(uuid())
+  title     String
+  images    GalleryImage[]
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(3)
+}
+
+model GalleryImage {
+  id        String   @id @default(uuid())
+  imageUrl  String
+  caption   String?
+  gallery   Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+  galleryId String
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(3)
+}
