@@ -276,7 +276,7 @@ export default function GalleryAdminPage() {
                       ? 'border-red-300 focus:ring-red-200'
                       : 'border-gray-300 focus:ring-emerald-200'
                   }`}
-                  placeholder="e.g., Bridal Looks Â- May 2025"
+                  placeholder="e.g., Bridal Looks - May 2025"
                   value={title}
                   maxLength={120}
                   onChange={(e) => setTitle(e.target.value)}
@@ -466,9 +466,9 @@ export default function GalleryAdminPage() {
           <div>
             <h4 className="font-semibold text-gray-900">Pro tips</h4>
             <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-gray-600">
-              <li>Use short, meaningful gallery names (e.g., ÂBridal Â- May 2025Â).</li>
+              <li>Use short, meaningful gallery names (e.g., 'Bridal - May 2025').</li>
               <li>Drag &amp; drop multiple images at once for faster uploads.</li>
-              <li>Use the ÂMoveÂ control on each photo to reorganize quickly.</li>
+              <li>Use the "Move" control on each photo to reorganize quickly.</li>
               <li>Click the copy icon to grab a photo URL for sharing or embedding.</li>
             </ul>
           </div>
@@ -484,7 +484,7 @@ export default function GalleryAdminPage() {
                 <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v4A4 4 0 008 12H4z"></path>
               </svg>
-              <span className="text-sm text-gray-800">ProcessingÂ</span>
+              <span className="text-sm text-gray-800">Processing...</span>
 </span>
             </div>
           </div>
