@@ -106,7 +106,8 @@ export default function AssignmentsPage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        serviceId: variant.id,
+        serviceId: svc.id,
+        tierId: variant.id,
         name: `${svc.name} - ${variant.name}`,
         price: variant.currentPrice?.offerPrice ?? variant.currentPrice?.actualPrice ?? 0,
         duration: variant.duration || 0,
