@@ -72,7 +72,7 @@ export default function AssignmentsPage() {
   useEffect(() => { load() }, [date])
 
   useEffect(() => {
-    fetch('/api/admin/service-variants/all')
+    fetch('/api/admin/services-walkin')
       .then(res => res.json())
       .then((d: ServiceOption[]) => {
         if (Array.isArray(d)) setServices(d)
