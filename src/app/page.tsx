@@ -76,7 +76,6 @@ export default function HomePage() {
 
   // Sticky mobile actions & hero tabs
   const heroTabsRef = useRef<HTMLDivElement | null>(null)
-  const lastScrollY = useRef(0)
   const [showSticky, setShowSticky] = useState(false)
 
   useEffect(() => {
@@ -198,17 +197,12 @@ export default function HomePage() {
   useEffect(() => {
     const handleScroll = () => {
       const current = window.scrollY
-      const delta = current - lastScrollY.current
 
-      if (current < 50) {
-        setShowSticky(false)
-      } else if (delta < -10) {
+      if (current > 100) {
         setShowSticky(true)
-      } else if (delta > 10) {
+      } else if (current === 0) {
         setShowSticky(false)
       }
-
-      lastScrollY.current = current
     }
 
     window.addEventListener("scroll", handleScroll)
@@ -279,11 +273,11 @@ export default function HomePage() {
               className="absolute left-0 w-full bg-emerald-900/60"
               style={{ bottom: showSticky ? "var(--sticky-nav-h, 0px)" : 0 }}
             >
-              <div className="flex gap-2 md:justify-center overflow-x-auto py-2 px-4 fancy-scroll scroll-px-4">
+              <div className="flex gap-3 md:justify-center overflow-x-auto py-2 px-4 fancy-scroll scroll-px-4">
                 {Array.from({ length: 7 }).map((_, i) => (
                   <div
                     key={i}
-                    className="h-10 min-w-[100px] rounded skel-tab bg-emerald-700/40"
+                    className="h-10 min-w-[80px] rounded-full skel-tab bg-emerald-700/40"
                   />
                 ))}
               </div>
@@ -348,24 +342,31 @@ export default function HomePage() {
               className="absolute left-0 w-full bg-emerald-900/70 backdrop-blur-sm z-30"
               style={{ bottom: showSticky ? "var(--sticky-nav-h, 0px)" : 0 }}
             >
-              <div className="flex gap-0 justify-start md:justify-center overflow-x-auto py-2 px-4 fancy-scroll scroll-px-4">
+              <div className="flex gap-3 justify-start md:justify-center overflow-x-auto py-2 px-4 fancy-scroll scroll-px-4">
                 {heroTabs
                   .filter((cat) => cat.id !== "home")
                   .map((cat) => (
                     <motion.button
                       key={cat.id}
                       onClick={() => setSelectedHeroCategory(cat.id)}
-                      className={`px-4 py-2 min-w-[100px] text-center text-sm font-medium transition-colors duration-200
+                      className={`flex flex-col items-center flex-shrink-0 px-4 py-2 rounded-full min-w-[80px] text-center text-xs font-medium transition-colors duration-200
                         ${
                           selectedHeroCategory === cat.id
-                            ? "text-emerald-200 border-b-2 border-emerald-400"
-                            : "text-white/80 hover:text-white hover:bg-emerald-800/50"
+                            ? "bg-emerald-700 text-emerald-100"
+                            : "bg-emerald-800/40 text-white/80 hover:bg-emerald-800/60"
                         }
                       `}
                       aria-pressed={selectedHeroCategory === cat.id}
-                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
+                      {cat.iconUrl && (
+                        <img
+                          src={cat.iconUrl}
+                          alt={cat.name}
+                          className="w-6 h-6 mb-1 object-contain"
+                        />
+                      )}
                       <span className="whitespace-nowrap">{cat.name}</span>
                     </motion.button>
                   ))}
