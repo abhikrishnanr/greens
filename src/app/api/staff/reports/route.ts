@@ -19,6 +19,7 @@ export async function GET(req: Request) {
   const items = await prisma.bookingItem.findMany({
     where: {
       staffId,
+      status: 'completed',
       booking: { date: { gte: start, lte: end } },
     },
     include: { booking: true, service: true },
