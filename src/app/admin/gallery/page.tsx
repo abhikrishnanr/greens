@@ -14,6 +14,7 @@ import {
   FolderPlus,
   Copy,
 } from 'lucide-react'
+import Image from 'next/image'
 
 interface Image {
   id: string
@@ -392,11 +393,13 @@ export default function GalleryAdminPage() {
                   <div className="px-4 sm:px-6 pb-6">
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                       {g.images.map((img) => (
-                        <div key={img.id} className="group relative">
-                          <img
+                        <div key={img.id} className="group relative h-32 w-full">
+                          <Image
                             src={img.imageUrl}
                             alt=""
-                            className="h-32 w-full rounded-xl object-cover ring-1 ring-gray-200"
+                            fill
+                            className="rounded-xl object-cover ring-1 ring-gray-200"
+                            sizes="(max-width: 768px) 50vw, 33vw"
                           />
 
                           {/* Hover controls */}
@@ -485,7 +488,6 @@ export default function GalleryAdminPage() {
                 <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v4A4 4 0 008 12H4z"></path>
               </svg>
               <span className="text-sm text-gray-800">Processing...</span>
-</span>
             </div>
           </div>
         </div>
