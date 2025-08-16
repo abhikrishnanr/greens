@@ -238,6 +238,21 @@ export default function HomePage() {
     return heroTabs.find((cat) => cat.id === selectedHeroCategory) || heroTabs[0]
   }, [selectedHeroCategory, heroTabs])
 
+  // Dynamically set actual viewport height to handle mobile browser UI chrome
+  useEffect(() => {
+    const updateViewport = () => {
+      const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight
+      document.documentElement.style.setProperty("--app-vh", `${vh}px`)
+    }
+    updateViewport()
+    window.visualViewport?.addEventListener("resize", updateViewport)
+    window.addEventListener("resize", updateViewport)
+    return () => {
+      window.visualViewport?.removeEventListener("resize", updateViewport)
+      window.removeEventListener("resize", updateViewport)
+    }
+  }, [])
+
   const clearSearch = () => setSearchQuery("")
 
   return (
@@ -245,11 +260,14 @@ export default function HomePage() {
       <Header />
 
       {/* HERO SECTION */}
-      <section className="relative flex flex-col overflow-hidden min-h-screen bg-emerald-950">
+      <section
+        className="relative flex flex-col overflow-hidden bg-emerald-950"
+        style={{ minHeight: "var(--app-vh, 100vh)" }}
+      >
         {heroLoading ? (
           <>
             {/* Media placeholder with emerald gradient, content anchored to bottom */}
-            <div className="relative flex-1 min-h-screen">
+            <div className="relative flex-1" style={{ minHeight: "var(--app-vh, 100vh)" }}>
       {/* on-brand gradient + soft pattern */}
       <div className="absolute inset-0 bg-gradient-to-b from-emerald-900 via-emerald-800 to-emerald-900" />
       <div className="absolute inset-0 opacity-30 bg-[radial-gradient(1200px_600px_at_10%_-10%,rgba(16,185,129,.15),transparent_60%),radial-gradient(900px_500px_at_90%_110%,rgba(251,191,36,.12),transparent_60%)]" />
@@ -349,25 +367,16 @@ export default function HomePage() {
                     <motion.button
                       key={cat.id}
                       onClick={() => setSelectedHeroCategory(cat.id)}
-                        className={`flex flex-col items-center flex-shrink-0 px-4 py-2 rounded-md min-w-[80px] text-center text-xs font-medium transition-colors duration-200
-                          ${
-                            selectedHeroCategory === cat.id
-                              ? "bg-emerald-700 text-emerald-100"
-                              : "bg-emerald-800/40 text-white/80 hover:bg-emerald-800/60"
-                          }
-                      `}
+                      className={`relative flex items-center justify-center flex-shrink-0 px-4 py-2 rounded-md min-w-[80px] text-center text-xs font-medium transition-colors duration-200 after:absolute after:top-0 after:right-0 after:w-[2px] after:h-full after:bg-gradient-to-b after:from-yellow-300 after:via-amber-300 after:to-yellow-500 after:content-[''] last:after:hidden ${
+                        selectedHeroCategory === cat.id
+                          ? "bg-emerald-700 text-emerald-100"
+                          : "bg-emerald-800/40 text-white/80 hover:bg-emerald-800/60"
+                      }`}
                       aria-pressed={selectedHeroCategory === cat.id}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      {cat.iconUrl && (
-                        <img
-                          src={cat.iconUrl}
-                          alt={cat.name}
-                          className="w-6 h-6 mb-1 object-contain"
-                        />
-                      )}
-                      <span className="whitespace-nowrap">{cat.name}</span>
+                      <span className="whitespace-nowrap font-semibold tracking-wide">{cat.name}</span>
                     </motion.button>
                   ))}
               </div>
