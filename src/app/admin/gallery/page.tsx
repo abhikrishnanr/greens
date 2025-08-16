@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useEffect, useMemo, useState, useCallback } from 'react'
 import {
@@ -465,12 +465,12 @@ export default function GalleryAdminPage() {
           <Info className="mt-0.5 h-5 w-5 text-emerald-600" />
           <div>
             <h4 className="font-semibold text-gray-900">Pro tips</h4>
-            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-gray-600">
-              <li>Use short, meaningful gallery names (e.g., 'Bridal - May 2025').</li>
-              <li>Drag &amp; drop multiple images at once for faster uploads.</li>
-              <li>Use the "Move" control on each photo to reorganize quickly.</li>
-              <li>Click the copy icon to grab a photo URL for sharing or embedding.</li>
-            </ul>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-gray-600">
+                <li>Use short, meaningful gallery names (e.g., &apos;Bridal - May 2025&apos;).</li>
+                <li>Drag &amp; drop multiple images at once for faster uploads.</li>
+                <li>Use the &quot;Move&quot; control on each photo to reorganize quickly.</li>
+                <li>Click the copy icon to grab a photo URL for sharing or embedding.</li>
+              </ul>
           </div>
         </div>
       </div>
