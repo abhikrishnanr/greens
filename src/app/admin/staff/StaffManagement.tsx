@@ -347,6 +347,9 @@ export default function StaffManagement() {
                 <option value="manager" className="text-black">
                   Manager
                 </option>
+                <option value="admin" className="text-black">
+                  Admin
+                </option>
               </select>
             </div>
 
@@ -616,6 +619,7 @@ export default function StaffManagement() {
                         <option value="staff">Staff</option>
                         <option value="customer_staff">Staff & Customer</option>
                         <option value="manager">Manager</option>
+        <option value="admin">Admin</option>
                       </select>
                     </div>
                     <div>
@@ -720,6 +724,7 @@ export default function StaffManagement() {
                       <option value="staff">Staff</option>
                       <option value="customer_staff">Staff & Customer</option>
                       <option value="manager">Manager</option>
+                      <option value="admin">Admin</option>
                     </select>
                   </div>
                   <div>
