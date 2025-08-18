@@ -445,6 +445,7 @@ export default function HomePage() {
                     path={`/offers/${offer.id}`}
                     title={offer.title}
                     text={offer.subTitle || ""}
+                    image={offer.imageUrl}
                   />
                 </div>
               </div>

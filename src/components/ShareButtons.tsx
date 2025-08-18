@@ -8,9 +8,10 @@ interface ShareButtonsProps {
   path: string
   title: string
   text?: string
+  image?: string
 }
 
-export default function ShareButtons({ path, title, text }: ShareButtonsProps) {
+export default function ShareButtons({ path, title, text, image }: ShareButtonsProps) {
   const [shareUrl, setShareUrl] = useState('')
 
   useEffect(() => {
@@ -19,19 +20,34 @@ export default function ShareButtons({ path, title, text }: ShareButtonsProps) {
 
   const message = `${title}${text ? ` - ${text}` : ''}`
   const encodedUrl = encodeURIComponent(shareUrl)
-  const encodedMessage = encodeURIComponent(`${message} ${shareUrl}`)
+  const messageWithUrl = `${message} ${shareUrl}${image ? ` ${image}` : ''}`
+  const encodedMessage = encodeURIComponent(messageWithUrl)
 
   const handleNativeShare = async () => {
-    if (navigator.share) {
-      try {
+    if (!navigator.share) return
+
+    try {
+      // Try to include the image if the browser supports file sharing
+      if (image && navigator.canShare && navigator.canShare({ files: [] })) {
+        const response = await fetch(image)
+        const blob = await response.blob()
+        const file = new File([blob], 'image', { type: blob.type })
         await navigator.share({
           title,
           text: message,
           url: shareUrl,
+          files: [file],
         })
-      } catch {
-        // ignored
+        return
       }
+
+      await navigator.share({
+        title,
+        text: message,
+        url: shareUrl,
+      })
+    } catch {
+      // ignored
     }
   }
 
@@ -40,7 +56,7 @@ export default function ShareButtons({ path, title, text }: ShareButtonsProps) {
   return (
     <div className="mt-4 flex items-center gap-4 text-emerald-700">
       <a
-        href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodeURIComponent(message)}`}
+        href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedMessage}`}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Share on Facebook"

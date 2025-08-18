@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { headers } from 'next/headers'
+import type { Metadata } from 'next'
 import Header from '@/components/Header'
 import { FiArrowLeft } from 'react-icons/fi'
 import ShareButtons from '@/components/ShareButtons'
@@ -88,10 +89,33 @@ export default async function OfferDetailsPage({ params }: { params: Promise<{ i
                 View All Offers
               </Link>
             </div>
-            <ShareButtons path={`/offers/${id}`} title={offer.title} text={offer.subTitle || ''} />
+            <ShareButtons path={`/offers/${id}`} title={offer.title} text={offer.subTitle || ''} image={offer.imageUrl} />
           </article>
         </div>
       </div>
     </main>
   )
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const headersList = await headers()
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `http://${headersList.get('host')}`
+  try {
+    const res = await fetch(`${baseUrl}/api/limited-time-offers/${id}`, { cache: 'no-store' })
+    if (!res.ok) return {}
+    const offer = await res.json()
+    return {
+      title: offer.title,
+      description: offer.subTitle ?? undefined,
+      openGraph: {
+        title: offer.title,
+        description: offer.subTitle ?? undefined,
+        url: `${baseUrl}/offers/${id}`,
+        images: offer.imageUrl ? [offer.imageUrl] : [],
+      },
+    }
+  } catch {
+    return {}
+  }
 }
