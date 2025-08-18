@@ -19,9 +19,9 @@ export default function ShareButtons({ path, title, text, image }: ShareButtonsP
   }, [path])
 
   const message = `${title}${text ? ` - ${text}` : ''}`
+  const encodedMessage = encodeURIComponent(message)
   const encodedUrl = encodeURIComponent(shareUrl)
-  const messageWithUrl = `${message} ${shareUrl}${image ? ` ${image}` : ''}`
-  const encodedMessage = encodeURIComponent(messageWithUrl)
+  const encodedMessageWithUrl = encodeURIComponent(`${message} ${shareUrl}`)
 
   const handleNativeShare = async () => {
     if (!navigator.share) return
@@ -65,7 +65,7 @@ export default function ShareButtons({ path, title, text, image }: ShareButtonsP
         <FaFacebookF />
       </a>
       <a
-        href={`https://wa.me/?text=${encodedMessage}`}
+        href={`https://wa.me/?text=${encodedMessageWithUrl}`}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Share on WhatsApp"
