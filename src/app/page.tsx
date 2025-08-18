@@ -18,6 +18,7 @@ import { ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Header from "@/components/Header"
 import { FaWhatsapp, FaFacebookF } from "react-icons/fa"
+import ShareButtons from "@/components/ShareButtons"
 
 const CACHE_DURATION = 1000 * 60 * 60 // 1 hour
 
@@ -440,6 +441,12 @@ export default function HomePage() {
                   >
                     View details <FiArrowRight />
                   </Link>
+                  <ShareButtons
+                    path={`/offers/${offer.id}`}
+                    title={offer.title}
+                    text={offer.subTitle || ""}
+                    image={offer.imageUrl}
+                  />
                 </div>
               </div>
             </div>

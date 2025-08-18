@@ -1,19 +1,15 @@
 import Link from 'next/link'
-import { headers } from 'next/headers'
+import type { Metadata } from 'next'
 import Header from '@/components/Header'
 import { FiArrowLeft } from 'react-icons/fi'
+import ShareButtons from '@/components/ShareButtons'
+import { prisma } from '@/lib/prisma'
 
-export default async function OfferDetailsPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  const headersList = await headers()
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `http://${headersList.get('host')}`
+export default async function OfferDetailsPage({ params }: { params: { id: string } }) {
+  const { id } = params
 
-  const res = await fetch(`${baseUrl}/api/limited-time-offers/${id}`, { cache: 'no-store' })
-  if (!res.ok) {
-    return <div className="text-red-500 text-xl p-8">Unable to load offer</div>
-  }
-  const offer = await res.json()
-  if (!offer || !offer.id) {
+  const offer = await prisma.offer.findUnique({ where: { id } })
+  if (!offer) {
     return <div className="text-red-500 text-xl p-8">Offer not found</div>
   }
 
@@ -87,9 +83,31 @@ export default async function OfferDetailsPage({ params }: { params: Promise<{ i
                 View All Offers
               </Link>
             </div>
+            <ShareButtons path={`/offers/${id}`} title={offer.title} text={offer.subTitle || ''} image={offer.imageUrl} />
           </article>
         </div>
       </div>
     </main>
   )
+}
+
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const { id } = params
+  try {
+    const offer = await prisma.offer.findUnique({ where: { id } })
+    if (!offer) return {}
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    return {
+      title: offer.title,
+      description: offer.subTitle ?? undefined,
+      openGraph: {
+        title: offer.title,
+        description: offer.subTitle ?? undefined,
+        url: `${baseUrl}/offers/${id}`,
+        images: offer.imageUrl ? [offer.imageUrl] : [],
+      },
+    }
+  } catch {
+    return {}
+  }
 }
