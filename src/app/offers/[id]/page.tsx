@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { headers } from 'next/headers'
 import Header from '@/components/Header'
 import { FiArrowLeft } from 'react-icons/fi'
+import ShareButtons from '@/components/ShareButtons'
 
 export default async function OfferDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -87,6 +88,7 @@ export default async function OfferDetailsPage({ params }: { params: Promise<{ i
                 View All Offers
               </Link>
             </div>
+            <ShareButtons path={`/offers/${id}`} title={offer.title} text={offer.subTitle || ''} />
           </article>
         </div>
       </div>
