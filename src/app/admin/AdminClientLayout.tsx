@@ -72,20 +72,16 @@ const adminSections: {
         { href: '/admin/gallery', label: 'Gallery', icon: MdPhoto },
       ],
     },
-    {
-      heading: 'Services',
-      items: [
-        { href: '/admin/service-categories', label: 'Categories', icon: MdCategory },
-        { href: '/admin/services', label: 'Services', icon: MdDesignServices },
+  {
+    heading: 'Services',
+    items: [
+      { href: '/admin/service-categories', label: 'Categories', icon: MdCategory },
+      { href: '/admin/services', label: 'Services', icon: MdDesignServices },
       { href: '/admin/featured-services', label: 'Hot Picks', icon: MdStar },
       { href: '/admin/limited-time-offers', label: 'Offers', icon: MdLocalOffer },
       { href: '/admin/premium-services', label: 'Signature Services', icon: MdWorkspacePremium },
       { href: '/admin/variant-price-history', label: 'Price History', icon: MdHistory },
     ],
-  },
-  {
-    heading: 'Settings',
-    items: [{ href: '/admin/users', label: 'Staff Roles', icon: MdPeople }],
   },
 ]
 

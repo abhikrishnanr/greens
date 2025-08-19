@@ -8,14 +8,10 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import {
   Users,
-  UserCheck,
-  UserX,
   Plus,
   Download,
   Search,
   Edit,
-  RotateCcw,
-  Trash2,
   Calendar,
   Mail,
   Phone,
@@ -24,6 +20,8 @@ import {
   Layers,
   Filter,
   X,
+  Eye,
+  EyeOff,
 } from "lucide-react"
 
 interface Branch {
@@ -46,6 +44,7 @@ interface Staff {
   branchId?: string
   branch?: Branch
   removed: boolean
+  password?: string
   createdAt: string
   imageUrl?: string
 }
@@ -64,6 +63,7 @@ export default function StaffManagement() {
   const [phoneVerified, setPhoneVerified] = useState(false)
   const [newPhone, setNewPhone] = useState("")
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   // Fetch
   const fetchStaff = async () => {
@@ -96,11 +96,6 @@ export default function StaffManagement() {
   }, {} as Record<string, number>)
 
   // Handlers
-  const handleToggle = async (id: string, curr: boolean) => {
-    await fetch("/api/staff/toggle", { method: "POST", body: JSON.stringify({ id, removed: !curr }) })
-    fetchStaff()
-  }
-
   const handleExport = () => {
     const headers = [
       "Name",
@@ -207,12 +202,16 @@ export default function StaffManagement() {
       toast.error("Phone must be 10 digits")
       return
     }
+    const active = fd.get("active") === "on"
+    fd.delete("active")
+    fd.append("removed", String(!active))
     fd.append("id", selectedStaff!.id)
     const res = await fetch("/api/staff/update", { method: "POST", body: fd })
     const { success } = await res.json()
     if (success) {
       toast.success("Staff updated successfully!")
       setSelectedStaff(null)
+      setShowPassword(false)
       fetchStaff()
     } else {
       toast.error("Failed to update staff")
@@ -491,24 +490,6 @@ export default function StaffManagement() {
                       <Edit className="w-4 h-4 mr-1" />
                       Edit
                     </Button>
-                    <Button
-                      onClick={() => handleToggle(staff.id, staff.removed)}
-                      size="sm"
-                      variant={staff.removed ? "default" : "destructive"}
-                      className={staff.removed ? "flex-1 bg-emerald-600 hover:bg-emerald-700" : "flex-1"}
-                    >
-                      {staff.removed ? (
-                        <>
-                          <RotateCcw className="w-4 h-4 mr-1" />
-                          Restore
-                        </>
-                      ) : (
-                        <>
-                          <Trash2 className="w-4 h-4 mr-1" />
-                          Remove
-                        </>
-                      )}
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -694,6 +675,23 @@ export default function StaffManagement() {
                     <Input name="phone" defaultValue={selectedStaff.phone} required maxLength={10} pattern="\d{10}" />
                   </div>
                   <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <div className="relative">
+                      <Input
+                        name="password"
+                        type={showPassword ? "text" : "password"}
+                        defaultValue={selectedStaff.password}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-600"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                  <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Gender*</label>
                     <select name="gender" defaultValue={selectedStaff.gender} required className="w-full p-2 border rounded-md">
                       <option value="">Select gender</option>
@@ -728,6 +726,17 @@ export default function StaffManagement() {
                     </select>
                   </div>
                   <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Active</label>
+                    <div className="flex items-center h-10">
+                      <input
+                        type="checkbox"
+                        name="active"
+                        defaultChecked={!selectedStaff.removed}
+                        className="h-4 w-4"
+                      />
+                    </div>
+                  </div>
+                  <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Branch*</label>
                     <select name="branchId" defaultValue={selectedStaff.branchId || ""} required className="w-full p-2 border rounded-md">
                       <option value="">Select branch</option>
@@ -745,7 +754,14 @@ export default function StaffManagement() {
                 </div>
 
                 <div className="flex justify-end gap-3 pt-6 border-t">
-                  <Button type="button" variant="outline" onClick={() => setSelectedStaff(null)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedStaff(null)
+                      setShowPassword(false)
+                    }}
+                  >
                     Cancel
                   </Button>
                   <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
