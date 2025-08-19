@@ -19,7 +19,6 @@ import {
   Building,
   Layers,
   Filter,
-  X,
   Eye,
   EyeOff,
 } from "lucide-react"
@@ -145,20 +144,23 @@ export default function StaffManagement() {
       toast.error("Phone must be 10 digits")
       return
     }
-    const res = await fetch(`/api/staff/check?phone=${newPhone}`)
-    const data = await res.json()
-    if (data.exists) {
-      if (data.user.role !== "customer") {
-        toast.error("User already staff")
-        return
+    try {
+      const res = await fetch(`/api/staff/check?phone=${newPhone}`)
+      const data = await res.json()
+      if (data.exists) {
+        if (data.user.role !== "customer") {
+          toast.error("User already staff")
+          return
+        }
+        toast.info("Existing customer found. Proceeding to add as staff")
+        setExistingCustomer(data.user)
+      } else {
+        setExistingCustomer(null)
       }
-      const ok = window.confirm("Customer exists with this number. Add as staff?")
-      if (!ok) return
-      setExistingCustomer(data.user)
-    } else {
-      setExistingCustomer(null)
+      setPhoneVerified(true)
+    } catch {
+      toast.error("Failed to verify phone")
     }
-    setPhoneVerified(true)
   }
 
   const handleAdd = async (e: FormEvent<HTMLFormElement>) => {
