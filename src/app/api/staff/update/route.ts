@@ -41,6 +41,16 @@ export async function POST(req: Request) {
       branchId:    form.get('branchId') as string,
     };
 
+    const removed = form.get('removed');
+    if (removed !== null) {
+      data.removed = removed === 'true';
+    }
+
+    const password = form.get('password') as string | null;
+    if (password) {
+      data.password = password;
+    }
+
     // If a new image was uploaded, overwrite
     const imageFile = form.get('image') as File | null;
     if (imageFile && imageFile.size > 0) {
