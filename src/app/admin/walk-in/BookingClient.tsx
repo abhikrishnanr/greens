@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react"
 import { useSearchParams } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { format } from "date-fns"
 
 import {
@@ -96,6 +97,13 @@ interface Booking {
 const COLORS = ["#f87171", "#60a5fa", "#34d399", "#fbbf24", "#c084fc", "#f472b6"]
 
 export default function AdminBooking() {
+  const { data: session, status } = useSession()
+  const defaultStaffId =
+    session?.user &&
+    (session.user.role === 'staff' || session.user.role === 'customer_staff')
+      ? session.user.id
+      : ''
+
   const [services, setServices] = useState<ServiceOption[]>([])
   const [selectedSvc, setSelectedSvc] = useState("")
 
@@ -147,14 +155,14 @@ export default function AdminBooking() {
               name: `${t.serviceName} - ${t.variantName}`,
               duration: t.duration || 0,
               price: t.current?.offerPrice ?? t.current?.actualPrice ?? 0,
-              staffId: '',
-              start: '',
+              staffId: defaultStaffId,
+              start: getDefaultSlot(),
             }))
           setItems(pre)
         })
         .catch(err => console.error('prefill variants failed', err))
     }
-  }, [searchParams])
+  }, [searchParams, defaultStaffId])
 
   const loadServices = async () => {
     try {
@@ -173,7 +181,11 @@ export default function AdminBooking() {
       const res = await fetch("/api/staff")
       if (!res.ok) throw new Error("Failed to fetch staff")
       const { staff: staffData } = await res.json()
-      setStaff((staffData as StaffApi[]).filter((s) => !s.removed))
+      let filtered = (staffData as StaffApi[]).filter((s) => !s.removed)
+      if (defaultStaffId) {
+        filtered = filtered.filter((s) => s.id === defaultStaffId)
+      }
+      setStaff(filtered)
     } catch (error) {
       console.error("Error loading staff:", error)
       setResult({ success: false, message: "Failed to load staff members." })
@@ -198,8 +210,14 @@ export default function AdminBooking() {
 
   useEffect(() => {
     loadServices()
-    loadStaff()
   }, [])
+
+  useEffect(() => {
+    if (status !== "loading") {
+      loadStaff()
+    }
+  }, [status, defaultStaffId])
+
   useEffect(() => {
     loadBookings()
   }, [date])
@@ -253,8 +271,8 @@ export default function AdminBooking() {
         name: `${serviceName} - ${variant.name}`,
         duration,
         price,
-        staffId: "",
-         start: getDefaultSlot(), // default current rounded slot
+        staffId: defaultStaffId,
+        start: getDefaultSlot(), // default current rounded slot
       },
     ])
     setSelectedTier("")

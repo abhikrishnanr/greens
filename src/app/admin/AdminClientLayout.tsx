@@ -92,6 +92,7 @@ const staffSections: {
   {
     heading: 'Staff',
     items: [
+      { href: '/admin/walk-in', label: 'Walk-In Booking', icon: MdEvent },
       { href: '/admin/staff/assignments', label: 'Assignments', icon: MdEvent },
       { href: '/admin/staff/reports', label: 'Reports', icon: MdHistory },
     ],
