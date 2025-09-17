@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
     orderBy: { order: "asc" },
     include: {
       variants: {
+        orderBy: { order: "asc" },
         include: {
           serviceTier: {
             include: {
