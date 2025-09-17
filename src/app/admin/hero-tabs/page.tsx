@@ -1,8 +1,8 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import WysiwygEditor from '@/app/components/WysiwygEditor'
-import { Pencil, Trash2 } from 'lucide-react'
-import Select from 'react-select'
+import { ArrowDown, ArrowUp, Pencil, Trash2, X } from 'lucide-react'
+import Select, { MultiValue } from 'react-select'
 
 interface HeroTab {
   id: string
@@ -13,6 +13,7 @@ interface HeroTab {
   heroTitle: string
   heroDescription?: string
   buttonLabel?: string
+  buttonLink?: string
   order?: number
   variantIds: string[]
 }
@@ -22,6 +23,11 @@ interface VariantOption {
   variantName: string
   serviceName: string
   categoryName: string
+}
+
+type VariantSelectOption = {
+  value: string
+  label: string
 }
 
 export default function HeroTabsPage() {
@@ -34,6 +40,7 @@ export default function HeroTabsPage() {
     heroTitle: '',
     heroDescription: '',
     buttonLabel: '',
+    buttonLink: '',
     order: 0,
     variantIds: [],
   }
@@ -75,11 +82,10 @@ export default function HeroTabsPage() {
   const save = async (e: React.FormEvent) => {
     e.preventDefault()
     const method = editing ? 'PUT' : 'POST'
-    const { variantIds, buttonLink, ...rest } = form as any
     await fetch('/api/admin/hero-tabs', {
       method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...rest, variantIds }),
+      body: JSON.stringify(form),
     })
     setForm(empty)
     setEditing(false)
@@ -101,6 +107,48 @@ export default function HeroTabsPage() {
     load()
   }
 
+  const variantLabel = (variant: VariantOption) =>
+    `${variant.categoryName} - ${variant.serviceName} (${variant.variantName})`
+
+  const selectedVariantOptions = useMemo(() => {
+    return form.variantIds
+      .map(id => {
+        const variant = variants.find(v => v.id === id)
+        if (!variant) return null
+        return {
+          value: variant.id,
+          label: variantLabel(variant),
+        }
+      })
+      .filter(Boolean) as VariantSelectOption[]
+  }, [form.variantIds, variants])
+
+  const handleVariantChange = (vals: MultiValue<VariantSelectOption>) => {
+    setForm(prev => ({ ...prev, variantIds: vals.map(v => v.value) }))
+  }
+
+  const moveVariant = (id: string, direction: 'up' | 'down') => {
+    setForm(prev => {
+      const currentIndex = prev.variantIds.indexOf(id)
+      if (currentIndex === -1) return prev
+      const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
+      if (targetIndex < 0 || targetIndex >= prev.variantIds.length) return prev
+      const updated = [...prev.variantIds]
+      ;[updated[currentIndex], updated[targetIndex]] = [
+        updated[targetIndex],
+        updated[currentIndex],
+      ]
+      return { ...prev, variantIds: updated }
+    })
+  }
+
+  const removeVariant = (id: string) => {
+    setForm(prev => ({
+      ...prev,
+      variantIds: prev.variantIds.filter(vId => vId !== id),
+    }))
+  }
+
   return (
     <div className="max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold mb-4 text-green-700">Hero Tabs</h1>
@@ -120,12 +168,14 @@ export default function HeroTabsPage() {
         <div>
           <label className="block font-medium mb-1">Icon Image</label>
           <input type="file" accept="image/*" onChange={e => handleImage(e, 'iconUrl')} />
-          {form.iconUrl && <img src={form.iconUrl} className="h-16 mt-2" />}
+          {form.iconUrl && <img src={form.iconUrl} alt="Selected icon preview" className="h-16 mt-2" />}
         </div>
         <div>
           <label className="block font-medium mb-1">Background Image</label>
           <input type="file" accept="image/*" onChange={e => handleImage(e, 'backgroundUrl')} />
-          {form.backgroundUrl && <img src={form.backgroundUrl} className="h-16 mt-2" />}
+          {form.backgroundUrl && (
+            <img src={form.backgroundUrl} alt="Selected background preview" className="h-16 mt-2" />
+          )}
         </div>
         <div>
           <label className="block font-medium mb-1">Video Source</label>
@@ -148,19 +198,63 @@ export default function HeroTabsPage() {
             classNamePrefix="select"
             options={variants.map(v => ({
               value: v.id,
-              label: `${v.categoryName} - ${v.serviceName} (${v.variantName})`,
+              label: variantLabel(v),
             }))}
-            value={variants
-              .filter(v => form.variantIds.includes(v.id))
-              .map(v => ({
-                value: v.id,
-                label: `${v.categoryName} - ${v.serviceName} (${v.variantName})`,
-              }))}
-            onChange={(vals: any) =>
-              setForm({ ...form, variantIds: vals.map((v: any) => v.value) })
-            }
+            value={selectedVariantOptions}
+            onChange={handleVariantChange}
           />
         </div>
+        {form.variantIds.length > 0 && (
+          <div>
+            <label className="block font-medium mb-2">Selected Service Order</label>
+            <ul className="space-y-2">
+              {form.variantIds.map((id, index) => {
+                const variant = variants.find(v => v.id === id)
+                if (!variant) return null
+                const label = variantLabel(variant)
+                return (
+                  <li
+                    key={id}
+                    className="flex items-center justify-between gap-3 rounded border border-gray-200 bg-gray-50 px-3 py-2"
+                  >
+                    <div className="text-sm text-gray-700">
+                      <span className="font-semibold mr-2">#{index + 1}</span>
+                      <span>{label}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        className="rounded p-1.5 text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
+                        onClick={() => moveVariant(id, 'up')}
+                        disabled={index === 0}
+                        aria-label="Move up"
+                      >
+                        <ArrowUp className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded p-1.5 text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
+                        onClick={() => moveVariant(id, 'down')}
+                        disabled={index === form.variantIds.length - 1}
+                        aria-label="Move down"
+                      >
+                        <ArrowDown className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded p-1.5 text-red-600 transition hover:bg-red-100"
+                        onClick={() => removeVariant(id)}
+                        aria-label="Remove"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        )}
         <button className="bg-green-600 px-4 py-2 rounded text-white" type="submit">{editing ? 'Update' : 'Add'} Tab</button>
       </form>
       <table className="w-full text-left text-sm bg-white rounded shadow border">
@@ -176,7 +270,7 @@ export default function HeroTabsPage() {
           {tabs.map(t => (
             <tr key={t.id} className="border-t">
               <td className="px-3 py-2">{t.name}</td>
-              <td className="px-3 py-2">{t.iconUrl ? <img src={t.iconUrl} className="h-10"/> : '—'}</td>
+              <td className="px-3 py-2">{t.iconUrl ? <img src={t.iconUrl} alt={`${t.name} icon`} className="h-10" /> : '—'}</td>
               <td className="px-3 py-2">{t.order ?? 0}</td>
               <td className="flex gap-2 px-3 py-2">
                 <button className="flex items-center gap-1 px-2 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded" onClick={() => edit(t)}>

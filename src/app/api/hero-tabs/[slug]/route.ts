@@ -15,6 +15,7 @@ export async function GET(
     where: { id: slug },
     include: {
       variants: {
+        orderBy: { order: "asc" },
         include: {
           serviceTier: {
             include: {
@@ -37,6 +38,7 @@ export async function GET(
     const tabs = await prisma.heroTab.findMany({
       include: {
         variants: {
+          orderBy: { order: "asc" },
           include: {
             serviceTier: {
               include: {

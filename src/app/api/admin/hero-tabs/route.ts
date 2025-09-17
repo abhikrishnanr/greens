@@ -4,7 +4,11 @@ import { prisma } from '@/lib/prisma'
 export async function GET() {
   const tabs = await prisma.heroTab.findMany({
     orderBy: { order: 'asc' },
-    include: { variants: true },
+    include: {
+      variants: {
+        orderBy: { order: 'asc' },
+      },
+    },
   })
   const result = tabs.map(t => ({
     ...t,
@@ -28,7 +32,10 @@ export async function POST(req: NextRequest) {
       order: data.order ?? 0,
       variants: {
         create: Array.isArray(data.variantIds)
-          ? data.variantIds.map((id: string) => ({ serviceTierId: id }))
+          ? data.variantIds.map((id: string, index: number) => ({
+              serviceTierId: id,
+              order: index,
+            }))
           : [],
       },
     },
@@ -56,7 +63,10 @@ export async function PUT(req: NextRequest) {
       order: data.order ?? 0,
       variants: {
         create: Array.isArray(data.variantIds)
-          ? data.variantIds.map((id: string) => ({ serviceTierId: id }))
+          ? data.variantIds.map((id: string, index: number) => ({
+              serviceTierId: id,
+              order: index,
+            }))
           : [],
       },
     },

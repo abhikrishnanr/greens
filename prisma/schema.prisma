@@ -260,6 +260,7 @@ model HeroTabVariant {
   heroTab       HeroTab     @relation(fields: [heroTabId], references: [id])
   serviceTierId String
   serviceTier   ServiceTier @relation(fields: [serviceTierId], references: [id])
+  order         Int         @default(0)
 
   @@id([heroTabId, serviceTierId])
 }
