@@ -27,6 +27,7 @@ model User {
   experience  String?   @db.VarChar(191)
   gender      String?   @db.VarChar(191)
   removed     Boolean   @default(false)
+  listInScheduling Boolean @default(true)
   startDate   DateTime? @db.Timestamp(3)
   imageUrl    String?   @db.VarChar(191)
   createdAt   DateTime  @default(now()) @db.Timestamp(3)
