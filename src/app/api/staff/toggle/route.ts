@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireAdmin } from '@/lib/authz';
 
 export async function POST(req: Request) {
+  const guard = await requireAdmin();
+  if (guard instanceof Response) return guard;
+
   const { id, removed } = await req.json();
   try {
     await prisma.user.update({

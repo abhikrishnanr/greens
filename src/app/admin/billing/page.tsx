@@ -138,14 +138,17 @@ export default function BillingPage() {
 
   const applyVoucher = async () => {
     if (!voucher.trim()) return
-    const res = await fetch(`/api/coupon?code=${encodeURIComponent(voucher.trim())}`)
+    const res = await fetch(
+      `/api/coupon?code=${encodeURIComponent(voucher.trim())}&amount=${totalOffer}`
+    )
     if (res.ok) {
       const c = await res.json()
       setCoupon(c)
       showBanner("success", `Voucher "${c.code}" applied`)
     } else {
+      const body = await res.json().catch(() => null)
       setCoupon(null)
-      showBanner("error", "Invalid voucher code")
+      showBanner("error", body?.error || "Invalid voucher code")
     }
   }
 
@@ -165,7 +168,7 @@ export default function BillingPage() {
 
     const phones = Array.from(new Set(svcData.map((s) => s.phone).filter(Boolean))) as string[]
 
-    await fetch("/api/billing", {
+    const res = await fetch("/api/billing", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -178,6 +181,12 @@ export default function BillingPage() {
         services: svcData,
       }),
     })
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => null)
+      showBanner("error", body?.error || "Failed to save bill")
+      return
+    }
 
     setSelected([])
     router.push(`/admin/billing-history?date=${date}`)

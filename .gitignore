@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+/.test-build
 
 # next.js
 /.next/
@@ -43,3 +44,20 @@ next-env.d.ts
 
 # Prisma
 prisma/dev.db
+*.db
+*.sqlite
+
+# Database backups / exports (NEVER commit customer data)
+/backups
+*.sql
+*.sql.gz
+*.dump
+# ...but DO keep Prisma migration SQL under version control:
+!prisma/migrations/**/*.sql
+
+# Local uploaded media (when using the local-disk upload fallback)
+/public/uploads
+
+# Logs
+*.log
+logs/
