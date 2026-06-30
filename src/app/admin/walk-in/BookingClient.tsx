@@ -178,7 +178,7 @@ export default function AdminBooking() {
 
   const loadStaff = async () => {
     try {
-      const res = await fetch("/api/staff")
+      const res = await fetch("/api/staff?scheduling=1")
       if (!res.ok) throw new Error("Failed to fetch staff")
       const { staff: staffData } = await res.json()
       let filtered = (staffData as StaffApi[]).filter((s) => !s.removed)

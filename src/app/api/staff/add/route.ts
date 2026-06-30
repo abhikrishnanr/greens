@@ -29,6 +29,8 @@ export async function POST(req: Request) {
     const startRaw    = form.get('startDate') as string;
     const role        = form.get('role') as string;
     const branchId    = (form.get('branchId') as string) || undefined;
+    // Defaults to true unless the form explicitly sends "false".
+    const listInScheduling = (form.get('listInScheduling') as string) !== 'false';
 
     // 2) Handle the image Blob
     let imageUrl: string | undefined;
@@ -63,6 +65,7 @@ export async function POST(req: Request) {
       role,
       password: 'User@1234',
       removed: false,
+      listInScheduling,
       imageUrl,
     };
 

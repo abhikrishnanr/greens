@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '@/lib/prisma'
 import { randomUUID } from 'crypto'
+import { validateCoupon, allocateDiscount } from '@/lib/coupon'
 
 interface BillGroup {
   id: string
@@ -121,27 +122,79 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
     const billId = randomUUID()
-    for (const s of data.services) {
-      await prisma.billing.create({
-        data: {
-          customerId: data.customerId || null,
-          billId,
-          phone: s.phone,
-          billingName: data.billingName || null,
-          billingAddress: data.billingAddress || null,
-          category: s.category,
-          service: s.service,
-          variant: s.variant,
-          amountBefore: s.amountBefore,
-          amountAfter: s.amountAfter,
-          voucherCode: data.voucherCode || null,
-          paymentMethod: data.paymentMethod || 'cash',
-          paidAt: data.paidAt ? new Date(data.paidAt) : data.paymentMethod === 'paylater' ? null : new Date(),
-          scheduledAt: new Date(s.scheduledAt),
-        },
-      })
+
+    // --- Server-trusted voucher discount ---------------------------------
+    // The client only sends the voucher CODE and the per-line offer prices.
+    // We re-validate the coupon and recompute the discount here so that what
+    // gets written to `Billing.amountAfter` (and therefore every invoice,
+    // billing-history total and report) always reflects the real discount and
+    // can never be inflated/forged from the browser.
+    const lineOffer = data.services.map((s) => Number(s.amountAfter) || 0)
+    const subtotalAfter = lineOffer.reduce((a, b) => a + b, 0)
+
+    let appliedDiscount = 0
+    let appliedCode: string | null = null
+    let coupon: Awaited<ReturnType<typeof prisma.coupon.findUnique>> | null = null
+
+    if (data.voucherCode) {
+      coupon = await prisma.coupon.findUnique({ where: { code: data.voucherCode } })
+      if (!coupon) {
+        return res.status(422).json({ error: 'Invalid voucher code' })
+      }
+      const check = validateCoupon(coupon, subtotalAfter, new Date())
+      if (!check.ok) {
+        return res.status(422).json({ error: 'Voucher cannot be applied', reason: check.reason })
+      }
+      appliedDiscount = check.discount
+      appliedCode = coupon.code
     }
-    return res.status(200).json({ success: true })
+
+    // Spread the discount proportionally across the line items so per-line
+    // `amountAfter` stays consistent with the bill total.
+    const discountedAfter = allocateDiscount(lineOffer, appliedDiscount)
+
+    // Persist all rows + the coupon usage increment atomically. If anything
+    // fails, nothing is written (no partial bills, no double-counted usage).
+    await prisma.$transaction(async (tx) => {
+      for (let i = 0; i < data.services.length; i++) {
+        const s = data.services[i]
+        await tx.billing.create({
+          data: {
+            customerId: data.customerId || null,
+            billId,
+            phone: s.phone,
+            billingName: data.billingName || null,
+            billingAddress: data.billingAddress || null,
+            category: s.category,
+            service: s.service,
+            variant: s.variant,
+            amountBefore: s.amountBefore,
+            amountAfter: discountedAfter[i],
+            voucherCode: appliedCode,
+            paymentMethod: data.paymentMethod || 'cash',
+            paidAt: data.paidAt
+              ? new Date(data.paidAt)
+              : data.paymentMethod === 'paylater'
+                ? null
+                : new Date(),
+            scheduledAt: new Date(s.scheduledAt),
+          },
+        })
+      }
+      if (coupon && appliedDiscount > 0) {
+        await tx.coupon.update({
+          where: { id: coupon.id },
+          data: { timesUsed: { increment: 1 } },
+        })
+      }
+    })
+
+    return res.status(200).json({
+      success: true,
+      billId,
+      discount: appliedDiscount,
+      voucherCode: appliedCode,
+    })
   } catch (err) {
     console.error('billing save error', err)
     return res.status(500).json({ error: 'Failed to save billing' })

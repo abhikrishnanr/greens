@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": ".test-build",
+    "noEmit": false,
+    "jsx": "react-jsx",
+    "skipLibCheck": true
+  },
+  "include": ["src/lib/coupon.ts", "tests/**/*.ts"]
+}

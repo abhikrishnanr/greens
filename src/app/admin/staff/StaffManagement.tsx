@@ -43,6 +43,7 @@ interface Staff {
   branchId?: string
   branch?: Branch
   removed: boolean
+  listInScheduling?: boolean
   password?: string
   createdAt: string
   imageUrl?: string
@@ -56,6 +57,7 @@ export default function StaffManagement() {
   const [searchTerm, setSearchTerm] = useState("")
   const [branchFilter, setBranchFilter] = useState<string>("")
   const [roleFilter, setRoleFilter] = useState<string>("")
+  const [designationFilter, setDesignationFilter] = useState<string>("")
   const [showAddModal, setShowAddModal] = useState(false)
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null)
   const [existingCustomer, setExistingCustomer] = useState<Partial<Staff> | null>(null)
@@ -227,13 +229,33 @@ export default function StaffManagement() {
       .filter((s) => (filter === "ALL" ? true : filter === "REMOVED" ? s.removed : !s.removed))
       .filter((s) => (branchFilter ? s.branchId === branchFilter : true))
       .filter((s) => (roleFilter ? s.role === roleFilter : true))
+      .filter((s) => (designationFilter ? s.designation === designationFilter : true))
       .filter(
         (s) =>
           s.name.toLowerCase().includes(q) ||
           s.email.toLowerCase().includes(q) ||
           s.designation.toLowerCase().includes(q),
       )
-  }, [staffList, filter, searchTerm, branchFilter, roleFilter])
+  }, [staffList, filter, searchTerm, branchFilter, roleFilter, designationFilter])
+
+  // Distinct designations (for the filter dropdown) and grouped rendering.
+  const designationOptions = useMemo(
+    () =>
+      Array.from(new Set(staffList.map((s) => s.designation).filter(Boolean))).sort((a, b) =>
+        a.localeCompare(b),
+      ),
+    [staffList],
+  )
+
+  const groupedStaff = useMemo(() => {
+    const groups = new Map<string, Staff[]>()
+    for (const s of filteredStaff) {
+      const key = s.designation || "Unassigned"
+      if (!groups.has(key)) groups.set(key, [])
+      groups.get(key)!.push(s)
+    }
+    return Array.from(groups.entries()).sort((a, b) => a[0].localeCompare(b[0]))
+  }, [filteredStaff])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -279,7 +301,7 @@ export default function StaffManagement() {
           </div>
 
           {/* Toolbar */}
-          <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto_auto_auto_auto]">
+          <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto_auto_auto_auto_auto]">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/70" />
               <Input
@@ -351,6 +373,24 @@ export default function StaffManagement() {
                 <option value="admin" className="text-black">
                   Admin
                 </option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Briefcase className="h-4 w-4 text-white/80" />
+              <select
+                value={designationFilter}
+                onChange={(e) => setDesignationFilter(e.target.value)}
+                className="h-10 rounded-md border border-white/30 bg-white/10 px-3 text-white outline-none focus:ring-2 focus:ring-white/40"
+              >
+                <option value="" className="text-black">
+                  All Designations
+                </option>
+                {designationOptions.map((d) => (
+                  <option key={d} value={d} className="text-black">
+                    {d}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -426,8 +466,18 @@ export default function StaffManagement() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredStaff.map((staff) => (
+          <div className="space-y-10">
+            {groupedStaff.map(([designation, members]) => (
+              <section key={designation}>
+                <div className="mb-4 flex items-center gap-3">
+                  <h2 className="text-lg font-bold text-gray-800">{designation}</h2>
+                  <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
+                    {members.length}
+                  </span>
+                  <div className="h-px flex-1 bg-gray-200" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {members.map((staff) => (
               <Card
                 key={staff.id}
                 className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
@@ -495,6 +545,9 @@ export default function StaffManagement() {
                   </div>
                 </CardContent>
               </Card>
+                  ))}
+                </div>
+              </section>
             ))}
           </div>
         )}
@@ -619,6 +672,15 @@ export default function StaffManagement() {
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-2">Address*</label>
                       <Input name="address" defaultValue={existingCustomer?.address} required />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        List in appointment scheduling?
+                      </label>
+                      <select name="listInScheduling" defaultValue="true" className="w-full p-2 border rounded-md">
+                        <option value="true">Yes — show when assigning staff to bookings</option>
+                        <option value="false">No — hide from the scheduling staff list</option>
+                      </select>
                     </div>
                   </div>
 
@@ -752,6 +814,19 @@ export default function StaffManagement() {
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">Address*</label>
                     <Input name="address" defaultValue={selectedStaff.address} required />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      List in appointment scheduling?
+                    </label>
+                    <select
+                      name="listInScheduling"
+                      defaultValue={selectedStaff.listInScheduling === false ? "false" : "true"}
+                      className="w-full p-2 border rounded-md"
+                    >
+                      <option value="true">Yes — show when assigning staff to bookings</option>
+                      <option value="false">No — hide from the scheduling staff list</option>
+                    </select>
                   </div>
                 </div>
 

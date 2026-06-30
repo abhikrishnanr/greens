@@ -46,6 +46,11 @@ export async function POST(req: Request) {
       data.removed = removed === 'true';
     }
 
+    const listInScheduling = form.get('listInScheduling');
+    if (listInScheduling !== null) {
+      data.listInScheduling = listInScheduling === 'true';
+    }
+
     const password = form.get('password') as string | null;
     if (password) {
       data.password = password;

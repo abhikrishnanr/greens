@@ -50,6 +50,7 @@ export default function BillingPage() {
   const [selected, setSelected] = useState<string[]>([])
   const [coupon, setCoupon] = useState<Coupon | null>(null)
   const [voucher, setVoucher] = useState("")
+  const [availableCoupons, setAvailableCoupons] = useState<Coupon[]>([])
   const [billingName, setBillingName] = useState("")
   const [billingAddress, setBillingAddress] = useState("")
   const [method, setMethod] = useState("cash")
@@ -61,6 +62,13 @@ export default function BillingPage() {
     setBanner({ type, msg })
     setTimeout(() => setBanner(null), 2600)
   }
+
+  useEffect(() => {
+    fetch("/api/admin/coupons?active=1")
+      .then((r) => (r.ok ? r.json() : { coupons: [] }))
+      .then((d) => setAvailableCoupons(d.coupons || []))
+      .catch(() => setAvailableCoupons([]))
+  }, [])
 
   useEffect(() => {
     const load = async () => {
@@ -136,18 +144,25 @@ export default function BillingPage() {
   const finalTotal = Math.max(0, totalOffer - discount)
   const gstAmount = finalTotal * 0.18
 
-  const applyVoucher = async () => {
-    if (!voucher.trim()) return
-    const res = await fetch(`/api/coupon?code=${encodeURIComponent(voucher.trim())}`)
+  const applyCode = async (code: string) => {
+    const trimmed = code.trim()
+    if (!trimmed) return
+    const res = await fetch(
+      `/api/coupon?code=${encodeURIComponent(trimmed)}&amount=${totalOffer}`
+    )
     if (res.ok) {
       const c = await res.json()
       setCoupon(c)
+      setVoucher(c.code)
       showBanner("success", `Voucher "${c.code}" applied`)
     } else {
+      const body = await res.json().catch(() => null)
       setCoupon(null)
-      showBanner("error", "Invalid voucher code")
+      showBanner("error", body?.error || "Invalid voucher code")
     }
   }
+
+  const applyVoucher = () => applyCode(voucher)
 
   const confirmBilling = async () => {
     if (!selected.length) return
@@ -165,7 +180,7 @@ export default function BillingPage() {
 
     const phones = Array.from(new Set(svcData.map((s) => s.phone).filter(Boolean))) as string[]
 
-    await fetch("/api/billing", {
+    const res = await fetch("/api/billing", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -178,6 +193,12 @@ export default function BillingPage() {
         services: svcData,
       }),
     })
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => null)
+      showBanner("error", body?.error || "Failed to save bill")
+      return
+    }
 
     setSelected([])
     router.push(`/admin/billing-history?date=${date}`)
@@ -493,14 +514,53 @@ export default function BillingPage() {
                       />
                     </div>
 
-                    {/* Voucher */}
+                    {/* Coupons — prominent picker */}
+                    <div className="rounded-lg border border-emerald-200 bg-emerald-50/60 p-3">
+                      <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-emerald-800">
+                        <Ticket className="h-4 w-4" /> Apply a coupon
+                      </div>
+                      {availableCoupons.length === 0 ? (
+                        <p className="text-xs text-emerald-700/70">
+                          No active coupons. Create one under Pricing → Coupons.
+                        </p>
+                      ) : (
+                        <div className="flex flex-wrap gap-2">
+                          {availableCoupons.map((c) => {
+                            const active = coupon?.code === c.code
+                            return (
+                              <button
+                                key={c.id}
+                                type="button"
+                                onClick={() => (active ? clearVoucher() : applyCode(c.code))}
+                                className={`rounded-full border px-3 py-1 text-xs transition ${
+                                  active
+                                    ? "border-emerald-600 bg-emerald-600 text-white"
+                                    : "border-emerald-300 bg-white text-emerald-800 hover:bg-emerald-100"
+                                }`}
+                                title={
+                                  c.discountType === "percent"
+                                    ? `${c.discountValue}% off`
+                                    : `₹${c.discountValue} off`
+                                }
+                              >
+                                {active && <CheckCircle2 className="mr-1 inline h-3 w-3" />}
+                                {c.code} ·{" "}
+                                {c.discountType === "percent" ? `${c.discountValue}%` : `₹${c.discountValue}`}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Voucher (manual code entry) */}
                     <div className="flex gap-2 items-end">
                       <div className="flex-1">
                         <label
                           htmlFor="voucher-code"
                           className="flex items-center gap-2 mb-1 text-sm font-medium"
                         >
-                          <Ticket className="h-4 w-4 text-gray-500" /> Voucher Code
+                          <Ticket className="h-4 w-4 text-gray-500" /> Or enter a code
                         </label>
                         <input
                           id="voucher-code"

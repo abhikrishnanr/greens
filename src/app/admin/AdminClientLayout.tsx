@@ -28,6 +28,7 @@ import {
     MdWork,
     MdSchool,
     MdPhoto,
+    MdConfirmationNumber,
   } from 'react-icons/md'
 import type { IconType } from 'react-icons'
 
@@ -56,31 +57,37 @@ const adminSections: {
       { href: '/admin/customers', label: 'Customers', icon: MdPeople },
     ],
   },
-    {
-      heading: 'Location & Setup',
-      items: [
-        { href: '/admin/branches', label: 'Branches', icon: MdStore },
-        { href: '/admin/hero-tabs', label: 'Hero Banners', icon: MdViewCarousel },
-      ],
-    },
-    {
-      heading: 'Website',
-      items: [
-        { href: '/admin/about', label: 'About Greens', icon: MdInfo },
-        { href: '/admin/jobs', label: 'Jobs @ Greens', icon: MdWork },
-        { href: '/admin/beauty-education', label: 'Beauty Education', icon: MdSchool },
-        { href: '/admin/gallery', label: 'Gallery', icon: MdPhoto },
-      ],
-    },
   {
     heading: 'Services',
     items: [
       { href: '/admin/service-categories', label: 'Categories', icon: MdCategory },
       { href: '/admin/services', label: 'Services', icon: MdDesignServices },
+    ],
+  },
+  {
+    heading: 'Website',
+    items: [
+      { href: '/admin/hero-tabs', label: 'Hero Banners', icon: MdViewCarousel },
       { href: '/admin/featured-services', label: 'Hot Picks', icon: MdStar },
       { href: '/admin/limited-time-offers', label: 'Offers', icon: MdLocalOffer },
       { href: '/admin/premium-services', label: 'Signature Services', icon: MdWorkspacePremium },
+      { href: '/admin/about', label: 'About Greens', icon: MdInfo },
+      { href: '/admin/jobs', label: 'Jobs @ Greens', icon: MdWork },
+      { href: '/admin/beauty-education', label: 'Beauty Education', icon: MdSchool },
+      { href: '/admin/gallery', label: 'Gallery', icon: MdPhoto },
+    ],
+  },
+  {
+    heading: 'Pricing',
+    items: [
       { href: '/admin/variant-price-history', label: 'Price History', icon: MdHistory },
+      { href: '/admin/coupons', label: 'Coupons', icon: MdConfirmationNumber },
+    ],
+  },
+  {
+    heading: 'Setup',
+    items: [
+      { href: '/admin/branches', label: 'Branches', icon: MdStore },
     ],
   },
 ]
