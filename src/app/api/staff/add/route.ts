@@ -9,9 +9,6 @@ cloudinary.config({
 });
 import type { Prisma } from '@prisma/client';
 
-export const config = {
-  api: { bodyParser: false }, 
-};
 
 export async function POST(req: Request) {
   try {
