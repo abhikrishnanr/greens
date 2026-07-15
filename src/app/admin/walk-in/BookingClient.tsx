@@ -67,6 +67,7 @@ interface VariantFull {
 }
 
 interface Selected {
+  id?: string
   serviceId: string
   variantId: string
   name: string
@@ -95,6 +96,31 @@ interface Booking {
 }
 
 const COLORS = ["#f87171", "#60a5fa", "#34d399", "#fbbf24", "#c084fc", "#f472b6"]
+
+const getDefaultSlot = () => {
+  const now = new Date()
+  now.setSeconds(0, 0)
+  const minutes = now.getMinutes()
+  const roundedMinutes = Math.floor(minutes / 15) * 15
+  now.setMinutes(roundedMinutes)
+  return format(now, "HH:mm")
+}
+
+// Round "now" down to nearest 15-min slot, clamped to opening hour (09:00).
+const getRoundedDownSlot = (dateStr: string) => {
+  const d = new Date()
+  const todayStr = format(d, "yyyy-MM-dd")
+  d.setSeconds(0, 0)
+  const rounded = Math.floor(d.getMinutes() / 15) * 15
+  d.setMinutes(rounded)
+
+  if (dateStr === todayStr) {
+    const open = new Date()
+    open.setHours(9, 0, 0, 0)
+    if (d < open) return "09:00"
+  }
+  return format(d, "HH:mm")
+}
 
 export default function AdminBooking() {
   const { data: session, status } = useSession()
@@ -132,6 +158,7 @@ export default function AdminBooking() {
   const formRef = useRef<HTMLFormElement>(null)
   const [attemptSubmit, setAttemptSubmit] = useState(false)
   const [customerStats, setCustomerStats] = useState<{ totalAmount: number; billCount: number } | null>(null)
+  const [dbStatus, setDbStatus] = useState<"checking" | "connected" | "disconnected">("checking")
   const searchParams = useSearchParams()
 
   useEffect(() => {
@@ -210,6 +237,21 @@ export default function AdminBooking() {
 
   useEffect(() => {
     loadServices()
+  }, [])
+
+  useEffect(() => {
+    fetch("/api/health/db", { cache: "no-store" })
+      .then((res) => {
+        if (!res.ok) throw new Error("Database health check failed")
+        return res.json()
+      })
+      .then((data: { connected?: boolean }) => {
+        setDbStatus(data.connected ? "connected" : "disconnected")
+      })
+      .catch((err) => {
+        console.error("Database health check failed", err)
+        setDbStatus("disconnected")
+      })
   }, [])
 
   useEffect(() => {
@@ -364,31 +406,6 @@ const timeOptionsFor = (duration: number) => {
     }
     return false
   }
-
-const getDefaultSlot = () => {
-  const now = new Date();
-  now.setSeconds(0, 0); // Clear seconds/milliseconds
-  const minutes = now.getMinutes();
-  const roundedMinutes = Math.floor(minutes / 15) * 15; // round down to nearest 15 min
-  now.setMinutes(roundedMinutes);
-  return format(now, "HH:mm");
-};
-// Round "now" down to nearest 15-min slot, clamped to opening hour (09:00)
-const getRoundedDownSlot = (dateStr: string) => {
-  const d = new Date();
-  const todayStr = format(d, "yyyy-MM-dd");
-  d.setSeconds(0, 0);
-  const rounded = Math.floor(d.getMinutes() / 15) * 15;
-  d.setMinutes(rounded);
-
-  // clamp to salon hours for today
-  if (dateStr === todayStr) {
-    const open = new Date();
-    open.setHours(9, 0, 0, 0);
-    if (d < open) return "09:00";
-  }
-  return format(d, "HH:mm");
-};
 
 // Find the best default: prefer current rounded slot; if busy, move forward by 15 mins.
 const getBestDefaultSlot = (
@@ -644,6 +661,18 @@ const getBestDefaultSlot = (
       <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
         <h1 className="text-2xl font-bold text-gray-800">Greens Salon Admin: Walk-in Booking</h1>
         <div className="flex items-center gap-3">
+          <div
+            className={`rounded-full px-3 py-1 text-xs font-medium ${
+              dbStatus === "connected"
+                ? "bg-green-100 text-green-700"
+                : dbStatus === "checking"
+                  ? "bg-yellow-100 text-yellow-700"
+                  : "bg-red-100 text-red-700"
+            }`}
+            title="Checks server database connectivity through /api/health/db"
+          >
+            DB: {dbStatus === "checking" ? "Checking" : dbStatus === "connected" ? "Connected" : "Disconnected"}
+          </div>
           <Label htmlFor="booking-date" className="sr-only">
             Booking Date
           </Label>
