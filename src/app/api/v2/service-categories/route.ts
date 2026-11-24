@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { HOMEPAGE_CACHE_HEADERS } from '@/lib/http-cache'
 
 export async function GET() {
   try {
@@ -57,7 +58,7 @@ export async function GET() {
       }
     })
 
-    return NextResponse.json(result)
+    return NextResponse.json(result, { headers: HOMEPAGE_CACHE_HEADERS })
   } catch (err) {
     console.error('v2/service-categories error:', err)
     return NextResponse.json([], { status: 500 })

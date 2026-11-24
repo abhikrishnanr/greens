@@ -31,44 +31,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Tailwind CDN */}
-        <script src="https://cdn.tailwindcss.com/3.4.16"></script>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              tailwind.config = {
-                theme: {
-                  extend: {
-                    colors: {
-                      primary: '#41eb70',
-                      secondary: '#90EE90'
-                    }
-                  }
-                }
-              }
-            `,
-          }}
-        />
-        {/* Google Fonts */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-
-        {/* Remixicon */}
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" />
-
-        {/* Minimal body style fallback */}
-        <style>{`
-          body {
-            margin: 0;
-            background-color: #ffffff;
-            color: #000000;
-            font-family: 'Poppins', sans-serif;
-          }
-        `}</style>
+        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
       </head>
-      <body>
+      <body className="font-sans">
         <Providers>
           <AuthProvider>
             <CartProvider>{children}</CartProvider>

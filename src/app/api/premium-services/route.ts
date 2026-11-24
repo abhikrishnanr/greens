@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { HOMEPAGE_CACHE_HEADERS } from '@/lib/http-cache'
 
 function serialize(plan: any) {
   return {
@@ -46,5 +47,5 @@ export async function GET() {
     },
     orderBy: { order: 'asc' },
   })
-  return NextResponse.json(plans.map(serialize))
+  return NextResponse.json(plans.map(serialize), { headers: HOMEPAGE_CACHE_HEADERS })
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { HOMEPAGE_CACHE_HEADERS } from '@/lib/http-cache'
 
 export async function GET() {
   const featured = await prisma.featuredService.findMany({
@@ -25,5 +26,5 @@ export async function GET() {
       imageUrl: f.service.imageUrl || null,
     })
   })
-  return NextResponse.json(grouped)
+  return NextResponse.json(grouped, { headers: HOMEPAGE_CACHE_HEADERS })
 }

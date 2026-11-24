@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect, useRef, useMemo } from "react"
 import Link from "next/link"
+import { getCloudinaryImageUrl, getCloudinarySrcSet } from "@/lib/cloudinary-image"
 import {
   FiPhone,
   FiYoutube,
@@ -50,6 +51,7 @@ export default function HomePage() {
   const [selectedHeroCategory, setSelectedHeroCategory] = useState<string>("") // default empty until load
   const [heroTabs, setHeroTabs] = useState<any[]>([])
   const [heroLoading, setHeroLoading] = useState(true)
+  const [shouldLoadHeroVideo, setShouldLoadHeroVideo] = useState(false)
   const [featuredServices, setFeaturedServices] = useState<
     Record<string, { id: string; name: string; slug: string; caption: string | null; imageUrl: string | null }[]>
   >({
@@ -69,6 +71,13 @@ export default function HomePage() {
     title: string
     imageUrl?: string | null
     items: PremiumServiceItem[]
+  }
+  interface ServiceListItem {
+    id: string
+    slug?: string | null
+    name: string
+    minActualPrice?: number | null
+    minOfferPrice?: number | null
   }
   const [premiumPlans, setPremiumPlans] = useState<PremiumServicePlan[]>([])
 
@@ -226,10 +235,10 @@ export default function HomePage() {
       .filter(Boolean)
   }, [categories, searchQuery])
 
-  const subServices = useMemo(() => {
+  const subServices = useMemo<ServiceListItem[]>(() => {
     if (!expandedCat) return []
     const cat = filteredCategories.find((c) => c.id === expandedCat)
-    return cat ? cat.services : []
+    return cat && Array.isArray(cat.services) ? cat.services : []
   }, [expandedCat, filteredCategories])
 
   const signatureServices = useMemo(() => Object.values(featuredServices).flat(), [featuredServices])
@@ -252,6 +261,25 @@ export default function HomePage() {
       window.visualViewport?.removeEventListener("resize", updateViewport)
       window.removeEventListener("resize", updateViewport)
     }
+  }, [])
+
+  // Keep the poster as the fast LCP element. The decorative 30-second hero
+  // video is deferred on desktop and skipped on mobile/data-saver connections.
+  useEffect(() => {
+    const connection = (
+      navigator as Navigator & {
+        connection?: { saveData?: boolean; effectiveType?: string }
+      }
+    ).connection
+
+    const isMobile = window.matchMedia("(max-width: 767px)").matches
+    const isConstrained =
+      connection?.saveData || connection?.effectiveType?.includes("2g")
+
+    if (isMobile || isConstrained) return
+
+    const timer = window.setTimeout(() => setShouldLoadHeroVideo(true), 1500)
+    return () => window.clearTimeout(timer)
   }, [])
 
   const clearSearch = () => setSearchQuery("")
@@ -315,24 +343,40 @@ export default function HomePage() {
           transition={{ duration: 0.5 }}
         >
           <div className="absolute inset-0 z-0">
-            {currentHeroContent.videoSrc && selectedHeroCategory === "home" ? (
+            <img
+              src={getCloudinaryImageUrl(
+                currentHeroContent.backgroundUrl || "/placeholder.svg",
+                1600,
+                { quality: "auto:eco" },
+              )}
+              srcSet={getCloudinarySrcSet(
+                currentHeroContent.backgroundUrl,
+                [640, 960, 1280, 1600, 1920],
+                { quality: "auto:eco" },
+              )}
+              sizes="100vw"
+              alt={currentHeroContent.name || "Greens Beauty Salon"}
+              className="h-full w-full object-cover"
+              fetchPriority="high"
+              loading="eager"
+              decoding="async"
+            />
+            {currentHeroContent.videoSrc &&
+            selectedHeroCategory === "home" &&
+            shouldLoadHeroVideo ? (
               <video
                 autoPlay
                 loop
                 muted
                 playsInline
-                className="w-full h-full object-cover"
-                poster={currentHeroContent.backgroundUrl}
+                preload="none"
+                aria-hidden="true"
+                className="absolute inset-0 h-full w-full object-cover"
+                poster={getCloudinaryImageUrl(currentHeroContent.backgroundUrl, 1600)}
               >
                 <source src={currentHeroContent.videoSrc} type="video/mp4" />
               </video>
-            ) : (
-              <img
-                src={currentHeroContent.backgroundUrl || "/placeholder.svg"}
-                alt={currentHeroContent.name || "Background"}
-                className="w-full h-full object-cover"
-              />
-            )}
+            ) : null}
           </div>
 
           <div className="relative z-20 text-white max-w-3xl space-y-4" style={{paddingBottom: "calc(var(--hero-tabs-h, 56px) + var(--sticky-nav-h, 0px) + 12px)",}}>
@@ -424,9 +468,18 @@ export default function HomePage() {
                 <div className="h-1 rounded-t-[16px] bg-gradient-to-r from-amber-400 via-emerald-500 to-amber-400" />
                 {offer.imageUrl && (
                   <img
-                    src={offer.imageUrl}
+                    src={getCloudinaryImageUrl(offer.imageUrl, 640, { aspectRatio: 2, crop: "fill" })}
+                    srcSet={getCloudinarySrcSet(offer.imageUrl, [320, 480, 640, 960], {
+                      aspectRatio: 2,
+                      crop: "fill",
+                    })}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     alt={offer.title}
+                    width={640}
+                    height={320}
                     className="w-full h-40 object-cover rounded-t-[16px]"
+                    loading="lazy"
+                    decoding="async"
                   />
                 )}
                 <div className="p-4">
@@ -484,9 +537,18 @@ export default function HomePage() {
           >
             {plan.imageUrl && (
               <img
-                src={plan.imageUrl}
+                src={getCloudinaryImageUrl(plan.imageUrl, 720, { aspectRatio: 2, crop: "fill" })}
+                srcSet={getCloudinarySrcSet(plan.imageUrl, [360, 540, 720, 960], {
+                  aspectRatio: 2,
+                  crop: "fill",
+                })}
+                sizes="(max-width: 768px) 100vw, 50vw"
                 alt={plan.title}
+                width={720}
+                height={320}
                 className="w-full h-40 object-cover rounded mb-4"
+                loading="lazy"
+                decoding="async"
               />
             )}
             <h3 className="text-xl font-bold mb-4 text-center text-[#FFD86B]">
@@ -572,10 +634,22 @@ export default function HomePage() {
                       viewport={{ once: true, amount: 0.2 }}
                     >
                       <img
-                        src={service.imageUrl || `/placeholder.svg?height=400&width=320&query=${service.name}`}
+                        src={getCloudinaryImageUrl(
+                          service.imageUrl || `/placeholder.svg?height=400&width=320&query=${service.name}`,
+                          640,
+                          { aspectRatio: 5 / 6, crop: "fill" },
+                        )}
+                        srcSet={getCloudinarySrcSet(service.imageUrl, [320, 480, 640, 800], {
+                          aspectRatio: 5 / 6,
+                          crop: "fill",
+                        })}
+                        sizes="(max-width: 640px) 18rem, 20rem"
                         alt={service.name}
+                        width={640}
+                        height={768}
                         className="w-full h-80 sm:h-96 object-cover transition-transform duration-500 group-hover:scale-105"
                         loading="lazy"
+                        decoding="async"
                       />
                       {/* Smooth bottom fade — no middle band */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
@@ -616,7 +690,15 @@ export default function HomePage() {
               </div>
             </div>
             <div className="rounded-2xl overflow-hidden border border-emerald-200">
-              <img src="/academy-banner.jpg" alt="Academy" className="w-full h-64 object-cover" />
+              <img
+                src="/academy-banner.jpg"
+                alt="Academy"
+                width={1024}
+                height={559}
+                className="w-full h-64 object-cover"
+                loading="lazy"
+                decoding="async"
+              />
             </div>
           </div>
         </div>
@@ -723,9 +805,17 @@ export default function HomePage() {
                       <div className="flex min-w-0 items-center gap-4">
                         <div className="relative">
                           <img
-                            src={cat.imageUrl || "/placeholder.svg?height=60&width=60"}
+                            src={getCloudinaryImageUrl(
+                              cat.imageUrl || "/placeholder.svg?height=60&width=60",
+                              112,
+                              { aspectRatio: 1, crop: "fill" },
+                            )}
                             alt={cat.name}
+                            width={56}
+                            height={56}
                             className="w-14 h-14 rounded-xl object-cover ring-1 ring-emerald-700/60"
+                            loading="lazy"
+                            decoding="async"
                           />
                           <span className="pointer-events-none absolute -bottom-1 -right-1 inline-flex h-5 items-center justify-center rounded-full bg-emerald-700/80 px-1.5 text-xs text-emerald-50">
                             {cat.services?.length || 0}
@@ -817,11 +907,8 @@ export default function HomePage() {
   id="about"
   className="relative py-10 sm:py-12 overflow-hidden"
   style={{
-    backgroundImage:
-      "linear-gradient(rgba(250,252,249,0.96), rgba(250,252,249,0.96)), url('/luxury-salon-mural.png')",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundAttachment: "fixed",
+    background:
+      "radial-gradient(circle at 10% 10%, rgba(16,185,129,0.12), transparent 35%), radial-gradient(circle at 90% 90%, rgba(251,191,36,0.12), transparent 35%), #fafcf9",
   }}
 >
   {/* compact glows */}
@@ -994,9 +1081,9 @@ export default function HomePage() {
 
       {/* BOOKING & CONTACT SECTION (DARK with BG Image) */}
       <section
-        className="py-16 sm:py-24 bg-cover bg-center bg-fixed"
+        className="py-16 sm:py-24 bg-cover bg-center"
         style={{
-          backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/serene-salon-interior.png')",
+          backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/serene-salon-interior.webp')",
         }}
       >
         <div className="container mx-auto px-6 relative z-10">
