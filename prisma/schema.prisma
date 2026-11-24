@@ -1,75 +1,322 @@
+// 1. Prisma Client generator
 generator client {
   provider = "prisma-client-js"
 }
 
+// 2. Database connection
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  PARTICIPANT
-  ADMIN
-}
-
-enum SubmissionType {
-  PHOTO
-  VIDEO
-}
-
-enum SubmissionStatus {
-  DRAFT
-  SUBMITTED
-}
-
-enum ReviewDecision {
-  PENDING
-  SELECTED
-  REJECTED
-}
+// 3. Models
 
 model User {
+  id          String    @id @default(uuid()) @db.VarChar(191)
+  name        String?   @db.VarChar(191)
+  email       String?   @unique @db.VarChar(191)
+  role        String    @default("customer") @db.VarChar(191)
+  password    String?   @db.VarChar(191)
+  modules     Json?     @default("[]")
+  branchId    String?   @db.VarChar(191)
+  branch      Branch?   @relation(fields: [branchId], references: [id])
+  phone       String?   @unique @db.VarChar(191)
+  address     String?   @db.Text
+  designation String?   @db.VarChar(191)
+  dob         DateTime? @db.Timestamp(3)
+  experience  String?   @db.VarChar(191)
+  gender      String?   @db.VarChar(191)
+  removed     Boolean   @default(false)
+  startDate   DateTime? @db.Timestamp(3)
+  imageUrl    String?   @db.VarChar(191)
+  createdAt   DateTime  @default(now()) @db.Timestamp(3)
+  updatedAt   DateTime  @default(now()) @updatedAt @db.Timestamp(3)
+
+  bookings  Booking[]
+  enquiries Enquiry[]
+}
+
+model Branch {
+  id        String   @id @db.VarChar(191)
+  name      String   @db.VarChar(191)
+  address   String   @db.VarChar(191)
+  phone     String   @db.VarChar(191)
+  upiId     String?  @db.VarChar(191)
+  qrUrl     String?  @db.VarChar(191)
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(3)
+
+  users         User[]
+  branchService BranchService[]
+}
+
+model Coupon {
+  id             String   @id @db.VarChar(191)
+  code           String   @unique @db.VarChar(191)
+  description    String?  @db.VarChar(191)
+  discountType   String   @db.VarChar(191)
+  discountValue  Float
+  startDate      DateTime @db.Timestamp(3)
+  endDate        DateTime @db.DateTime(3)
+  minAmount      Float?
+  maxRedemptions Int?
+  timesUsed      Int      @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now()) @db.Timestamp(3)
+  updatedAt      DateTime @default(now()) @updatedAt @db.Timestamp(3)
+}
+
+model ServiceCategory {
   id          String       @id @default(uuid())
-  email       String       @unique
-  name        String?
-  role        Role         @default(PARTICIPANT)
-  submissions Submission[]
-  reviews     Review[]     @relation("ReviewReviewer")
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  name        String       @unique
+  description String?      @db.LongText
+  imageUrl    String?
+  order       Int          @default(0)
+  services    Service[]
+  servicesNew ServiceNew[]
+  caption     String?
 }
 
-model Submission {
-  id          String            @id @default(uuid())
-  userId      String
-  user        User              @relation(fields: [userId], references: [id])
-  type        SubmissionType
+model Service {
+  id                         String           @id @db.VarChar(191)
+  applicableTo               String           @map("applicable_to") @db.VarChar(191)
+  mainServiceName            String           @map("main_service_name") @db.VarChar(191)
+  mainServiceNameDescription String?          @map("main_service_name_description") @db.LongText // CHANGED!
+  subCategory                String           @map("sub_category") @db.VarChar(191)
+  costCategory               String           @map("cost_category") @db.VarChar(191)
+  serviceDescription         String?          @map("service_description") @db.LongText // CHANGED!
+  searchTags                 String?          @map("search_tags") @db.Text
+  imageUrl                   String?          @map("image_url") @db.VarChar(191)
+  categoryImageUrl           String?          @map("category_image_url") @db.VarChar(191)
+  duration                   Int
+  active                     Boolean          @default(true)
+  createdAt                  DateTime         @default(now()) @db.Timestamp(3)
+  updatedAt                  DateTime         @default(now()) @updatedAt @db.Timestamp(3)
+  order                      Int              @default(0)
+  category                   ServiceCategory? @relation(fields: [categoryId], references: [id])
+  categoryId                 String?
+  caption                    String?
+
+  branchService BranchService[]
+
+  @@map("service")
+}
+
+model ServiceImage {
+  id        String     @id @default(uuid())
+  imageUrl  String
+  caption   String?
+  service   ServiceNew @relation(fields: [serviceId], references: [id])
+  serviceId String
+}
+
+model BranchService {
+  branch    Branch  @relation(fields: [branchId], references: [id])
+  branchId  String  @db.VarChar(191)
+  service   Service @relation(fields: [serviceId], references: [id])
+  serviceId String  @db.VarChar(191)
+
+  @@id([branchId, serviceId])
+  @@map("branch_service")
+}
+
+model ServiceNew {
+  id               String            @id @default(uuid())
+  categoryId       String
+  category         ServiceCategory   @relation(fields: [categoryId], references: [id])
+  name             String
+  slug             String            @unique
+  caption          String?
+  description      String?           @db.LongText
+  imageUrl         String?
+  applicableTo     String            @map("applicable_to") @db.VarChar(191)
+  order            Int               @default(0)
+  images           ServiceImage[]
+  tiers            ServiceTier[]
+  featuredServices FeaturedService[]
+}
+
+model ServiceTier {
+  id           String                    @id @default(uuid())
+  serviceId    String
+  service      ServiceNew                @relation(fields: [serviceId], references: [id])
+  name         String
+  actualPrice  Float
+  offerPrice   Float?
+  duration     Int?
+  priceHistory ServiceTierPriceHistory[]
+  heroTabs     HeroTabVariant[]
+  premiumItems PremiumServiceItem[]
+}
+
+model ServiceTierPriceHistory {
+  id          String      @id @default(uuid()) @db.VarChar(191)
+  tierId      String      @db.VarChar(191)
+  tier        ServiceTier @relation(fields: [tierId], references: [id])
+  actualPrice Float       @map("actual_price")
+  offerPrice  Float?      @map("offer_price")
+  startDate   DateTime    @default(now()) @map("start_date") @db.Timestamp(3)
+  endDate     DateTime?   @map("end_date") @db.Timestamp(3)
+  changedAt   DateTime    @default(now()) @map("changed_at") @db.Timestamp(3)
+
+  @@map("servicetierpricehistory")
+}
+
+model FeaturedService {
+  id           String     @id @default(uuid())
+  serviceId    String
+  service      ServiceNew @relation(fields: [serviceId], references: [id])
+  applicableTo String     @db.VarChar(191)
+  order        Int        @default(0)
+  createdAt    DateTime   @default(now()) @db.Timestamp(3)
+  updatedAt    DateTime   @default(now()) @updatedAt @db.Timestamp(3)
+}
+
+model PremiumService {
+  id        String               @id @default(uuid())
+  title     String
+  imageUrl  String?
+  order     Int                  @default(0)
+  items     PremiumServiceItem[]
+  createdAt DateTime             @default(now()) @db.Timestamp(3)
+  updatedAt DateTime             @default(now()) @updatedAt @db.Timestamp(3)
+}
+
+model PremiumServiceItem {
+  id               String         @id @default(uuid())
+  premiumService   PremiumService @relation(fields: [premiumServiceId], references: [id], onDelete: Cascade)
+  premiumServiceId String
+  serviceTier      ServiceTier    @relation(fields: [serviceTierId], references: [id])
+  serviceTierId    String
+  order            Int            @default(0)
+}
+
+model Booking {
+  id        String        @id @default(uuid())
+  customer  String?       @db.VarChar(191)
+  phone     String?       @db.VarChar(191)
+  gender    String        @db.VarChar(191)
+  age       Int?
+  staffId   String        @db.VarChar(191)
+  staff     User          @relation(fields: [staffId], references: [id])
+  date      String        @db.VarChar(10)
+  start     String        @db.VarChar(5)
+  color     String        @db.VarChar(191)
+  status    String        @default("pending") @db.VarChar(191)
+  createdAt DateTime      @default(now()) @db.Timestamp(3)
+  items     BookingItem[]
+}
+
+model BookingItem {
+  id        String  @id @default(uuid())
+  bookingId String  @db.VarChar(191)
+  booking   Booking @relation(fields: [bookingId], references: [id])
+  serviceId String  @db.VarChar(191)
+  tierId    String  @db.VarChar(191)
+  name      String  @db.VarChar(191)
+  duration  Int
+  price     Float
+  staffId   String  @db.VarChar(191)
+  start     String  @db.VarChar(5)
+  status    String  @default("pending") @db.VarChar(191)
+}
+
+model Billing {
+  id             String    @id @default(uuid())
+  billId         String    @db.VarChar(191)
+  customerId     String?   @db.VarChar(191)
+  phone          String?   @db.VarChar(191)
+  billingName    String?   @db.VarChar(191)
+  billingAddress String?   @db.VarChar(191)
+  category       String    @db.VarChar(191)
+  service        String    @db.VarChar(191)
+  variant        String    @db.VarChar(191)
+  amountBefore   Float
+  amountAfter    Float
+  voucherCode    String?   @db.VarChar(191)
+  paymentMethod  String    @default("cash") @db.VarChar(191)
+  paidAt         DateTime? @db.Timestamp(3)
+  scheduledAt    DateTime  @db.Timestamp(3)
+  createdAt      DateTime  @default(now()) @db.Timestamp(3)
+}
+
+model HeroTab {
+  id              String  @id @default(uuid())
+  name            String
+  iconUrl         String?
+  backgroundUrl   String?
+  videoSrc        String?
+  heroTitle       String
+  heroDescription String?
+  buttonLabel     String?
+  buttonLink      String?
+  order           Int     @default(0)
+
+  variants HeroTabVariant[]
+}
+
+model HeroTabVariant {
+  heroTabId     String
+  heroTab       HeroTab     @relation(fields: [heroTabId], references: [id])
+  serviceTierId String
+  serviceTier   ServiceTier @relation(fields: [serviceTierId], references: [id])
+
+  @@id([heroTabId, serviceTierId])
+}
+
+model Enquiry {
+  id            String    @id @default(uuid()) @db.VarChar(191)
+  customerId    String?   @db.VarChar(191)
+  customer      User?     @relation(fields: [customerId], references: [id])
+  name          String?   @db.VarChar(191)
+  phone         String?   @db.VarChar(191)
+  gender        String?   @db.VarChar(191)
+  enquiry       String?   @db.LongText
+  variantIds    String?   @db.Text
+  status        String    @default("new") @db.VarChar(191)
+  remark        String?   @db.Text
+  source        String    @default("admin") @db.VarChar(191)
+  preferredDate DateTime? @db.Date
+  preferredTime String?   @db.VarChar(191)
+
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(3)
+}
+
+model Offer {
+  id          String   @id @default(uuid())
   title       String
-  description String?
-  fileUrl     String
-  fileKey     String
-  mime        String
-  sizeBytes   Int
-  status      SubmissionStatus  @default(DRAFT)
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  reviews     Review[]
-
-  @@unique([userId, type])
+  subTitle    String?  @db.VarChar(191)
+  category    String?  @db.VarChar(191)
+  description String?  @db.LongText
+  imageUrl    String?  @db.VarChar(191)
+  createdAt   DateTime @default(now()) @db.Timestamp(3)
+  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamp(3)
 }
 
-model Review {
-  id           String          @id @default(uuid())
-  submissionId String
-  submission   Submission      @relation(fields: [submissionId], references: [id])
-  level        Int
-  reviewerId   String?
-  reviewer     User?           @relation("ReviewReviewer", fields: [reviewerId], references: [id])
-  decision     ReviewDecision  @default(PENDING)
-  comments     String?
-  decidedAt    DateTime?
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
+model StaticPage {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  title     String
+  content   String?  @db.LongText
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(3)
+}
 
-  @@unique([submissionId, level])
+model Gallery {
+  id        String         @id @default(uuid())
+  title     String
+  images    GalleryImage[]
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(3)
+}
+
+model GalleryImage {
+  id        String   @id @default(uuid())
+  imageUrl  String
+  caption   String?
+  gallery   Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+  galleryId String
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(3)
 }

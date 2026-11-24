@@ -1,0 +1,6 @@
+ALTER TABLE `Enquiry`
+    ADD COLUMN `name` VARCHAR(191) NULL,
+    ADD COLUMN `phone` VARCHAR(191) NULL,
+    ADD COLUMN `gender` VARCHAR(191) NULL,
+    ADD COLUMN `source` VARCHAR(191) NOT NULL DEFAULT 'admin',
+    MODIFY `customerId` VARCHAR(191) NULL;

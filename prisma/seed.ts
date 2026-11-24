@@ -1,111 +1,113 @@
-import { PrismaClient } from '@prisma/client'
+// prisma/seed.js
+const { PrismaClient } = require('@prisma/client');
+const fs = require('fs');
+const path = require('path');
+const Papa = require('papaparse');
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
+
+function slugify(title) {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+}
 
 async function main() {
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@example.com' },
-    update: {},
-    create: {
-      email: 'admin@example.com',
-      name: 'Admin User',
-      role: 'ADMIN',
-    },
-  })
+  const csvPath = path.join(__dirname, 'Rate_Chart_with_Main___Service_Descriptions.csv');
+  const csv = fs.readFileSync(csvPath, 'utf8');
+  const { data } = Papa.parse(csv, {
+    header: true,
+    skipEmptyLines: true
+  });
 
-  const participant = await prisma.user.upsert({
-    where: { email: 'participant@example.com' },
-    update: {},
-    create: {
-      email: 'participant@example.com',
-      name: 'Participant User',
-      role: 'PARTICIPANT',
-    },
-  })
+  // fetch all branch IDs once
+  const branches = await prisma.branch.findMany({ select: { id: true } });
 
-  const submission = await prisma.submission.upsert({
-    where: {
-      userId_type: {
-        userId: participant.id,
-        type: 'PHOTO',
+  const categoryMap = new Map();
+  const serviceMap = new Map();
+
+  for (const row of data) {
+    const id = row.service_id;
+
+    const categoryName = row['Main Service Name'];
+    let category = categoryMap.get(categoryName);
+    if (!category) {
+      category = await prisma.serviceCategory.upsert({
+        where: { name: categoryName },
+        create: {
+          name: categoryName,
+          description: row['Main Service Name Description'] || null,
+        },
+        update: {},
+      });
+      categoryMap.set(categoryName, category);
+    }
+
+    const svcKey = `${category.id}-${row['Sub category']}`;
+    let svc = serviceMap.get(svcKey);
+    if (!svc) {
+      svc = await prisma.serviceNew.create({
+        data: {
+          categoryId: category.id,
+          name: row['Sub category'],
+          slug: slugify(`${row['Sub category']} ${row['Applicable to'] || 'female'}`),
+          caption: row['Service Description']?.slice(0, 120) || null,
+          description: row['Service Description'] || null,
+          applicableTo: row['Applicable to'] || 'female',
+        },
+      });
+      serviceMap.set(svcKey, svc);
+    }
+
+    await prisma.serviceTier.create({
+      data: {
+        serviceId: svc.id,
+        name: row['Cost Category'],
+        actualPrice: parseFloat(row['Actual Price'] || '0'),
+        offerPrice: row['Offer Price'] ? parseFloat(row['Offer Price']) : null,
+        duration: parseInt(row.Duration || '0', 10),
       },
-    },
-    update: {
-      title: 'Community Garden Photo',
-      description: 'A photo submission showing the community garden in bloom.',
-      fileUrl: 'https://example.com/submissions/community-garden.jpg',
-      fileKey: 'community-garden.jpg',
-      mime: 'image/jpeg',
-      sizeBytes: 256000,
-      status: 'SUBMITTED',
-    },
-    create: {
-      userId: participant.id,
-      type: 'PHOTO',
-      title: 'Community Garden Photo',
-      description: 'A photo submission showing the community garden in bloom.',
-      fileUrl: 'https://example.com/submissions/community-garden.jpg',
-      fileKey: 'community-garden.jpg',
-      mime: 'image/jpeg',
-      sizeBytes: 256000,
-      status: 'SUBMITTED',
-    },
-  })
-
-  await prisma.review.upsert({
-    where: {
-      submissionId_level: {
-        submissionId: submission.id,
-        level: 1,
+    });
+    // 1) Upsert service
+    await prisma.service.upsert({
+      where: { id },
+      create: {
+        id,
+        applicableTo: row['Applicable to'],
+        mainServiceName: row['Main Service Name'],
+        mainServiceNameDescription: row['Main Service Name Description'] || null,
+        subCategory: row['Sub category'],
+        costCategory: row['Cost Category'],
+        serviceDescription: row['Service Description'] || null,
+        searchTags: row['Search Tags'] || null,
+        duration: parseInt(row.Duration || '0', 10),
+        active: true,
       },
-    },
-    update: {
-      reviewerId: admin.id,
-      decision: 'SELECTED',
-      comments: 'Great composition and storytelling.',
-      decidedAt: new Date(),
-    },
-    create: {
-      submissionId: submission.id,
-      level: 1,
-      reviewerId: admin.id,
-      decision: 'SELECTED',
-      comments: 'Great composition and storytelling.',
-      decidedAt: new Date(),
-    },
-  })
+      update: {}
+    });
 
-  await prisma.review.upsert({
-    where: {
-      submissionId_level: {
-        submissionId: submission.id,
-        level: 2,
-      },
-    },
-    update: {
-      reviewerId: admin.id,
-      decision: 'PENDING',
-      comments: null,
-      decidedAt: null,
-    },
-    create: {
-      submissionId: submission.id,
-      level: 2,
-      reviewerId: admin.id,
-      decision: 'PENDING',
-      comments: null,
-      decidedAt: null,
-    },
-  })
+    // Legacy price history removed
 
-  console.log('✅ Seed data has been inserted.')
+    // 3) Link service to all branches (global catalog)
+    for (const { id: branchId } of branches) {
+      await prisma.branchService.upsert({
+        where: { branchId_serviceId: { branchId, serviceId: id } },
+        create: { branchId, serviceId: id },
+        update: {}
+      });
+    }
+  }
+
+  console.log('✅ Seeding complete');
 }
 
 main()
-  .catch((error) => {
-    console.error('❌ Seeding failed:', error)
-    process.exit(1)
+  .catch(e => {
+    console.error(e);
+    process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect()
-  })
+    await prisma.$disconnect();
+  });
