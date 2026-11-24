@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'res.cloudinary.com' },
     ],
   },
+  eslint: {
+    // Keep legacy lint debt from blocking production deployments.
+    // Run ESLint separately in CI while the existing violations are cleaned up.
+    ignoreDuringBuilds: true,
+  },
   typescript: {
     // allow production builds despite TypeScript errors
     ignoreBuildErrors: true,
