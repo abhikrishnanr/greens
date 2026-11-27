@@ -12,6 +12,7 @@ export default function SignInClient() {
   const [error, setError] = useState('')
   const [roles, setRoles] = useState<{ admin: boolean; staff: boolean; customer: boolean } | null>(null)
   const [loading, setLoading] = useState(false)
+  const [roleLoading, setRoleLoading] = useState<'admin' | 'staff' | 'customer' | null>(null)
   const router = useRouter()
 
   // --- helpers: digits only + 10 max ---
@@ -60,6 +61,12 @@ export default function SignInClient() {
     }
   }
 
+  const handleRoleSelect = async (role: 'staff' | 'customer' | 'admin') => {
+    setRoleLoading(role)
+    await selectRole(role)
+  }
+
+
   const selectRole = async (role: 'staff' | 'customer' | 'admin') => {
     await fetch('/api/auth/set-role', {
       method: 'POST',
@@ -96,26 +103,56 @@ export default function SignInClient() {
             <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center mt-2">
               {roles.admin && (
                 <button
-                  onClick={() => selectRole('admin')}
-                  className="flex-1 inline-flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-emerald-600 text-white font-semibold shadow hover:bg-emerald-700 transition-colors"
+                  onClick={() => handleRoleSelect('admin')}
+                  disabled={!!roleLoading}
+                  className="flex-1 inline-flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-emerald-600 text-white font-semibold shadow hover:bg-emerald-700 transition-colors disabled:opacity-50"
                 >
-                  <Shield /> Admin
+                  {roleLoading === 'admin' ? (
+                    <>
+                      <Loader2 className="animate-spin" /> Loading...
+                    </>
+                  ) : (
+                    <>
+                      <Shield /> Admin
+                    </>
+                  )}
+
                 </button>
               )}
               {roles.staff && (
                 <button
-                  onClick={() => selectRole('staff')}
-                  className="flex-1 inline-flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-emerald-600 text-white font-semibold shadow hover:bg-emerald-700 transition-colors"
+                  onClick={() => handleRoleSelect('staff')}
+                  disabled={!!roleLoading}
+                  className="flex-1 inline-flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-emerald-600 text-white font-semibold shadow hover:bg-emerald-700 transition-colors disabled:opacity-50"
                 >
-                  <Users /> Staff
+                  {roleLoading === 'staff' ? (
+                    <>
+                      <Loader2 className="animate-spin" /> Loading...
+                    </>
+                  ) : (
+                    <>
+                      <Users /> Staff
+                    </>
+                  )}
+
                 </button>
               )}
               {roles.customer && (
                 <button
-                  onClick={() => selectRole('customer')}
-                  className="flex-1 inline-flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-emerald-50 text-emerald-900 font-semibold shadow hover:bg-emerald-100 transition-colors"
+                  onClick={() => handleRoleSelect('customer')}
+                  disabled={!!roleLoading}
+                  className="flex-1 inline-flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-emerald-50 text-emerald-900 font-semibold shadow hover:bg-emerald-100 transition-colors disabled:opacity-50"
                 >
-                  <User /> Customer
+                  {roleLoading === 'customer' ? (
+                    <>
+                      <Loader2 className="animate-spin" /> Loading...
+                    </>
+                  ) : (
+                    <>
+                      <User /> Customer
+                    </>
+                  )}
+
                 </button>
               )}
             </div>
